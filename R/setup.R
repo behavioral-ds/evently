@@ -12,7 +12,7 @@ generate_ampl_execution <- function(path) {
     packageStartupMessage("  This package works with AMPL and ipopt")
     packageStartupMessage("  But they are not in your PATH.")
     packageStartupMessage("  Please specify their binary folder paths with:")
-    packageStartupMessage("  setup_ampl(ampl_path, ipopt_path)")
+    packageStartupMessage("  setup_ampl(ampl_path, ipopt_bin_path, ipopt_lib_path); set_tmp_folder(path);")
     packageStartupMessage("********************************************************\n")
   } else {
     .globals$execution <- generate_ampl_execution(Sys.getenv('PATH'))

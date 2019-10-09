@@ -1,5 +1,6 @@
 # this script implements default methods for the hawkes_model class
 
+#' @importFrom stats runif
 preprocess_data <- function(data, observation_time) {
   offset_same_time <- function(history) {
     # check if two retweets happened at the same time. add a random number if so
@@ -10,7 +11,7 @@ preprocess_data <- function(data, observation_time) {
     i <- i + 1
     while (i <= nrow(history)) {
       if (history$time[i] == k) {
-        history$time[i] <- history$time[i-1] + runif(1, 0, 1e-3)
+        history$time[i] <- history$time[i-1] + runif(1, 0, 1e-5)
       } else {
         k <- history$time[i]
       }
@@ -19,24 +20,21 @@ preprocess_data <- function(data, observation_time) {
     history
   }
 
-  if ('data.frame' %in% class(data)) {
-    data <- offset_same_time(data)
-    if (is.null(observation_time) || max(data$time) < observation_time) observation_time <- max(data$time)
-    new_index <- nrow(data) + 1
-    data[new_index, 'time'] <- observation_time
-    data[new_index, 'magnitude'] <- 0
-  } else if ('list' %in% class(data)) {
-    if (is.null(observation_time)) stop('Please specify an observation time when doing joint fitting!')
-    data <- lapply(data, function(hist) {
-      hist <- offset_same_time(hist)
-      new_index <- nrow(hist) + 1
-      hist[new_index, 'time'] <- observation_time
-      hist[new_index, 'magnitude'] <- 0
-      hist
-    })
-  } else {
-    stop('unknown training data format!')
+  if (length(data) == 1 && (is.null(observation_time) || max(data[[1]]$time) < observation_time)) {
+    observation_time <- max(data[[1]]$time)
   }
+
+  if (is.null(observation_time)) stop('Please specify an observation time when doing joint fitting!')
+  data <- lapply(data, function(hist) {
+    hist <- offset_same_time(hist)
+    new_row <- data.frame(time = observation_time, magnitude = 0)
+    hist <- rbind(hist, new_row)
+    hist
+  })
+
+  # sanity check
+  if (any(sapply(data, function(d) is.unsorted(d$time)))) stop('something went wrong..')
+
   data
 }
 
@@ -71,6 +69,7 @@ new_hawkes_model <- function(data, model_type, init_par = NULL, observation_time
   model
 }
 
+#' @importFrom stats runif
 generate_random_points.hawkes_model <- function(model) {
   init_k <- runif(5, min = .Machine$double.eps, max = 10)
   init_beta <- runif(5, min = .Machine$double.eps, max = 1)
@@ -99,6 +98,33 @@ get_upper_bound.hawkes_model <- function(model) {
   upper_bound[names(upper_bound) %in% get_param_names(model)]
 }
 
+print.hawkes_model <- function(model, ...) {
+  for (n in names(model)) {
+    if (n %in% 'data') {
+      cat(paste('No. of cascades:', length(model$data), '\n'))
+    } else if (n %in% c('model_type')) {
+      cat(paste('Model:', model$model_type, '\n'))
+    } else if (n %in% c('value')) {
+      cat(paste('Neg Log Likelihood:', model$value, '\n'))
+    } else if (n %in% c('convergence')) {
+      cat(paste('convergence:', model$convergence, '\n'))
+    } else if (n %in% c('init_par', 'par', 'lower_bound', 'upper_bound')) {
+      cat(paste0(n, '\n'))
+      cat('  ')
+      cat(paste(names(model[[n]]), formatC(model[[n]], format = "e", digits = 2), collapse = '; '))
+      cat('\n')
+    }
+  }
+}
+
+get_likelihood.default <- function(model) {
+  stop('Unknown model type!')
+}
+
+get_constrains.default <- function(model) {
+  stop('Unknown model type!')
+}
+
 # function dispatchers
 generate_random_points <- function(obj) {
   UseMethod('generate_random_points', obj)
@@ -114,4 +140,12 @@ get_lower_bound <- function(obj) {
 
 get_upper_bound <- function(obj) {
   UseMethod('get_upper_bound')
+}
+
+get_likelihood <- function(obj) {
+  UseMethod('get_likelihood')
+}
+
+get_constrains <- function(obj) {
+  UseMethod('get_constrains')
 }

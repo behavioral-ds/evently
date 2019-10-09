@@ -2,4 +2,8 @@
 
 export(fitSeries)
 export(fit_series)
+export(set_tmp_folder)
+export(setup_ampl)
 import(parallel)
+importFrom(stats,runif)
+importFrom(utils,read.csv)
