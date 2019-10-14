@@ -8,7 +8,7 @@ A package for fitting Hawkes processes and HawkesN processes with AMPL and ipopt
 # Installation
 Install the package by
 ```R
-devtools::devtools::install_github('qykong/HawkesFit')
+devtools::install_github('qykong/HawkesFit')
 ```
 
 # Usages
