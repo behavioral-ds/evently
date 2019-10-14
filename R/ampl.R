@@ -54,7 +54,7 @@ ampl_get_neg_likelihood_value <- function(model, ...) {
   solver_text <- sprintf("option solver %s;", solver)
   if (solver == "ipopt")
     solver_text <- paste(solver_text, "options ipopt_options 'linear_solver=ma57 print_level=1 max_iter=1000';", sep = '\n')
-  print("halt_on_ampl_error=yes causing errors; not sure why but removed for now")
+  # print("halt_on_ampl_error=yes causing errors; not sure why but removed for now")
   if (solver == "knitro")
     solver_text <- paste(solver_text, "options knitro_options 'ms_enable=1 honorbnds=1';", sep = '\n')
   content <- paste(
@@ -72,7 +72,7 @@ ampl_get_neg_likelihood_value <- function(model, ...) {
   ret <- NULL
   ## run AMPL with the configs we created
   tryCatch(expr = {
-    system(paste(.globals$execution, tmp_files$run))
+    system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = T)
 
     tmp <- read.csv(tmp_files$res, sep = '=', header = FALSE)
     ret <- tmp[,2]

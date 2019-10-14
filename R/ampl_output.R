@@ -34,8 +34,9 @@ output_dat <- function(data, file) {
 
 output_mod <- function(model, file) {
   ## if HawkesN, lower bound for population is at least as many as I have seen
-  if ("N" %in% names(model$init_par) && "N" %in% names(model$lower_bound) && model$lower_bound[["N"]] < nrow(model$data))
-    model$lower_bound[["N"]] <- nrow(model$data) - 1
+  max_N <- max(sapply(model$data, nrow)) - 1
+  if ("N" %in% names(model$init_par) && "N" %in% names(model$lower_bound) && model$lower_bound[["N"]] < max_N)
+    model$lower_bound[["N"]] <- max_N
 
   ## correct initial parameters out of bounds -- should not happen, but ...
   model$init_par[is.finite(model$init_par) & (model$init_par > model$upper_bound)] <- model$upper_bound[is.finite(model$init_par) & (model$init_par > model$upper_bound)]
@@ -60,10 +61,10 @@ output_mod <- function(model, file) {
     '',
     '# define objective function to maximize',
     'maximize Likelihood:',
-    get_likelihood(model),
+    get_ampl_likelihood(model),
     '',
     '# define bounds and constraints',
-    get_constrains(model),
+    get_ampl_constraints(model),
     sep = '\n'
   )
   ## finally, construct boxes (bounds) on parameters

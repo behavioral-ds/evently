@@ -98,30 +98,31 @@ get_upper_bound.hawkes_model <- function(model) {
   upper_bound[names(upper_bound) %in% get_param_names(model)]
 }
 
-print.hawkes_model <- function(model, ...) {
-  for (n in names(model)) {
+#' @export
+print.hawkes_model <- function(x, ...) {
+  for (n in names(x)) {
     if (n %in% 'data') {
-      cat(paste('No. of cascades:', length(model$data), '\n'))
+      cat(paste('No. of cascades:', length(x$data), '\n'))
     } else if (n %in% c('model_type')) {
-      cat(paste('Model:', model$model_type, '\n'))
+      cat(paste('Model:', x$model_type, '\n'))
     } else if (n %in% c('value')) {
-      cat(paste('Neg Log Likelihood:', model$value, '\n'))
+      cat(paste('Neg Log Likelihood:', x$value, '\n'))
     } else if (n %in% c('convergence')) {
-      cat(paste('convergence:', model$convergence, '\n'))
+      cat(paste('convergence:', x$convergence, '\n'))
     } else if (n %in% c('init_par', 'par', 'lower_bound', 'upper_bound')) {
       cat(paste0(n, '\n'))
       cat('  ')
-      cat(paste(names(model[[n]]), formatC(model[[n]], format = "e", digits = 2), collapse = '; '))
+      cat(paste(names(x[[n]]), formatC(x[[n]], format = "e", digits = 2), collapse = '; '))
       cat('\n')
     }
   }
 }
 
-get_likelihood.default <- function(model) {
+get_ampl_likelihood.default <- function(model) {
   stop('Unknown model type!')
 }
 
-get_constrains.default <- function(model) {
+get_ampl_constraints.default <- function(model) {
   stop('Unknown model type!')
 }
 
@@ -142,10 +143,10 @@ get_upper_bound <- function(obj) {
   UseMethod('get_upper_bound')
 }
 
-get_likelihood <- function(obj) {
-  UseMethod('get_likelihood')
+get_ampl_likelihood <- function(obj) {
+  UseMethod('get_ampl_likelihood')
 }
 
-get_constrains <- function(obj) {
-  UseMethod('get_constrains')
+get_ampl_constraints <- function(obj) {
+  UseMethod('get_ampl_constraints')
 }

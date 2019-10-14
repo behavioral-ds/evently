@@ -1,10 +1,14 @@
 # This script hosts functions that handle the data preprocessing and model selection.
 
-# for backward compactability
+#' For backward compactability
 #' @export
-fitSeries <- fitSeries <- function(history, parallel = T, kernel.type = 'EXPN', .init_no = NA, .additional.PLN.final.fit = F, .fit_engine = "AMPL", single_event_cascade = F, lowerBound = NULL, upperBound = NULL, ...) {
+fitSeries <- fitSeries <- function(history, parallel = T, kernel.type = 'EXPN',
+                                   .init_no = NA, .additional.PLN.final.fit = F,
+                                   .fit_engine = "AMPL", single_event_cascade = F,
+                                   lowerBound = NULL, upperBound = NULL, marked = T, ...) {
   cores <- 1
   if (parallel) cores <- detectCores()
+  if (marked) kernel.type <- paste0('m', kernel.type)
   if ('data.frame' %in% class(history)) history <- list(history)
   fit_series(history, model_type = kernel.type, cores = cores, lower_bound = lowerBound, upper_bound = upperBound, ...)
 }
