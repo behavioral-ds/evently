@@ -5,6 +5,12 @@ test_that('only list of dataframe is accepted', {
   expect_error(fit_series(cascade))
 })
 
+test_that('fitting works', {
+  params <- c(K = 1.3, theta = 1, N = 100)
+  sims <- generate_Hawkes_event_series(params = params, model_type = 'EXPN', M = 100)
+  fitted <- fit_series(data = list(sims), model_type = 'EXP', observation_time = 1e10)
+})
+
 test_that('simulating and fitting are working for EXP') {
   set.seed(888)
   cut_time <- 7
