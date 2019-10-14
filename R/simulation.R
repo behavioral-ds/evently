@@ -189,7 +189,7 @@ CIF = function(x, history, ...) {
 #' @importFrom utils read.table
 #' @importFrom utils write.table
 #' @export
-generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin = 1, M=10000, Tmax = 10, filename = NULL, history_init = NULL, maxEvents = NA, immigrants = NULL) {
+generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10, filename = NULL, history_init = NULL, maxEvents = NA, immigrants = NULL) {
   params <- unlist(params)
   # determine if this is a marked model or not
   if (substr(model_type, 1, 1) == 'm') {
@@ -251,11 +251,13 @@ generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin
     ## first, sample one event time from the maximum intensity
     r <- runif(1)
     t <- t - log(r) / intensityMax
+    if (t > Tmax) break
 
     ## then perform rejection sampling
     s <- runif(1)
     thr <- CIF(x = t, history = history, params = params, alpha = alpha, mmin = mmin, model_type = model_type) / intensityMax
-    if ( s <= thr) {
+
+    if (s <= thr) {
       ## if here, it means we accept the event
       # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
       mag <- generate_user_influence(n = 1, alpha = alpha, mmin = mmin)
