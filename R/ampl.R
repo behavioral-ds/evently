@@ -99,7 +99,10 @@ ampl_get_neg_likelihood_value <- function(model, ...) {
   content <- paste(
     paste('model ', tmp_files$mod, ';', sep = ''),
     paste('data ', tmp_files$dat, ';', sep = ''),
-    sprintf("display Likelihood > %s/res-%s.txt;", .globals$tmp, tmp_files$pid),
+    # use display the whole expression instead of display Likelihood, as display
+    # Likelihood seems load the whole processing model into memory which slows
+    # down this extremely
+    sprintf("display %s > %s/res-%s.txt;", gsub(';', '', get_ampl_likelihood(model)), .globals$tmp, tmp_files$pid),
     "exit;",
     sep = "\n"
   )

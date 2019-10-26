@@ -6,12 +6,14 @@ test_that('only list of dataframe is accepted', {
 })
 
 test_that('fitting works', {
+  set.seed(888)
   params <- c(K = 1.3, theta = 1, N = 100)
-  sims <- generate_Hawkes_event_series(params = params, model_type = 'EXPN', M = 100)
+  sims <- generate_Hawkes_event_series(params = params, model_type = 'EXPN', M = 1)
   fitted <- fit_series(data = list(sims), model_type = 'EXP', observation_time = 1e10)
+  expect_equal(fitted$convergence, 0)
 })
 
-test_that('simulating and fitting are working for EXP') {
+test_that('simulating and fitting are working for EXP', {
   set.seed(888)
   cut_time <- 7
   params <- c(K = 1.3, beta = 0.3, theta = 1, N = 100)
@@ -21,4 +23,4 @@ test_that('simulating and fitting are working for EXP') {
 
   fitted_params <- do.call(rbind.data.frame, lapply(fitted, function(.x) as.list(.x[['par']])))
   expect_true(all(abs(apply(fitted_params, 2, mean) - params) < 1e-2))
-}
+})

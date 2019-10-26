@@ -20,7 +20,7 @@ preprocess_data <- function(data, observation_time) {
     history
   }
 
-  if (length(data) == 1 && (is.null(observation_time) || max(data[[1]]$time) < observation_time)) {
+  if (length(data) == 1 && (is.null(observation_time) || max(data[[1]]$time) > observation_time)) {
     observation_time <- max(data[[1]]$time)
   }
 
