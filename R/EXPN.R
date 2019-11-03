@@ -31,3 +31,15 @@ get_ampl_likelihood.hawkes_mEXPN <- function(model) {
 get_ampl_constraints.hawkes_mEXPN <- function(model) {
   '' # no constraint for HawkesN
 }
+
+#' @export
+get_branching_factor.hawkes_EXPN <- function(model) {
+  model$par[['K']]
+}
+
+#' @export
+get_branching_factor.hawkes_mEXPN <- function(model) {
+  # assuming alpha = 2.016
+  (model$par[['K']] * 1.016) / (1.016 - model$par[['beta']])
+}
+

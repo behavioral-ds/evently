@@ -40,8 +40,8 @@ preprocess_data <- function(data, observation_time) {
 
 # default model class methods
 
-# create a new hawkes model class
-new_hawkes_model <- function(data, model_type, init_par = NULL, observation_time = NULL,
+# create a new hawkes model class for fitting
+new_unfitted_hawkes_model <- function(data, model_type, init_par = NULL, observation_time = NULL,
                              lower_bound = NULL, upper_bound = NULL) {
   data <- preprocess_data(data, observation_time)
   model <- list(
@@ -66,6 +66,26 @@ new_hawkes_model <- function(data, model_type, init_par = NULL, observation_time
   model$upper_bound <- upper_bound
 
   model$observation_time <- observation_time
+  model
+}
+
+# create a new hawkes model with parameters available
+#' @export
+new_hawkes_model <- function(par, model_type) {
+  model <- list(model_type = model_type)
+  class(model) <- c(paste0('hawkes_', model_type), 'hawkes_model')
+  param_names <- get_param_names(model)
+
+  # check if provided parameters are of the same length as required
+  stopifnot(length(param_names) == length(par))
+
+  if (length(names(par)) == 0) {
+    warning(paste0('Provided parameter vector is unnamed. Aussming the following order: ', paste(param_names, collapse = ', ')))
+    names(par) <- param_names
+  }
+
+  model$par <- par[param_names]
+
   model
 }
 
@@ -126,6 +146,11 @@ get_ampl_constraints.default <- function(model) {
   stop('Unknown model type!')
 }
 
+#' @export
+get_branching_factor.default <- function(model) {
+  stop('Unknown model type!')
+}
+
 # function dispatchers
 generate_random_points <- function(obj) {
   UseMethod('generate_random_points', obj)
@@ -149,4 +174,9 @@ get_ampl_likelihood <- function(obj) {
 
 get_ampl_constraints <- function(obj) {
   UseMethod('get_ampl_constraints')
+}
+
+#' @export
+get_branching_factor <- function(obj) {
+  UseMethod('get_branching_factor')
 }

@@ -36,3 +36,14 @@ get_ampl_likelihood.hawkes_mPLN <- function(model) {
 get_ampl_constraints.hawkes_mPLN <- function(model) {
   ''
 }
+
+#' @export
+get_branching_factor.hawkes_PLN <- function(model) {
+  model$par[['K']]* (1 / model$par[['theta']]) * (1 / model$par[['c']])^model$par[['theta']]
+}
+
+#' @export
+get_branching_factor.hawkes_mPLN <- function(model) {
+  # assuming alpha = 2.016
+  (model$par[['K']] * 1.016 / (1.016-model$par[['beta']]) ) * (1 / model$par[['theta']]) * (1 / model$par[['c']])^model$par[['theta']]
+}

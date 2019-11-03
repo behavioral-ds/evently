@@ -19,7 +19,7 @@ fitSeries <- fitSeries <- function(history, parallel = T, kernel.type = 'EXPN',
 fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation_time = NULL,
                        lower_bound = NULL, upper_bound = NULL, ...) {
   preparation(data)
-  model <- new_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
+  model <- new_unfitted_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound)
 
   ## get the initial points

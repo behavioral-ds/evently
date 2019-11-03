@@ -29,3 +29,14 @@ get_ampl_likelihood.hawkes_mEXP <- function(model) {
 get_ampl_constraints.hawkes_mEXP <- function(model) {
   'subject to branching_factor: K * 1.016 + beta <= 1.016;'
 }
+
+#' @export
+get_branching_factor.hawkes_EXP <- function(model) {
+  model$par[['K']]
+}
+
+#' @export
+get_branching_factor.hawkes_mEXP <- function(model) {
+  # assuming alpha = 2.016
+  (model$par[['K']] * 1.016) / (1.016 - model$par[['beta']])
+}

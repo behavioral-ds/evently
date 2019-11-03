@@ -22,5 +22,5 @@ test_that('simulating and fitting are working for EXP', {
   fitted <- lapply(seq(10), function(i) {fit_series(sims[(50*(i-1) +1):(50*i)], cores = 10, model_type = 'mEXPN', lower_bound = c(K = 1e-100, beta = 1e-100, theta = 1e-100, N = 100), upper_bound = c(K = 1e+6, beta = 1.016 - 1e-100, theta = 1e+3, N = 100), observation_time = cut_time)})
 
   fitted_params <- do.call(rbind.data.frame, lapply(fitted, function(.x) as.list(.x[['par']])))
-  expect_true(all(abs(apply(fitted_params, 2, mean) - params) < 1e-2))
+  expect_true(all(abs(apply(fitted_params, 2, mean) - params) < 1e-1))
 })
