@@ -34,7 +34,12 @@ ampl_run <- function(model = model, solver = 'ipopt', ...) {
   return(res)
 }
 
-ampl_get_neg_likelihood_value <- function(model, ...) {
+#' @export
+get_hawkes_neg_likelihood_value <- function(model, ...) {
+  # use par to compute the net log likelihood
+  stopifnot(hasName(model, 'par'))
+  model$init_par <- model$par
+
   tmp_files <- prepare_tmp_files()
   output_dat(data = model$data, file = tmp_files$dat)
   output_mod(model = model, file = tmp_files$mod)
@@ -117,5 +122,5 @@ ampl_get_neg_likelihood_value <- function(model, ...) {
   names(ret) <- c('Likelihood')
 
   # return neg log likelihood
-  return(-ret["Likelihood"])
+  return(-ret[["Likelihood"]])
 }

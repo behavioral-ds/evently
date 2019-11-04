@@ -61,8 +61,7 @@ model_selection <- function(models, ...) {
 
   ## score each model -- don't trust the algorithms own value, redo my own.
   nLLs <- sapply(models, function(model) {
-    model$init_par <- model$par
-    ampl_get_neg_likelihood_value(model, ...)
+    get_hawkes_neg_likelihood_value(model, ...)
   })
   if (all(is.na(nLLs))) stop('something went wrong! All neg.likelihood values are missing')
 
