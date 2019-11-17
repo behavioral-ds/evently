@@ -1,92 +1,83 @@
 # this script implements default methods for the hawkes_model class
 
-#' @importFrom stats runif
-preprocess_data <- function(data, observation_time) {
-  offset_same_time <- function(history) {
-    # check if two retweets happened at the same time. add a random number if so
-    i <- 1
-    while (i <= nrow(history) && history$time[i] == 0) i <- i + 1
-    if ((nrow(history) + 1) == i) return(history)
-    k <- history$time[i]
-    i <- i + 1
-    while (i <= nrow(history)) {
-      if (history$time[i] == k) {
-        history$time[i] <- history$time[i-1] + runif(1, 0, 1e-5)
-      } else {
-        k <- history$time[i]
-      }
-      i <- i + 1
-    }
-    history
-  }
-
-  if (length(data) == 1 && (is.null(observation_time) || max(data[[1]]$time) > observation_time)) {
-    observation_time <- max(data[[1]]$time)
-  }
-
-  if (is.null(observation_time)) stop('Please specify an observation time when doing joint fitting!')
-  data <- lapply(data, function(hist) {
-    hist <- offset_same_time(hist)
-    new_row <- data.frame(time = observation_time, magnitude = 0)
-    hist <- rbind(hist, new_row)
-    hist
-  })
-
-  # sanity check
-  if (any(sapply(data, function(d) is.unsorted(d$time)))) stop('something went wrong..')
-
-  data
-}
-
 # default model class methods
 
-# create a new hawkes model class for fitting
-new_unfitted_hawkes_model <- function(data, model_type, init_par = NULL, observation_time = NULL,
-                             lower_bound = NULL, upper_bound = NULL) {
-  data <- preprocess_data(data, observation_time)
-  model <- list(
-    data = data,
-    model_type = model_type
-  )
+# Create a new hawkes model with parameters available
+#' @param model_type A string indicates the model tyep, e.g. EXP for a Hawkes process
+#' with an exponential kernel
+#' @param par A named vector denotes the model parameters where the names are model
+#' parameters and the values are the corresponding parameter values
+#' @param data a list of data.frame(s) where each data.frame is an event cascade with event
+#' tims and event magnitudes (optional)
+#' @param observation_time the event cascades observation time. It is assumed that all cascades in data
+#' are observed until a common time.
+#' @param init_par Initial parameter values used in fitting
+#' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
+#' values are the lowest possible values.
+#' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
+#' values are the largest possible values.
+#' @export
+new_hawkes_model <- function(model_type, par = NULL, data = NULL, init_par = NULL,
+                             observation_time = NULL, lower_bound = NULL, upper_bound = NULL) {
+  model <- list(model_type = model_type)
   class(model) <- c(paste0('hawkes_', model_type), 'hawkes_model')
   param_names <- get_param_names(model)
+
+  if (!is.null(data)) model$data <- data
+
+  # check if provided parameters are of the same length as required
+  if (!is.null(par)) {
+    stopifnot(length(param_names) == length(par))
+
+    if (length(names(par)) == 0) {
+      warning(paste0('Provided parameter vector is unnamed. Aussming the following order: ', paste(param_names, collapse = ', ')))
+      names(par) <- param_names
+    }
+
+    par <- par[param_names]
+  } else {
+    par <- rep(NA, length(param_names))
+    names(par) <- param_names
+  }
+
   if (is.null(init_par)) {
     init_par <- rep(NA, length(param_names))
     names(init_par) <- param_names
   }
 
   model$init_par <- init_par
-  model$par <- rep(NA, length(param_names))
-  names(model$par) <- param_names
+  model$par <- par
   model$value <- NA
 
-  if (is.null(lower_bound)) lower_bound <- get_lower_bound(model)
-  if (is.null(upper_bound)) upper_bound <- get_upper_bound(model)
-  model$lower_bound <- lower_bound
-  model$upper_bound <- upper_bound
+  final_lower_bound <- get_lower_bound(model)
+  final_upper_bound <- get_upper_bound(model)
+  if (!is.null(lower_bound)) {
+    if (length(lower_bound) <= length(final_lower_bound)) {
+      final_lower_bound[names(lower_bound)] <- lower_bound
+    } else if (length(lower_bound) > length(final_lower_bound)) {
+      stop('Wrong lower bound provided!')
+    }
+  }
+
+  if (!is.null(upper_bound)) {
+    if (length(upper_bound) <= length(final_upper_bound)) {
+      final_upper_bound[names(upper_bound)] <- upper_bound
+    } else if (length(upper_bound) > length(final_upper_bound)) {
+      stop('Wrong upper bound provided!')
+    }
+  }
+  model$lower_bound <- final_lower_bound
+  model$upper_bound <- final_upper_bound
 
   model$observation_time <- observation_time
+
   model
 }
 
-# create a new hawkes model with parameters available
-#' @export
-new_hawkes_model <- function(par, model_type) {
-  model <- list(model_type = model_type)
-  class(model) <- c(paste0('hawkes_', model_type), 'hawkes_model')
-  param_names <- get_param_names(model)
-
-  # check if provided parameters are of the same length as required
-  stopifnot(length(param_names) == length(par))
-
-  if (length(names(par)) == 0) {
-    warning(paste0('Provided parameter vector is unnamed. Aussming the following order: ', paste(param_names, collapse = ', ')))
-    names(par) <- param_names
+check_required_hawkes_model_fields <- function(model, fields) {
+  for (f in fields) {
+    stopifnot(hasName(model, f))
   }
-
-  model$par <- par[param_names]
-
-  model
 }
 
 #' @importFrom stats runif

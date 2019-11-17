@@ -1,25 +1,27 @@
 # This script hosts functions that handle the data preprocessing and model selection.
 
-#' For backward compactability
-#' @export
-fitSeries <- fitSeries <- function(history, parallel = T, kernel.type = 'EXPN',
-                                   .init_no = NA, .additional.PLN.final.fit = F,
-                                   .fit_engine = "AMPL", single_event_cascade = F,
-                                   lowerBound = NULL, upperBound = NULL, marked = T, ...) {
-  cores <- 1
-  if (parallel) cores <- detectCores()
-  if (marked) kernel.type <- paste0('m', kernel.type)
-  if ('data.frame' %in% class(history)) history <- list(history)
-  fit_series(history, model_type = kernel.type, cores = cores, lower_bound = lowerBound, upper_bound = upperBound, ...)
-}
-
-
+#' Fit a Hawkes process or HawkesN process model on one or many event cascades
+#' and learn model parameters.
+#'
+#' @param data a list of data.frame(s) where each data.frame is an event cascade with event
+#' tims and event magnitudes (optional)
+#' @param model_type a string representing the model type, e.g. EXP for Hawkes processes with
+#' an exponential kernel function
+#' @param cores the number of cores used for parallel fitting, defaults to 1 (non-parallel)
+#' @param .init_no currently 10 random starting parameters are generated for fitting. This controls which
+#' random points are used. Defaults to NULL
+#' @param observation_time the event cascades observation time. It is assumed that all cascades in data
+#' are observed until a common time.
+#' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
+#' values are the lowest possible values.
+#' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
+#' values are the largest possible values.
 #' @import parallel
 #' @export
 fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation_time = NULL,
-                       lower_bound = NULL, upper_bound = NULL, ...) {
+                       lower_bound = NULL, upper_bound = NULL) {
   preparation(data)
-  model <- new_unfitted_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
+  model <- new_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound)
 
   ## get the initial points
@@ -36,32 +38,44 @@ fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation
   if (sum(.init_no > nrow(models_with_initial_point)) > 0) stop('init_no is too large')
 
   inner_apply_func <- function(model){
-    # tryCatch({
-      lgo_model <- NA
-      if (is.na(model$init_par[[1]])) {
-        lgo_model <- ampl_run(model = model, solver = "lgo", ...)
-        model[['init_par']] <- unlist(lgo_model$par)
-      }
-      model <- ampl_run(model = model, solver = "ipopt", ...)
-    # }, error = function(err) {
-    #   print(paste("[fitSeries] Error in optim:  ", err))
-    # })
+    lgo_model <- NA
+    if (is.na(model$init_par[[1]])) {
+      lgo_model <- ampl_run(model = model, solver = "lgo")
+      model[['init_par']] <- unlist(lgo_model$par)
+    }
+    model <- ampl_run(model = model, solver = "ipopt")
 
     return(model)
   }
 
   ## start fitting
-  fitted_models <- mclapply(X = models_with_initial_point, FUN = inner_apply_func, mc.cores = cores, mc.silent = F)
+  fitted_models <- mclapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, mc.cores = cores, mc.silent = F)
 
-  model_selection(models = fitted_models, ...)
+  model_selection(models = fitted_models)
 }
 
-model_selection <- function(models, ...) {
+#' Compute the negative log-likelihood values of a given model on a list of given
+#' event cascades.
+#'
+#' @param model An object of a specific model class where the `data` and the `par` fields
+#' are required
+#' @export
+get_hawkes_neg_likelihood_value <- function(model) {
+  # par and data are required for computing log-likelihood values
+  check_required_hawkes_model_fields(model, c('par', 'data', 'observation_time'))
+
+  # a trick to reuse existing functions
+  # have made sure this won't affect the original model object
+  model$init_par <- model$par
+  ampl_run(model, goal = 'nll')
+}
+
+model_selection <- function(models) {
   if (length(models) == 1) return(models[[1]])
 
   ## score each model -- don't trust the algorithms own value, redo my own.
   nLLs <- sapply(models, function(model) {
-    get_hawkes_neg_likelihood_value(model, ...)
+    get_hawkes_neg_likelihood_value(model)
   })
   if (all(is.na(nLLs))) stop('something went wrong! All neg.likelihood values are missing')
 

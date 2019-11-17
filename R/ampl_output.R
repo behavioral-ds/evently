@@ -1,4 +1,50 @@
-output_dat <- function(data, file) {
+#' @importFrom stats runif
+preprocess_data <- function(data, observation_time) {
+  offset_same_time <- function(history) {
+    # check if two retweets happened at the same time. add a random number if so
+    i <- 1
+    while (i <= nrow(history) && history$time[i] == 0) i <- i + 1
+    if ((nrow(history) + 1) == i) return(history)
+    k <- history$time[i]
+    i <- i + 1
+    while (i <= nrow(history)) {
+      if (history$time[i] == k) {
+        history$time[i] <- history$time[i-1] + runif(1, 0, 1e-5)
+      } else {
+        k <- history$time[i]
+      }
+      i <- i + 1
+    }
+    history
+  }
+
+  if (length(data) == 1 && (is.null(observation_time) || max(data[[1]]$time) > observation_time)) {
+    observation_time <- max(data[[1]]$time)
+  }
+
+  if (is.null(observation_time)) stop('Please specify an observation time!')
+  if (is.infinite(observation_time)) {
+    # ampl doesn't recognize infinity so set to machine max
+    observation_time <- .Machine$double.xmax
+  }
+
+  data <- lapply(data, function(hist) {
+    hist <- offset_same_time(hist)
+    new_row <- data.frame(time = observation_time, magnitude = 0)
+    hist <- rbind(hist, new_row)
+    hist
+  })
+
+  # sanity check
+  if (any(sapply(data, function(d) is.unsorted(d$time)))) stop('something went wrong..')
+
+  data
+}
+
+output_dat <- function(model, file) {
+  # preprocess the data here
+  data <- preprocess_data(model$data, model$observation_time)
+
   file.create(file)
   lengthes <- sapply(data, nrow)
 

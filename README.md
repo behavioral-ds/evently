@@ -12,5 +12,5 @@ devtools::install_github('qykong/HawkesFit')
 ```
 
 # Usages
-Check this short tutorial
+Check this short [tutorial](https://github.com/qykong/HawkesFit/blob/master/tutorial.md) to learn how to use the package.
 

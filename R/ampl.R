@@ -1,13 +1,18 @@
+#' Set up the AMPL execution path.
+#' @param ampl_path a string of path to where the executable ampl binary is located. Please make sure ipopt binary is in the same path.
 #' @export
-setup_ampl <- function(ampl_path, ipopt_bin_path, ipopt_lib_path) {
-  .globals$execution <- generate_ampl_execution(paste0(ampl_path, ':', ipopt_bin_path, ':', ipopt_lib_path))
+setup_ampl <- function(ampl_path) {
+  .globals$execution <- paste0('export PATH=$PATH:', ampl_path, '; ampl')
 }
 
+#' Set up the folder for placing temporary files, defaults to /tmp
+#' @param path a string of path to the folder where you would like to place temporary files
 #' @export
 set_tmp_folder <- function(path) {
   .globals$tmp <- path
 }
 
+# preparation code --------------------------------------------------------
 prepare_tmp_files <- function() {
   pid <- Sys.getpid()
   dat <- sprintf('%s/tmp-%s.dat', .globals$tmp, pid)
@@ -22,32 +27,24 @@ prepare_tmp_files <- function() {
   list(dat = dat, mod = mod, run = run, res = res, pid = pid)
 }
 
+
+# ampl main code ----------------------------------------------------------
+
 # fit with ampl
-ampl_run <- function(model = model, solver = 'ipopt', ...) {
+ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
   tmp_files <- prepare_tmp_files()
-  output_dat(data = model$data, file = tmp_files$dat)
+  output_dat(model = model, file = tmp_files$dat)
   output_mod(model = model, file = tmp_files$mod)
 
-  res <- .run(tmp_files = tmp_files, model = model, solver = solver)
+  # what's the expected result
+  res <- switch (goal,
+    fit = .run(tmp_files = tmp_files, model = model, solver = solver),
+    nll = .run_get_likelihood(tmp_files = tmp_files, model = model)
+  )
+
   file.remove(tmp_files$dat, tmp_files$mod, tmp_files$run, tmp_files$res)
 
   return(res)
-}
-
-#' @export
-get_hawkes_neg_likelihood_value <- function(model, ...) {
-  # use par to compute the net log likelihood
-  stopifnot(hasName(model, 'par'))
-  model$init_par <- model$par
-
-  tmp_files <- prepare_tmp_files()
-  output_dat(data = model$data, file = tmp_files$dat)
-  output_mod(model = model, file = tmp_files$mod)
-
-  neg_likelihood <- .run_get_likelihood(tmp_files = tmp_files, model = model)
-  file.remove(tmp_files$dat, tmp_files$mod, tmp_files$run, tmp_files$res)
-
-  return(neg_likelihood)
 }
 
 # Runs AMPL, with the given model (mod) and data file (dat). "solver" choices
@@ -60,6 +57,7 @@ get_hawkes_neg_likelihood_value <- function(model, ...) {
   if (solver == "ipopt")
     solver_text <- paste(solver_text, "options ipopt_options 'linear_solver=ma57 print_level=1 max_iter=1000';", sep = '\n')
   # print("halt_on_ampl_error=yes causing errors; not sure why but removed for now")
+  #
   if (solver == "knitro")
     solver_text <- paste(solver_text, "options knitro_options 'ms_enable=1 honorbnds=1';", sep = '\n')
   content <- paste(
@@ -77,7 +75,7 @@ get_hawkes_neg_likelihood_value <- function(model, ...) {
   ret <- NULL
   ## run AMPL with the configs we created
   tryCatch(expr = {
-    system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = T)
+    system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)
 
     tmp <- read.csv(tmp_files$res, sep = '=', header = FALSE)
     ret <- tmp[,2]
