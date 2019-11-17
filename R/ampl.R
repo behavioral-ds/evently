@@ -73,6 +73,7 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
 
   write(content, tmp_files$run)
   ret <- NULL
+
   ## run AMPL with the configs we created
   tryCatch(expr = {
     system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)

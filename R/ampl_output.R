@@ -24,8 +24,9 @@ preprocess_data <- function(data, observation_time) {
 
   if (is.null(observation_time)) stop('Please specify an observation time!')
   if (is.infinite(observation_time)) {
-    # ampl doesn't recognize infinity so set to machine max
-    observation_time <- .Machine$double.xmax
+    # ampl doesn't recognize infinity so set to a large number
+    # didn't set to machine max as it will cause error in AMPL
+    observation_time <- 1e20
   }
 
   data <- lapply(data, function(hist) {
@@ -80,7 +81,7 @@ output_dat <- function(model, file) {
 
 output_mod <- function(model, file) {
   ## if HawkesN, lower bound for population is at least as many as I have seen
-  max_N <- max(sapply(model$data, nrow)) - 1
+  max_N <- max(sapply(model$data, nrow))
   if ("N" %in% names(model$init_par) && "N" %in% names(model$lower_bound) && model$lower_bound[["N"]] < max_N)
     model$lower_bound[["N"]] <- max_N
 
@@ -89,7 +90,17 @@ output_mod <- function(model, file) {
   model$init_par[is.finite(model$init_par) & (model$init_par < model$lower_bound)] <- model$lower_bound[is.finite(model$init_par) & (model$init_par < model$lower_bound)]
 
   ## first describe the data
-  output.PARAM <- get_mod_param_def(model$data)
+  output.PARAM <- paste(
+    '# define data',
+    'param HL > 0;',
+    'param ML > 0;',
+    'param L {1..HL} >= 0;',
+    'param magnitude {1..HL,1..ML} >= 0;',
+    'param time {1..HL,1..ML} >= 0;',
+    'param J0 {1..HL} >= 0;',
+    '',
+    sep = '\n'
+  )
 
   ## next describe our initial parameters, if we have them
   ## assume that the variables we use are the ones in the init_params
@@ -129,18 +140,4 @@ output_mod <- function(model, file) {
   ## finally peace it all together
   output <- paste(output.PARAM, output.VAR, output.OJ, output.BOX, sep = '\n')
   write(output, file = file)
-}
-
-get_mod_param_def <- function(data) {
-  paste(
-    '# define data',
-    'param HL > 0;',
-    'param ML > 0;',
-    'param L {1..HL} >= 0;',
-    'param magnitude {1..HL,1..ML} >= 0;',
-    'param time {1..HL,1..ML} >= 0;',
-    'param J0 {1..HL} >= 0;',
-    '',
-    sep = '\n'
-  )
 }

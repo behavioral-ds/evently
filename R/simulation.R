@@ -247,6 +247,8 @@ generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin
     # generate the time of the next event, based on the previous events
     t.lambda.max <- t
     intensityMax <- CIF(x = t.lambda.max, history = history, params = params, alpha = alpha, mmin = mmin, model_type = model_type)
+    ## if intensityMax is too small then cut
+    if (intensityMax < 1e-5) break
 
     ## first, sample one event time from the maximum intensity
     r <- runif(1)
@@ -255,6 +257,7 @@ generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin
 
     ## then perform rejection sampling
     s <- runif(1)
+
     thr <- CIF(x = t, history = history, params = params, alpha = alpha, mmin = mmin, model_type = model_type) / intensityMax
 
     if (s <= thr) {

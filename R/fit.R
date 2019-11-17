@@ -38,12 +38,15 @@ fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation
   if (sum(.init_no > nrow(models_with_initial_point)) > 0) stop('init_no is too large')
 
   inner_apply_func <- function(model){
-    lgo_model <- NA
+    # to make sure exact init_par is saved, mainly for lgo fitting
+    saved_init_par <- model$init_par
     if (is.na(model$init_par[[1]])) {
       lgo_model <- ampl_run(model = model, solver = "lgo")
       model[['init_par']] <- unlist(lgo_model$par)
     }
     model <- ampl_run(model = model, solver = "ipopt")
+    # to emphasize the init_par is found by lgo
+    model$init_par <- saved_init_par
 
     return(model)
   }
