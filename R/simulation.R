@@ -185,11 +185,10 @@ CIF = function(x, history, ...) {
 #'   from a previous call of this function). Its purpose is to allow custom
 #'   initializations and to continue simulation of stopped processes.
 #' @param Tmax - maximum time of simulation.
-#' @param filename - file to which save the CSV file with the simulation.
 #' @importFrom utils read.table
 #' @importFrom utils write.table
 #' @export
-generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10, filename = NULL, history_init = NULL, maxEvents = NA, immigrants = NULL) {
+generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10, history_init = NULL, maxEvents = NA) {
   params <- unlist(params)
   # determine if this is a marked model or not
   if (substr(model_type, 1, 1) == 'm') {
@@ -198,49 +197,15 @@ generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin
   } else {
     params[['beta']] <- 0
   }
-  saveInterval <- 1000
-  history <- NULL
-
-  ## if no immigrant was given, then use the M at time 0
-  if (is.null(immigrants)){
-    immigrants <- as.data.frame(matrix(c(M, 0), nrow=1, byrow = TRUE))
-    colnames(immigrants) <- c("magnitude", "time")
-  }
 
   # initial event, magnitude M and time 0
-  if ( !is.null(history_init)) {
+  history <- as.data.frame(matrix(c(M, 0), nrow=1, byrow = TRUE))
+  colnames(history) <- c("magnitude", "time")
+  t <- history[1,]$time
+
+  if (!is.null(history_init)) {
     history <- history_init
     t <- history[nrow(history), "time"]
-  }
-
-  # maybe we have to continue simulation
-  if (is.null(filename)) {
-    if (is.null(history)) {
-      history <- immigrants
-      t <- history[1,]$time
-      colnames(history) <- c("magnitude", "time")
-    }
-  } else {
-    if (file.exists(filename)) {
-      # means we are continuing the simulation
-      # check first if there is some initialized history
-      if ( !is.null(history)) {
-        warning(sprintf("You gave me both a simulation to continue (yes, file %s exists) and an initial history. Ignoring initial history!", filename))
-      }
-      history <- read.table(file = filename, header = T)
-      colnames(history) <- c("magnitude", "time")
-      t <- history$time[nrow(history)]
-      cat(sprintf("--> Loaded %d events from file, simulation time %.3f.\n", nrow(history), t))
-    } else {
-      # means we mearly want to save results to file
-      # check first if there is some initialized history
-      if (is.null(history)) {
-        history <- immigrants
-        t <- history$time[1]
-        colnames(history) <- c("magnitude", "time")
-      }
-      cat(sprintf("--> Will save progress to history file %s, every %d events!\n", filename, saveInterval))
-    }
   }
 
   while(t <= Tmax){
@@ -279,20 +244,9 @@ generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin
       }
     }
 
-    # save progress
-    if ((nrow(history) %% saveInterval == 0) && (!is.null(filename))) {
-      write.table(x = history, file = filename, sep = "\t", row.names = F, col.names = T)
-    }
-
     if (!is.na(maxEvents) && nrow(history) >= maxEvents)
       break;
   }
 
-  # if a filename was provided, write the history to the file
-  if (!is.null(filename)) {
-    write.table(x = history, file = filename, sep = "\t", row.names = F, col.names = T)
-  }
-
-  # cat(sprintf("\n--> Simulation done!\n"))
   return(history)
 }

@@ -31,9 +31,8 @@ test_that('infinity observation time works for EXPN', {
   params <- c(K = 5, theta = 1, N = 50)
   sims <- lapply(seq(50), function(i) generate_Hawkes_event_series(params = params, model_type = 'EXPN', Tmax = Inf))
   fitted <- fit_series(sims, cores = 10, model_type = 'EXPN', observation_time = Inf)
-  expect_true(fitted[[1]]$init_par[[1]] != fitted[[1]]$par[[1]])
-  fitted_params <- do.call(rbind.data.frame, lapply(fitted, function(.x) as.list(.x[['par']])))
-  expect_true(all(abs(apply(fitted_params, 2, mean) - params) < 5e-1))
+  expect_true(fitted$init_par[[1]] != fitted$par[[1]])
+  expect_true(all(abs(fitted$par- params) < 5e-1))
 })
 
 test_that('compute holdout log-likelihood works', {
