@@ -40,5 +40,5 @@ test_that('compute holdout log-likelihood works', {
   params <- c(K = 1.3, theta = 1)
   model <- new_hawkes_model(model_type = 'EXP', data = list(data.frame(time = 0, magnitude = 1)), observation_time = Inf, par = params)
   nll <- get_hawkes_neg_likelihood_value(model)
-  expect_less_than(abs(nll - params[['K']]), 1e-10)
+  expect_lt(abs(nll - params[['K']]), 1e-10)
 })
