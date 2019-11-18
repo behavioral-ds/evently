@@ -3,9 +3,9 @@ Type: Package
 Title: Fit Hawkes and HawkesN Processes with AMPL and Ipopt
 Version: 0.1.0
 Author: Quyu Kong; Marian-Andrei Rizoiu
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Maintainer: Quyu Kong <quyu.kong@anu.edu.au>
+Description: This package is designed for simulating and
+fitting the Hawkes processes and the HawkesN processes with several options of kernel functions. 
 License: MIT
 Encoding: UTF-8
 LazyData: true
