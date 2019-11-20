@@ -31,7 +31,7 @@ TODO: show a table of models here with equations?
 
 Let's first simulate some event cascades.
 ```{r}
-lapply(seq(2), function(i) generate_Hawkes_event_series(c(K = 0.8, theta = 1), model_type = 'EXP'))
+lapply(seq(2), function(i) generate_hawkes_event_series(c(K = 0.8, theta = 1), model_type = 'EXP'))
 ```
 
 ## Fitting a model on data

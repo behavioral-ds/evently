@@ -188,7 +188,7 @@ CIF = function(x, history, ...) {
 #' @importFrom utils read.table
 #' @importFrom utils write.table
 #' @export
-generate_Hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10, history_init = NULL, maxEvents = NA) {
+generate_hawkes_event_series <- function(params, model_type, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10, history_init = NULL, maxEvents = NA) {
   params <- unlist(params)
   # determine if this is a marked model or not
   if (substr(model_type, 1, 1) == 'm') {

@@ -109,6 +109,14 @@ get_upper_bound.hawkes_model <- function(model) {
   upper_bound[names(upper_bound) %in% get_param_names(model)]
 }
 
+get_ampl_model_output.hawkes_model <- function(model) {
+  ''
+}
+
+get_ampl_data_output.hawkes_model <- function(model) {
+  ''
+}
+
 #' @export
 print.hawkes_model <- function(x, ...) {
   for (n in names(x)) {
@@ -170,4 +178,12 @@ get_ampl_constraints <- function(obj) {
 #' @export
 get_branching_factor <- function(obj) {
   UseMethod('get_branching_factor')
+}
+
+get_ampl_data_output <- function(obj) {
+  UseMethod('get_ampl_data_output')
+}
+
+get_ampl_model_output <- function(obj) {
+  UseMethod('get_ampl_model_output')
 }

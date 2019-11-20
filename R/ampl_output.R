@@ -76,6 +76,9 @@ output_dat <- function(model, file) {
   }
   output_string <- paste(output_string, ";", sep = "")
 
+  # allow for model-specific data output
+  output_string <- paste0(output_string, get_ampl_data_output(model))
+
   write(output_string, file = file)
 }
 
@@ -116,6 +119,8 @@ output_mod <- function(model, file) {
   ## next, do the part of the objective function and kernel dependent constraints
   output.OJ <- paste(
     '',
+    # allow for model-specific data output
+    get_ampl_model_output(model),
     '# define objective function to maximize',
     'maximize Likelihood:',
     get_ampl_likelihood(model),
