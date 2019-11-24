@@ -3,6 +3,7 @@
 # the powerlaw distribution was determined from the twitter data, from the #retweets
 # alpha = 2.016, xmin = 1. Draw n values
 #' @import poweRlaw
+#' @export
 generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {
 
   if ( is.null(.globals$user_infl) ) {
