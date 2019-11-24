@@ -96,7 +96,7 @@ generate_random_points.hawkes_model <- function(model) {
   init <- data.frame('K' = init_k, 'beta' = init_beta,
                      'c' = init_c, 'theta' = init_theta, 'N' = init_n)
 
-  init[, names(init) %in% get_param_names(model)]
+  init[names(init) %in% get_param_names(model)]
 }
 
 get_lower_bound.hawkes_model <- function(model) {

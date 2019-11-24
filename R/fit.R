@@ -27,7 +27,7 @@ fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation
   ## get the initial points
   points <- generate_random_points(model)
   models_with_initial_point <- lapply(seq(nrow(points)), function(i) {
-    model$init_par <- unlist(points[i, ])
+    model$init_par <- unlist(points[i, , drop = F])
     model
   })
 
