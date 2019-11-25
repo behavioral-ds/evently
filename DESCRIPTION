@@ -1,4 +1,4 @@
-Package: HawkesFit
+Package: evently
 Type: Package
 Title: Fit Hawkes and HawkesN Processes with AMPL and Ipopt
 Version: 0.1.0

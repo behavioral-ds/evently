@@ -1,4 +1,4 @@
 library(testthat)
-library(HawkesFit)
+library(evently)
 
-test_check("HawkesFit")
+test_check("evently")

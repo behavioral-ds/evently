@@ -1,5 +1,5 @@
 ---
-title: "HawkesFit: simulation, fitting of Hawkes processes"
+title: "evently: simulation, fitting of Hawkes processes"
 output:
   github_document:
     pandoc_args: --webtex
@@ -9,20 +9,20 @@ output:
 This package is designed for simulating and fitting the Hawkes processes and the HawkesN processes with several options of kernel functions. Currently, it assumes univariate processes without background event rates. Prior knowledge about the models is assumed in the following tutorial and please refer to [1] and [2] for details about the models.
 
 ```{r}
-library(HawkesFit)
+library(evently)
 ```
 
 ## Installation and dependencies
 Several dependencies are required for running this package:
 
-  - **poweRlaw**: r package, will be installed while installing the HawkesFit package
+  - **poweRlaw**: r package, will be installed while installing the evently package
   - **AMPL**: download the demo version from https://ampl.com/try-ampl/download-a-free-demo/
   - **Ipopt**: compile from the source code here https://www.coin-or.org/Ipopt/documentation/ so that the linear solver ma57 will be available.
  
 Install the package by executing
 ```{r, eval=FALSE}
 if (!require('devtools')) install.packages('devtools')
-devtools::install_github('qykong/HawkesFit')
+devtools::install_github('qykong/evently')
 ```
 
 ## Available models

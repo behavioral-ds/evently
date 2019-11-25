@@ -2,7 +2,7 @@
 #'
 #'
 #' @docType package
-#' @name HawkesFit
+#' @name evently
 NULL
 
 .globals <- new.env(parent = emptyenv())
