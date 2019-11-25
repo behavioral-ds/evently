@@ -8,7 +8,7 @@ test_that('only list of dataframe is accepted', {
 test_that('fitting works', {
   set.seed(888)
   par <- c(K = 1.3, theta = 1, N = 100)
-  sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN')$data
+  sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN')
   fitted <- fit_series(data = sims, model_type = 'EXPN', observation_time = Inf)
   expect_equal(fitted$convergence, 0)
   expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))
@@ -17,7 +17,7 @@ test_that('fitting works', {
 test_that('fitting works for PL', {
   set.seed(888)
   par <- c(K = 1.3, c = 1, theta = 1)
-  sims <- generate_hawkes_event_series(par = par, model_type = 'PL')$data
+  sims <- generate_hawkes_event_series(par = par, model_type = 'PL')
   fitted <- fit_series(data = sims, model_type = 'PL', observation_time = Inf)
   expect_equal(fitted$convergence, 0)
   expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))
@@ -27,7 +27,7 @@ test_that('simulating and fitting are working for EXPN', {
   set.seed(888)
   cut_time <- 7
   par <- c(K = 1.3, theta = 1, N = 100)
-  sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN', Tmax = cut_time, sim_no = 500)$data
+  sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN', Tmax = cut_time, sim_no = 500)
   sims <- lapply(sims, function(.x) .x[.x$time < cut_time, ])
   fitted <- lapply(seq(10), function(i) {fit_series(sims[(50*(i-1) +1):(50*i)], cores = 10, model_type = 'EXPN', lower_bound = c(K = 1e-100, theta = 1e-100, N = 100), upper_bound = c(K = 1e+6, theta = 1e+3, N = 100), observation_time = cut_time)})
   expect_true(fitted[[1]]$init_par[[1]] != fitted[[1]]$par[[1]])
@@ -38,7 +38,7 @@ test_that('simulating and fitting are working for EXPN', {
 test_that('infinity observation time works for EXPN', {
   set.seed(888)
   par <- c(K = 5, theta = 1, N = 50)
-  sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN', Tmax = Inf, sim_no = 50)$data
+  sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN', Tmax = Inf, sim_no = 50)
   fitted <- fit_series(sims, cores = 10, model_type = 'EXPN', observation_time = Inf)
   expect_true(fitted$init_par[[1]] != fitted$par[[1]])
   expect_true(all(abs(fitted$par- par) < 5e-1))

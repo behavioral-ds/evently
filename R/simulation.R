@@ -199,8 +199,6 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     check_required_hawkes_model_fields(model, c('par', 'model_type'))
     par <- model$par
     model_type <- model$model_type
-  } else {
-    model <- new_hawkes_model(model_type = model_type, par = par)
   }
 
   # determine if this is a marked model or not
@@ -209,6 +207,7 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     model_type <- substr(model_type, 2, nchar(model_type))
   } else {
     par[['beta']] <- 0
+    M <- 1
   }
 
   data <- mclapply(seq(sim_no), function(sim_iter) {
@@ -242,7 +241,7 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
       if (s <= thr) {
         ## if here, it means we accept the event
         # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
-        mag <- generate_user_influence(n = 1, alpha = alpha, mmin = mmin)
+        mag <- ifelse(par[['beta']] == 0, 1, generate_user_influence(n = 1, alpha = alpha, mmin = mmin))
 
         # add the next event to the history
         event <- matrix( c(mag, t), nrow=1, byrow = T)
@@ -265,7 +264,5 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     return(history)
   }, mc.cores = cores)
 
-  model$data <- data
-
-  return(model)
+  data
 }
