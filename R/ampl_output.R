@@ -106,7 +106,7 @@ output_mod <- function(model, file) {
   )
 
   ## next describe our initial parameters, if we have them
-  ## assume that the variables we use are the ones in the init_params
+  ## assume that the variables we use are the ones in the init_par
   output.VAR <- "#define parameters"
   for (var in names(model$init_par)) {
     if (is.finite(model$init_par[var])) {

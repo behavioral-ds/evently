@@ -34,7 +34,7 @@ fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation
   ## if no .init_no, then do all and model selection at the end
   if (is.null(.init_no)) .init_no <- seq(models_with_initial_point)
 
-  ## if we are asked for an init larger than our initial params, report errors
+  ## if we are asked for an init larger than our initial parameters, report errors
   if (sum(.init_no > nrow(models_with_initial_point)) > 0) stop('init_no is too large')
 
   inner_apply_func <- function(model){

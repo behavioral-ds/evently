@@ -6,12 +6,21 @@
 saves and continuing a stopped simulation. Creates a CSV file with two
 columns, each row is an event: (magnitude, time)}
 \usage{
-generate_hawkes_event_series(params, model_type, alpha = 2.016,
-  mmin = 1, M = 10000, Tmax = 10, history_init = NULL,
-  maxEvents = NA)
+generate_hawkes_event_series(model, par, model_type, sim_no = 1,
+  cores = 1, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10,
+  history_init = NULL, maxEvents = NA)
 }
 \arguments{
-\item{params}{a named vector of model parameters, K, alpha, beta, mmin, c, theta - parameters of the Hawkes kernel}
+\item{model}{a model class object with par and model_type presented. par and
+model_type are not requird once this is given}
+
+\item{par}{a named vector of model parameters, K, alpha, beta, mmin, c, theta - parameters of the Hawkes kernel}
+
+\item{model_type}{model type}
+
+\item{sim_no}{the number of simulated cascades}
+
+\item{cores}{the number of cores (processes) used for simulation}
 
 \item{M}{- magnitude of the initial event (in case no initial history
 provided)}

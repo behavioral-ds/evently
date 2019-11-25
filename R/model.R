@@ -27,7 +27,7 @@ new_hawkes_model <- function(model_type, par = NULL, data = NULL, init_par = NUL
 
   # check if provided parameters are of the same length as required
   if (!is.null(par)) {
-    stopifnot(length(param_names) == length(par))
+    if (length(param_names) != length(par)) stop('The provided parameters are not aligned with the required model parameters!')
 
     if (length(names(par)) == 0) {
       warning(paste0('Provided parameter vector is unnamed. Aussming the following order: ', paste(param_names, collapse = ', ')))
@@ -75,6 +75,7 @@ new_hawkes_model <- function(model_type, par = NULL, data = NULL, init_par = NUL
 }
 
 check_required_hawkes_model_fields <- function(model, fields) {
+  stopifnot('hawkes_model' %in% class(model))
   for (f in fields) {
     stopifnot(hasName(model, f))
   }
