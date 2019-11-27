@@ -30,10 +30,12 @@ preprocess_data <- function(data, observation_time) {
   }
 
   data <- lapply(data, function(hist) {
-    hist <- offset_same_time(hist)
+    if (observation_time < hist$time[nrow(hist)]) {
+      stop('The provided observation time is smaller than the last observed event.')
+    }
     new_row <- data.frame(time = observation_time, magnitude = 0)
     hist <- rbind(hist[, c('time', 'magnitude')], new_row)
-    hist
+    offset_same_time(hist)
   })
 
   # sanity check
