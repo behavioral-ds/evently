@@ -9,6 +9,7 @@ test_that('fitting works', {
   set.seed(888)
   par <- c(K = 1.3, theta = 1, N = 100)
   sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN')
+  sims <- lapply(sims, function(.x) cbind(.x, data.frame(test = rep(1, nrow(.x)))))
   fitted <- fit_series(data = sims, model_type = 'EXPN', observation_time = Inf)
   expect_equal(fitted$convergence, 0)
   expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))

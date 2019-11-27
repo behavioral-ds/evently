@@ -32,7 +32,7 @@ preprocess_data <- function(data, observation_time) {
   data <- lapply(data, function(hist) {
     hist <- offset_same_time(hist)
     new_row <- data.frame(time = observation_time, magnitude = 0)
-    hist <- rbind(hist, new_row)
+    hist <- rbind(hist[, c('time', 'magnitude')], new_row)
     hist
   })
 
