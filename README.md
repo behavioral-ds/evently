@@ -86,30 +86,7 @@ parallel.
 
 ``` r
 fitted_model <- fit_series(data, model_type = 'EXP', observation_time = 5, cores = 10)
-```
 
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-    ## [1] "here"
-
-``` r
 fitted_model
 ```
 
