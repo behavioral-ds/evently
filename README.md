@@ -86,7 +86,30 @@ parallel.
 
 ``` r
 fitted_model <- fit_series(data, model_type = 'EXP', observation_time = 5, cores = 10)
+```
 
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+    ## [1] "here"
+
+``` r
 fitted_model
 ```
 
@@ -108,21 +131,29 @@ fitted_model
 There are 8 models available so far in this
 package:
 
-|                           Model                            | Abbreviation (model\_type) |                                                                                                                                                                  Intensity Function                                                                                                                                                                   |    Parameters    |
-| :--------------------------------------------------------: | :------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------: |
-|     Hawkes process with an exponential kernel function     |            EXP             |                                                       ![\\kappa\\sum\_{t\_i \< t} \\theta e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\sum_{t_i \< t} \\theta e^{-\\theta (t-t_i)}")                                                       |     K,theta      |
-|      Hawkes process with a power-law kernel function       |             PL             |                                                      ![\\kappa\\sum\_{t\_i \< t} (t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\sum_{t_i \< t} (t-t_i + c)^{-(1+\\theta)}")                                                       |    K,c,theta     |
-|    HawkesN process with an exponential kernel function     |            EXPN            |                          ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} \\theta e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} \\theta e^{-\\theta (t-t_i)}")                          |    K,theta,N     |
-|      HawkesN process with a power-law kernel function      |            PLN             |                         ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} (t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} (t-t_i + c)^{-(1+\\theta)}")                          |   K,c,theta,N    |
-| Marked Hawkes process with an exponential kernel function  |            mEXP            |                              ![\\kappa\\sum\_{t\_i \< t} \\theta m\_i^{\\beta} e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20m_i%5E%7B%5Cbeta%7D%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\sum_{t_i \< t} \\theta m_i^{\\beta} e^{-\\theta (t-t_i)}")                               |   K,beta,theta   |
-|   Marked Hawkes process with a power-law kernel function   |            mPL             | ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} m\_i^{\\beta} (t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20m_i%5E%7B%5Cbeta%7D%20%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} m_i^{\\beta} (t-t_i + c)^{-(1+\\theta)}") |  K,beta,c,theta  |
-| Marked HawkesN process with an exponential kernel function |           mEXPN            | ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} \\theta m\_i^{\\beta} e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20m_i%5E%7B%5Cbeta%7D%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} \\theta m_i^{\\beta} e^{-\\theta (t-t_i)}")  |  K,beta,theta,N  |
-|  Marked HawkesN process with a power-law kernel function   |            mPLN            |   ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} m\_i^{\\beta}(t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20m_i%5E%7B%5Cbeta%7D%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} m_i^{\\beta}(t-t_i + c)^{-(1+\\theta)}")    | K,beta,c,theta,N |
+|                           Model                            | Abbreviation (model\_type) |                                                                                                                                                                  Intensity Function                                                                                                                                                                  |    Parameters    |
+| :--------------------------------------------------------: | :------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------: |
+|     Hawkes process with an exponential kernel function     |            EXP             |                                                      ![\\kappa\\sum\_{t\_i \< t} \\theta e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\sum_{t_i \< t} \\theta e^{-\\theta (t-t_i)}")                                                       |     K,theta      |
+|      Hawkes process with a power-law kernel function       |             PL             |                                                      ![\\kappa\\sum\_{t\_i \< t} (t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\sum_{t_i \< t} (t-t_i + c)^{-(1+\\theta)}")                                                      |    K,c,theta     |
+|    HawkesN process with an exponential kernel function     |            EXPN            |                         ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} \\theta e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} \\theta e^{-\\theta (t-t_i)}")                          |    K,theta,N     |
+|      HawkesN process with a power-law kernel function      |            PLN             |                         ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} (t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} (t-t_i + c)^{-(1+\\theta)}")                         |   K,c,theta,N    |
+| Marked Hawkes process with an exponential kernel function  |            mEXP            |                              ![\\kappa\\sum\_{t\_i \< t} \\theta m\_i^{\\beta} e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20m_i%5E%7B%5Cbeta%7D%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\sum_{t_i \< t} \\theta m_i^{\\beta} e^{-\\theta (t-t_i)}")                              |   K,beta,theta   |
+|   Marked Hawkes process with a power-law kernel function   |            mPL             |                             ![\\kappa\\sum\_{t\_i \< t} m\_i^{\\beta} (t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Csum_%7Bt_i%20%3C%20t%7D%20m_i%5E%7B%5Cbeta%7D%20%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\sum_{t_i \< t} m_i^{\\beta} (t-t_i + c)^{-(1+\\theta)}")                              |  K,beta,c,theta  |
+| Marked HawkesN process with an exponential kernel function |           mEXPN            | ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} \\theta m\_i^{\\beta} e^{-\\theta (t-t\_i)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20%5Ctheta%20m_i%5E%7B%5Cbeta%7D%20e%5E%7B-%5Ctheta%20%28t-t_i%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} \\theta m_i^{\\beta} e^{-\\theta (t-t_i)}") |  K,beta,theta,N  |
+|  Marked HawkesN process with a power-law kernel function   |            mPLN            |   ![\\kappa\\frac{N-N\_t}{N}\\sum\_{t\_i \< t} m\_i^{\\beta}(t-t\_i + c)^{-(1+\\theta)}](https://latex.codecogs.com/png.latex?%5Ckappa%5Cfrac%7BN-N_t%7D%7BN%7D%5Csum_%7Bt_i%20%3C%20t%7D%20m_i%5E%7B%5Cbeta%7D%28t-t_i%20%2B%20c%29%5E%7B-%281%2B%5Ctheta%29%7D "\\kappa\\frac{N-N_t}{N}\\sum_{t_i \< t} m_i^{\\beta}(t-t_i + c)^{-(1+\\theta)}")   | K,beta,c,theta,N |
 
 ## Acknowledgement
 
 The development of this package is supported by the Green Policy grant
 from the National Security College, Crawford School, ANU.
+
+## License
+
+Both dataset and code are distributed under the [Creative Commons
+Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+license](https://creativecommons.org/licenses/by-nc/4.0/). If you
+require a different license, please contact us at <Quyu.Kong@anu.edu.au>
+or <Marian-Andrei@rizoiu.eu>.
 
 ## Reference
 
