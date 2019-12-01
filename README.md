@@ -34,7 +34,7 @@ devtools::install_github('behavioral-ds/evently')
 
 Let’s first simulate 100 event cascades of the **Hawkes process with an
 exponential kernel function** (please refer to the [Available
-models](#available_models) for models and their abbreviations in the
+models](#available-models) for models and their abbreviations in the
 package) with a given parameter set, ![\\kappa = 0.9, \\theta
 = 1](https://latex.codecogs.com/png.latex?%5Ckappa%20%3D%200.9%2C%20%5Ctheta%20%3D%201
 "\\kappa = 0.9, \\theta = 1"). For each simulation, we only simulate

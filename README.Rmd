@@ -23,7 +23,7 @@ devtools::install_github('behavioral-ds/evently')
 
 ## Simulating cascades
 
-Let's first simulate 100 event cascades of the **Hawkes process with an exponential kernel function** (please refer to the [Available models](#available_models) for models and their abbreviations in the package) with a given parameter set, $\kappa = 0.9, \theta = 1$. For each simulation, we only simulate until 5 seconds. The resulted cascades are placed in a single `list` where each cascade is a `data.frame`.
+Let's first simulate 100 event cascades of the **Hawkes process with an exponential kernel function** (please refer to the [Available models](#available-models) for models and their abbreviations in the package) with a given parameter set, $\kappa = 0.9, \theta = 1$. For each simulation, we only simulate until 5 seconds. The resulted cascades are placed in a single `list` where each cascade is a `data.frame`.
 
 ```{r}
 set.seed(4)
