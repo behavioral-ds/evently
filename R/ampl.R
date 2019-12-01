@@ -1,8 +1,41 @@
-#' Set up the AMPL execution path.
-#' @param ampl_path a string of path to where the executable ampl binary is located. Please make sure ipopt binary is in the same path.
+#' Set up the AMPL environment by downloading an AMPL demo version and the compiled
+#' ipopt binary. Only supports UNIX compatible OSs.
+#' @param ampl_path the path where the AMPL folder will be placed
+#' @importFrom utils download.file
+#' @importFrom utils untar
+#' @importFrom utils unzip
 #' @export
 setup_ampl <- function(ampl_path) {
-  .globals$execution <- paste0('export PATH=$PATH:', ampl_path, '; ampl')
+  machine_ident <- paste0(Sys.info()[['sysname']], Sys.info()[['machine']])
+  if (missing(ampl_path) || ampl_path == '') ampl_path <- Sys.getenv('HOME')
+  ampl_final_path <- paste0(ampl_path, '/ampl')
+
+  # download AMPL
+  ampl_suffix <- switch (machine_ident,
+    'Linuxx86_64' = 'ampl.linux64',
+    'Darwinx86_64' = 'ampl.macosx64',
+    stop('Cannot infer the operating system your are using. Autodownload failed.')
+  )
+  ampl_download_url <- paste0('https://ampl.com/demo/', ampl_suffix, '.tgz')
+  download.file(ampl_download_url, destfile = '/tmp/ampl.tgz')
+  untar('/tmp/ampl.tgz', exdir = ampl_path)
+  file.rename(from = paste0(ampl_path, '/', ampl_suffix),
+              to = ampl_final_path)
+
+  # download ipopt
+  ipopt_download_url <- switch (machine_ident,
+    'Linuxx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-linux64.zip',
+    'Darwinx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-osx.zip',
+    stop('Cannot infer the operating system your are using. Autodownload failed.')
+  )
+  download.file(ipopt_download_url, destfile = '/tmp/ipopt.zip')
+  unzip(zipfile = '/tmp/ipopt.zip', exdir = ampl_final_path)
+  Sys.chmod(paste0(ampl_final_path, '/ipopt'), '777', use_umask = FALSE)
+
+  # add ampl to path environment
+  write(paste0('PATH=', Sys.getenv('PATH'), ':', ampl_final_path), file = paste0(Sys.getenv('HOME'), '/.Renviron'), append = TRUE)
+
+  .globals$execution <- paste0('export PATH=$PATH:', ampl_final_path, '; ampl')
 }
 
 #' Set up the folder for placing temporary files, defaults to /tmp
@@ -55,9 +88,9 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
   var_names <- paste(names(model$init_par), collapse = ", ")
   solver_text <- sprintf("option solver %s;", solver)
   if (solver == "ipopt")
-    solver_text <- paste(solver_text, "options ipopt_options 'linear_solver=ma57 print_level=1 max_iter=1000';", sep = '\n')
+    solver_text <- paste(solver_text, "options ipopt_options 'print_level=1 max_iter=1000';", sep = '\n')
   # print("halt_on_ampl_error=yes causing errors; not sure why but removed for now")
-  #
+  # linear_solver=ma57
   if (solver == "knitro")
     solver_text <- paste(solver_text, "options knitro_options 'ms_enable=1 honorbnds=1';", sep = '\n')
   content <- paste(
