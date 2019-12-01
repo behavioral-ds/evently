@@ -16,15 +16,12 @@ library(evently)
 
 ## Installation and dependencies
 
-Several dependencies are required for running this package:
-
-  - **poweRlaw**: r package, will be installed while installing the
-    evently package
-  - **AMPL**: download the demo version from
-    <https://ampl.com/try-ampl/download-a-free-demo/>
-  - **Ipopt**: compile from the source code here
-    <https://www.coin-or.org/Ipopt/documentation/> so that the linear
-    solver ma57 will be available.
+Several dependencies
+([poweRlaw](https://cran.r-project.org/web/packages/poweRlaw/poweRlaw.pdf),
+[AMPL](https://ampl.com/),
+[Ipopt](https://www.coin-or.org/Ipopt/documentation/)) are required for
+running this package. These dependencies will be installed automatically
+by R or by following instructions upon package load.
 
 Install the package by executing
 
