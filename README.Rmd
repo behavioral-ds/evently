@@ -22,7 +22,7 @@ Several dependencies are required for running this package:
 Install the package by executing
 ```{r, eval=FALSE}
 if (!require('devtools')) install.packages('devtools')
-devtools::install_github('qykong/evently')
+devtools::install_github('behavioral-ds/evently')
 ```
 
 ## Simulating cascades

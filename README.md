@@ -30,7 +30,7 @@ Install the package by executing
 
 ``` r
 if (!require('devtools')) install.packages('devtools')
-devtools::install_github('qykong/evently')
+devtools::install_github('behavioral-ds/evently')
 ```
 
 ## Simulating cascades
