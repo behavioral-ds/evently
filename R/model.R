@@ -118,6 +118,10 @@ get_ampl_data_output.hawkes_model <- function(model) {
   ''
 }
 
+get_ampl_execution_options.hawkes_model <- function(model) {
+  ''
+}
+
 #' @export
 print.hawkes_model <- function(x, ...) {
   for (n in names(x)) {
@@ -187,4 +191,8 @@ get_ampl_data_output <- function(obj) {
 
 get_ampl_model_output <- function(obj) {
   UseMethod('get_ampl_model_output')
+}
+
+get_ampl_execution_options <- function(obj) {
+  UseMethod('get_ampl_execution_options')
 }

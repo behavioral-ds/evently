@@ -19,7 +19,7 @@
 #' @import parallel
 #' @export
 fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation_time = NULL,
-                       lower_bound = NULL, upper_bound = NULL) {
+                       lower_bound = NULL, upper_bound = NULL, ...) {
   preparation(data)
   model <- new_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound)
@@ -44,7 +44,7 @@ fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation
       lgo_model <- ampl_run(model = model, solver = "lgo")
       model[['init_par']] <- unlist(lgo_model$par)
     }
-    model <- ampl_run(model = model, solver = "ipopt")
+    model <- ampl_run(model = model, solver = "ipopt", ...)
     # to emphasize the init_par is found by lgo
     model$init_par <- saved_init_par
 
@@ -54,7 +54,7 @@ fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation
   ## start fitting
   fitted_models <- mclapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, mc.cores = cores, mc.silent = F)
 
-  model_selection(models = fitted_models)
+  model_selection(models = fitted_models, cores = cores)
 }
 
 #' Compute the negative log-likelihood values of a given model on a list of given
@@ -73,13 +73,13 @@ get_hawkes_neg_likelihood_value <- function(model) {
   ampl_run(model, goal = 'nll')
 }
 
-model_selection <- function(models) {
+model_selection <- function(models, cores) {
   if (length(models) == 1) return(models[[1]])
 
   ## score each model -- don't trust the algorithms own value, redo my own.
-  nLLs <- sapply(models, function(model) {
+  nLLs <- simplify2array(mclapply(models, function(model) {
     get_hawkes_neg_likelihood_value(model)
-  })
+  }, mc.cores = cores), higher = F)
   if (all(is.na(nLLs))) stop('something went wrong! All neg.likelihood values are missing')
 
   models[[which.min(nLLs)]]

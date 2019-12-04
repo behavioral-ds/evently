@@ -5,6 +5,11 @@ test_that('only list of dataframe is accepted', {
   expect_error(fit_series(cascade, model_type = 'EXP'))
 })
 
+test_that('Debug is possible', {
+  cascade <- data.frame(time = seq(10), magnitude = seq(10))
+  expect_error(fit_series(list(cascade), model_type = 'EXP', debug = T))
+})
+
 test_that('fitting works', {
   set.seed(888)
   par <- c(K = 1.3, theta = 1, N = 100)

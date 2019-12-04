@@ -64,15 +64,15 @@ prepare_tmp_files <- function() {
 # ampl main code ----------------------------------------------------------
 
 # fit with ampl
-ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
+ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
   tmp_files <- prepare_tmp_files()
   output_dat(model = model, file = tmp_files$dat)
   output_mod(model = model, file = tmp_files$mod)
 
   # what's the expected result
   res <- switch (goal,
-    fit = .run(tmp_files = tmp_files, model = model, solver = solver),
-    nll = .run_get_likelihood(tmp_files = tmp_files, model = model)
+    fit = .run(tmp_files = tmp_files, model = model, solver = solver, ...),
+    nll = .run_get_likelihood(tmp_files = tmp_files, model = model, ...)
   )
 
   file.remove(tmp_files$dat, tmp_files$mod, tmp_files$run, tmp_files$res)
@@ -84,7 +84,9 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
 # the solver (default "minos"). Returns the fitted parameters, the value of the
 # log.likelihood function and the exit status.
 #' @importFrom utils read.csv
-.run <- function(tmp_files, model, solver = "minos") {
+.run <- function(tmp_files, model, solver = "minos", ...) {
+  arguments <- list(...) # allow future extensions
+
   var_names <- paste(names(model$init_par), collapse = ", ")
   solver_text <- sprintf("option solver %s;", solver)
   if (solver == "ipopt")
@@ -96,6 +98,7 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
   content <- paste(
     sprintf("option TMPDIR \"%s\";", .globals$tmp),
     solver_text,
+    get_ampl_execution_options(model),
     paste('model ', tmp_files$mod, ';', sep = ''),
     paste('data ', tmp_files$dat, ';', sep = ''),
     "solve;",
@@ -107,6 +110,12 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
   write(content, tmp_files$run)
   ret <- NULL
 
+  # allow to debug the ampl execution
+  if ('debug' %in% names(arguments) && arguments$debug) {
+    cat(sprintf('Debugging is on! Please find the AMPL files in the following locations:\nModel: %s\nData: %s\nExecution: %s',
+                tmp_files$mod, tmp_files$dat, tmp_files$run))
+    stop('Debugging is on!')
+  }
   ## run AMPL with the configs we created
   tryCatch(expr = {
     system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)
@@ -132,8 +141,11 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
   return(model)
 }
 
-.run_get_likelihood <- function(tmp_files, model) {
+.run_get_likelihood <- function(tmp_files, model, ...) {
+  arguments <- list(...) # allow future extensions
+
   content <- paste(
+    get_ampl_execution_options(model),
     paste('model ', tmp_files$mod, ';', sep = ''),
     paste('data ', tmp_files$dat, ';', sep = ''),
     # use display the whole expression instead of display Likelihood, as display
@@ -146,6 +158,13 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit') {
   run_tmp <- sprintf('%s/tmp-%s.run', .globals$tmp, tmp_files$pid)
   res_tmp <- sprintf('%s/res-%s.txt', .globals$tmp, tmp_files$pid)
   write(content, run_tmp)
+
+  # allow to debug the ampl execution
+  if ('debug' %in% names(arguments) && arguments$debug) {
+    cat(sprintf('Debugging is on! Please find the following AMPL files for inspection:\nModel: %s\nData: %s\nExecution: %s',
+                tmp_files$mod, tmp_files$dat, tmp_files$run))
+    stop('Debugging is on!')
+  }
 
   system(paste(.globals$execution, run_tmp))
 
