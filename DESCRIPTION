@@ -12,5 +12,5 @@ RoxygenNote: 6.1.1
 Imports:
     poweRlaw
 Suggests: 
-    testthat
+    testthat,
     covr
