@@ -13,3 +13,4 @@ Imports:
     poweRlaw
 Suggests: 
     testthat
+    covr
