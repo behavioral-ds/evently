@@ -13,4 +13,5 @@ Imports:
     poweRlaw
 Suggests: 
     testthat,
-    covr
+    covr,
+    devtools

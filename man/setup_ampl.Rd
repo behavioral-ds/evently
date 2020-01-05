@@ -2,13 +2,15 @@
 % Please edit documentation in R/ampl.R
 \name{setup_ampl}
 \alias{setup_ampl}
-\title{Set up the AMPL execution path.}
+\title{Set up the AMPL environment by downloading an AMPL demo version and the compiled
+ipopt binary. Only supports UNIX compatible OSs.}
 \usage{
 setup_ampl(ampl_path)
 }
 \arguments{
-\item{ampl_path}{a string of path to where the executable ampl binary is located. Please make sure ipopt binary is in the same path.}
+\item{ampl_path}{the path where the AMPL folder will be placed}
 }
 \description{
-Set up the AMPL execution path.
+Set up the AMPL environment by downloading an AMPL demo version and the compiled
+ipopt binary. Only supports UNIX compatible OSs.
 }

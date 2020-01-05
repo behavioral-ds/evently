@@ -6,7 +6,8 @@
 and learn model parameters.}
 \usage{
 fit_series(data, model_type, cores = 1, .init_no = NULL,
-  observation_time = NULL, lower_bound = NULL, upper_bound = NULL)
+  observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
+  ...)
 }
 \arguments{
 \item{data}{a list of data.frame(s) where each data.frame is an event cascade with event
