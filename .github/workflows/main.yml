@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    container:
+      image: rstudio/r-base:3.6-bionic
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Install Package Dependencies
+        run: Rscript -e "install.packages('covr')"
+      - name: Check Package
+        run: Rscript -e "rcmdcheck::rcmdcheck(error_on = 'error', check_dir = 'check')"
+      - name: Run Code Coverage
+        run: Rscript -e "covr::codecov(quiet = FALSE, commit = '$GITHUB_SHA', branch = '$GITHUB_REF', token = '$${{ secrets.CODECOV_TOKEN }}')"
