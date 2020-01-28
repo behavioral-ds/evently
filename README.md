@@ -1,4 +1,4 @@
-![](https://github.com/behavioral-ds/evently/workflows/CI/badge.svg)
+![](https://github.com/behavioral-ds/evently/workflows/unit-tests/badge.svg)
 
 evently: simulation, fitting of Hawkes processes
 ================
