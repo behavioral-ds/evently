@@ -23,6 +23,7 @@ preprocess_data <- function(data, observation_time) {
   }
 
   if (is.null(observation_time)) stop('Please specify an observation time!')
+  if (observation_time <= 0) stop('Observation time must be greater than 0!')
   if (is.infinite(observation_time)) {
     # ampl doesn't recognize infinity so set to a large number
     # didn't set to machine max as it will cause error in AMPL

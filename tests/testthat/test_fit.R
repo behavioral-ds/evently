@@ -7,7 +7,12 @@ test_that('only list of dataframe is accepted', {
 
 test_that('Debug is possible', {
   cascade <- data.frame(time = seq(10), magnitude = seq(10))
-  expect_error(fit_series(list(cascade), model_type = 'EXP', debug = T))
+  expect_error(fit_series(list(cascade), model_type = 'EXP', observation_time = Inf, debug = T), regexp = 'Debugging is on!')
+})
+
+test_that('Errors for only single event cascades', {
+  cascade <- data.frame(time = 0, magnitude = 1)
+  expect_error(fit_series(list(cascade), model_type = 'EXP'), regexp = 'Observation time must be greater than 0!')
 })
 
 test_that('fitting works', {
