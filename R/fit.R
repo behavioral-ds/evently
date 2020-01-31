@@ -8,8 +8,11 @@
 #' @param model_type a string representing the model type, e.g. EXP for Hawkes processes with
 #' an exponential kernel function
 #' @param cores the number of cores used for parallel fitting, defaults to 1 (non-parallel)
-#' @param .init_no currently 10 random starting parameters are generated for fitting. This controls which
-#' random points are used. Defaults to NULL
+#' @param init_pars a data.frame of initial parameters passed to the fitting program. Parameters should be
+#' aligned with required ones for the corresponding "model_type". The default initial parameters will
+#' be used if not provided.
+#' @param .init_no If initi_pars is not provided, currently 10 random starting parameters are generated
+#' for fitting. This controls which random points are used. Defaults to NULL
 #' @param observation_time the event cascades observation time. It is assumed that all cascades in data
 #' are observed until a common time.
 #' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
@@ -18,14 +21,23 @@
 #' values are the largest possible values.
 #' @import parallel
 #' @export
-fit_series <- function(data, model_type, cores = 1, .init_no = NULL, observation_time = NULL,
+fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
                        lower_bound = NULL, upper_bound = NULL, ...) {
   preparation(data)
   model <- new_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound)
 
-  ## get the initial points
-  points <- generate_random_points(model)
+  if (!missing(init_pars)) {
+    ## use the provided init_pars
+    if (all(get_param_names(model) %in% names(init_pars))) {
+      points <- init_pars[names(init_pars) %in% get_param_names(model)]
+    } else {
+      stop('The provided initial parameters have a wrong parameter set!')
+    }
+  } else {
+    ## get the initial points
+    points <- generate_random_points(model)
+  }
   models_with_initial_point <- lapply(seq(nrow(points)), function(i) {
     model$init_par <- unlist(points[i, , drop = F])
     model

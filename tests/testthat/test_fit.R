@@ -18,11 +18,13 @@ test_that('Errors for only single event cascades', {
 test_that('fitting works', {
   set.seed(888)
   par <- c(K = 1.3, theta = 1, N = 100)
+  par_data_frame <- as.data.frame(t(par))
   sims <- generate_hawkes_event_series(par = par, model_type = 'EXPN')
   sims <- lapply(sims, function(.x) cbind(.x, data.frame(test = rep(1, nrow(.x)))))
-  fitted <- fit_series(data = sims, model_type = 'EXPN', observation_time = Inf)
+  fitted <- fit_series(data = sims, model_type = 'EXPN', observation_time = Inf, init_pars = par_data_frame)
   expect_equal(fitted$convergence, 0)
   expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))
+  expect_true(all(fitted$init_par == par))
 
   # a testing data.frame
   test_sim <- list(data.frame(time = c(0, 1, 1, 1, 2, 2, 2), magnitude = rep(1, 7)))
