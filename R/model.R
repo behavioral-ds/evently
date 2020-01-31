@@ -16,9 +16,11 @@
 #' values are the lowest possible values.
 #' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
+#' @param model_vars a named list of extra variables provided to hawkes_model objects
 #' @export
 new_hawkes_model <- function(model_type, par = NULL, data = NULL, init_par = NULL,
-                             observation_time = NULL, lower_bound = NULL, upper_bound = NULL) {
+                             observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
+                             model_vars = NULL) {
   model <- list(model_type = model_type)
   class(model) <- c(paste0('hawkes_', model_type), 'hawkes_model')
   param_names <- get_param_names(model)
@@ -70,6 +72,12 @@ new_hawkes_model <- function(model_type, par = NULL, data = NULL, init_par = NUL
   model$upper_bound <- final_upper_bound
 
   model$observation_time <- observation_time
+
+  if (length(names(model_vars)) > 0) {
+    for (var in names(model_vars)) {
+      model[[var]] <- model_vars[[var]]
+    }
+  }
 
   model
 }

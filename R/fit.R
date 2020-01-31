@@ -19,13 +19,14 @@
 #' values are the lowest possible values.
 #' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
+#' @param model_vars a named list of extra variables provided to hawkes_model objects
 #' @import parallel
 #' @export
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
-                       lower_bound = NULL, upper_bound = NULL, ...) {
+                       lower_bound = NULL, upper_bound = NULL, model_vars = NULL, ...) {
   preparation(data)
   model <- new_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
-                            lower_bound = lower_bound, upper_bound = upper_bound)
+                            lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
 
   if (!missing(init_pars)) {
     ## use the provided init_pars
