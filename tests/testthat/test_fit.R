@@ -6,7 +6,7 @@ test_that('only list of dataframe is accepted', {
 })
 
 test_that('Debug is possible', {
-  cascade <- data.frame(time = seq(10), magnitude = seq(10))
+  cascade <- data.frame(time = seq(0, 10), magnitude = seq(11))
   expect_error(fit_series(list(cascade), model_type = 'EXP', observation_time = Inf, debug = T), regexp = 'Debugging is on!')
 })
 
@@ -65,7 +65,7 @@ test_that('infinity observation time works for EXPN', {
 test_that('compute holdout log-likelihood works', {
   cut_time <- 7
   par <- c(K = 1.3, theta = 1)
-  model <- new_hawkes_model(model_type = 'EXP', data = list(data.frame(time = 0, magnitude = 1)), observation_time = Inf, par = par)
+  model <- new_hawkes(model_type = 'EXP', data = list(data.frame(time = 0, magnitude = 1)), observation_time = Inf, par = par)
   nll <- get_hawkes_neg_likelihood_value(model)
   expect_lt(abs(nll - par[['K']]), 1e-10)
 })

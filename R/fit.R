@@ -19,13 +19,13 @@
 #' values are the lowest possible values.
 #' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
-#' @param model_vars a named list of extra variables provided to hawkes_model objects
+#' @param model_vars a named list of extra variables provided to hawkes objects
 #' @import parallel
 #' @export
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
                        lower_bound = NULL, upper_bound = NULL, model_vars = NULL, ...) {
   preparation(data)
-  model <- new_hawkes_model(data = data, model_type = model_type, observation_time = observation_time,
+  model <- new_hawkes(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
 
   if (!missing(init_pars)) {
@@ -78,7 +78,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #' @export
 get_hawkes_neg_likelihood_value <- function(model) {
   # par and data are required for computing log-likelihood values
-  check_required_hawkes_model_fields(model, c('par', 'data', 'observation_time'))
+  check_required_hawkes_fields(model, c('par', 'data', 'observation_time'))
 
   # a trick to reuse existing functions
   # have made sure this won't affect the original model object

@@ -5,9 +5,9 @@
 \title{Fit a Hawkes process or HawkesN process model on one or many event cascades
 and learn model parameters.}
 \usage{
-fit_series(data, model_type, cores = 1, .init_no = NULL,
+fit_series(data, model_type, cores = 1, init_pars, .init_no = NULL,
   observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
-  ...)
+  model_vars = NULL, ...)
 }
 \arguments{
 \item{data}{a list of data.frame(s) where each data.frame is an event cascade with event
@@ -18,14 +18,20 @@ an exponential kernel function}
 
 \item{cores}{the number of cores used for parallel fitting, defaults to 1 (non-parallel)}
 
-\item{.init_no}{currently 10 random starting parameters are generated for fitting. This controls which
-random points are used. Defaults to NULL}
+\item{init_pars}{a data.frame of initial parameters passed to the fitting program. Parameters should be
+aligned with required ones for the corresponding "model_type". The default initial parameters will
+be used if not provided.}
+
+\item{.init_no}{If initi_pars is not provided, currently 10 random starting parameters are generated
+for fitting. This controls which random points are used. Defaults to NULL}
 
 \item{observation_time}{the event cascades observation time. It is assumed that all cascades in data
 are observed until a common time.}
 
 \item{lower_bound}{model parameter lower bounds. A named vector where names are model parameters and
 values are the lowest possible values.}
+
+\item{model_vars}{a named list of extra variables provided to hawkes objects}
 
 \item{uppper_bound}{model parameter upper bounds. A named vector where names are model parameters and
 values are the largest possible values.}

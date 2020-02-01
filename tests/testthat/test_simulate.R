@@ -7,7 +7,7 @@ test_that('max time should be smaller Tmax when set', {
 })
 
 test_that('simulation should accept model class object', {
-  model <- new_hawkes_model(par = c(K = 2, theta = 1), model_type = 'EXP')
+  model <- new_hawkes(par = c(K = 2, theta = 1), model_type = 'EXP')
   expect_error(generate_hawkes_event_series(model = model, par = c(K = 2, theta = 1), model_type = 'EXP', Tmax = 1))
   data <- generate_hawkes_event_series(model = model, Tmax = 1)
   expect_true(is.list(data))

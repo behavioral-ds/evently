@@ -196,7 +196,7 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
     stop('Please either give model or (par, model_type) instead of both.')
   } else if (!missing(model)) {
-    check_required_hawkes_model_fields(model, c('par', 'model_type'))
+    check_required_hawkes_fields(model, c('par', 'model_type'))
     par <- model$par
     model_type <- model$model_type
   }
