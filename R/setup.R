@@ -2,6 +2,7 @@
 #                     Setup
 # *************************************************
 
+#' @importFrom utils menu
 .onAttach <- function(libname, pkgname) {
   if (Sys.which('ampl') != '') {
     .globals$execution <- 'ampl'
@@ -13,7 +14,7 @@
     packageStartupMessage("  Please also make sure the ipopt binary is in the ")
     packageStartupMessage("  same folder.")
     packageStartupMessage("********************************************************\n")
-    cat('It seems AMPL is not found in your PATH environment, do you want to install it now?')
+    packageStartupMessage('It seems AMPL is not found in your PATH environment, do you want to install it now?')
     if (interactive()) {
       installation_choice <- menu(c('yes', 'no'))
       if (installation_choice == 1) {

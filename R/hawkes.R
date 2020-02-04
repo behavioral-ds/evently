@@ -1,6 +1,6 @@
 # this script implements default methods for the hawkes class
 
-# Create a new hawkes model with parameters available
+#' Create a new hawkes model with parameters available
 #' @param model_type A string indicates the model tyep, e.g. EXP for a Hawkes process
 #' with an exponential kernel
 #' @param par A named vector denotes the model parameters where the names are model
@@ -80,6 +80,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   model
 }
 
+#' @importFrom utils hasName
 check_required_hawkes_fields <- function(model, fields) {
   stopifnot('hawkes' %in% class(model))
   for (f in fields) {

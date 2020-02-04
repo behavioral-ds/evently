@@ -46,36 +46,39 @@ set_tmp_folder <- function(path) {
 }
 
 # preparation code --------------------------------------------------------
-prepare_tmp_files <- function() {
+#' Prepare the temporary auxilixry files for AMPL
+#' @param type is one of "mod" (AMPL model file), "dat" (AMPL data file),
+#' "run" (AMPL run file) and "res" (file hosts AMPL runned output)
+prepare_tmp_file <- function(type) {
   pid <- Sys.getpid()
-  dat <- sprintf('%s/tmp-%s.dat', .globals$tmp, pid)
-  mod <- sprintf('%s/tmp-%s.mod', .globals$tmp, pid)
-  run <- sprintf('%s/tmp-%s.run', .globals$tmp, pid)
-  res <- sprintf('%s/res-%s.txt', .globals$tmp, pid)
-  if (file.exists(dat)) file.remove(dat)
-  if (file.exists(mod)) file.remove(mod)
-  if (file.exists(run)) file.remove(run)
-  if (file.exists(res)) file.remove(res)
-
-  list(dat = dat, mod = mod, run = run, res = res, pid = pid)
+  f <- sprintf('%s/tmp-%s.%s', .globals$tmp, pid, type)
+  if (file.exists(f)) file.remove(f)
+  f
 }
 
 
 # ampl main code ----------------------------------------------------------
 
 # fit with ampl
-ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
-  tmp_files <- prepare_tmp_files()
-  output_dat(model = model, file = tmp_files$dat)
-  output_mod(model = model, file = tmp_files$mod)
-
+ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal = 'fit', debug = F) {
+  if (missing(dat_file)) {
+    dat_file <- output_dat(model)
+    # if the file is created within this function then remove once finishes
+    if (!debug) on.exit(file.remove(dat_file), add = T)
+  }
+  if (missing(mod_file)) {
+    mod_file <- output_mod(model)
+    # if the file is created within this function then remove once finishes
+    if (!debug) on.exit(file.remove(mod_file), add = T)
+  }
+  tmp_run <- prepare_tmp_file(type = 'run')
+  tmp_res <- prepare_tmp_file(type = 'res')
+  tmp_files <- list(dat = dat_file, mod = mod_file, run = tmp_run, res = tmp_res)
   # what's the expected result
   res <- switch (goal,
-    fit = .run(tmp_files = tmp_files, model = model, solver = solver, ...),
-    nll = .run_get_likelihood(tmp_files = tmp_files, model = model, ...)
+    fit = .run(model = model, solver = solver, tmp_files = tmp_files, debug),
+    nll = .run_get_likelihood(model = model, tmp_files = tmp_files, debug)
   )
-
-  file.remove(tmp_files$dat, tmp_files$mod, tmp_files$run, tmp_files$res)
 
   return(res)
 }
@@ -84,7 +87,7 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
 # the solver (default "minos"). Returns the fitted parameters, the value of the
 # log.likelihood function and the exit status.
 #' @importFrom utils read.csv
-.run <- function(tmp_files, model, solver = "minos", ...) {
+.run <- function(model, solver = "minos", tmp_files, debug, ...) {
   arguments <- list(...) # allow future extensions
 
   var_names <- paste(names(model$init_par), collapse = ", ")
@@ -102,7 +105,7 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
     paste('model ', tmp_files$mod, ';', sep = ''),
     paste('data ', tmp_files$dat, ';', sep = ''),
     "solve;",
-    sprintf("display %s, Likelihood, solve_exitcode > %s/res-%s.txt;", var_names, .globals$tmp, tmp_files$pid),
+    sprintf("display %s, Likelihood, solve_exitcode > %s;", var_names, tmp_files$res),
     "exit;",
     sep = "\n"
   )
@@ -111,8 +114,8 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
   ret <- NULL
 
   # allow to debug the ampl execution
-  if ('debug' %in% names(arguments) && arguments$debug) {
-    cat(sprintf('Debugging is on! Please find the AMPL files in the following locations:\nModel: %s\nData: %s\nExecution: %s',
+  if (debug) {
+    cat(sprintf('Debugging is on! Please find the AMPL files in the following locations:\nModel: %s\nData: %s\nExecution: %s\n',
                 tmp_files$mod, tmp_files$dat, tmp_files$run))
     stop('Debugging is on!')
   }
@@ -138,10 +141,12 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
 
     model$par <- ret
   }
+
+  file.remove(tmp_files$run, tmp_files$res)
   return(model)
 }
 
-.run_get_likelihood <- function(tmp_files, model, ...) {
+.run_get_likelihood <- function(model, tmp_files, debug, ...) {
   arguments <- list(...) # allow future extensions
 
   content <- paste(
@@ -151,27 +156,27 @@ ampl_run <- function(model = model, solver = 'ipopt', goal = 'fit', ...) {
     # use display the whole expression instead of display Likelihood, as display
     # Likelihood seems load the whole processing model into memory which slows
     # down this extremely
-    sprintf("display %s > %s/res-%s.txt;", gsub(';', '', get_ampl_likelihood(model)), .globals$tmp, tmp_files$pid),
+    sprintf("display %s > %s;", gsub(';', '', get_ampl_likelihood(model)), tmp_files$res),
     "exit;",
     sep = "\n"
   )
-  run_tmp <- sprintf('%s/tmp-%s.run', .globals$tmp, tmp_files$pid)
-  res_tmp <- sprintf('%s/res-%s.txt', .globals$tmp, tmp_files$pid)
-  write(content, run_tmp)
+
+  write(content, tmp_files$run)
 
   # allow to debug the ampl execution
-  if ('debug' %in% names(arguments) && arguments$debug) {
-    cat(sprintf('Debugging is on! Please find the following AMPL files for inspection:\nModel: %s\nData: %s\nExecution: %s',
+  if (debug) {
+    cat(sprintf('Debugging is on! Please find the following AMPL files for inspection:\nModel: %s\nData: %s\nExecution: %s\n',
                 tmp_files$mod, tmp_files$dat, tmp_files$run))
     stop('Debugging is on!')
   }
 
-  system(paste(.globals$execution, run_tmp))
+  system(paste(.globals$execution, tmp_files$run))
 
-  tmp <- readChar(res_tmp, file.info(res_tmp)$size)
+  tmp <- readChar(tmp_files$res, file.info(tmp_files$res)$size)
   ret <- as.numeric(unlist(strsplit(tmp, '='))[2])
   names(ret) <- c('Likelihood')
 
+  file.remove(tmp_files$res, tmp_files$run)
   # return neg log likelihood
   return(-ret[["Likelihood"]])
 }

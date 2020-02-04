@@ -22,12 +22,12 @@ generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {
 # at time t, then it contributes to the conditional intensity. If inclusive ==
 # F, then events at time t are removed.
 kernelFct <- function(event, t, par = c(K = 0.024, beta = 0.5, c = 0.001, theta = 0.2, N = 1000), alpha = 2.016, mmin = 1, inclusive = T, model_type='PL') {
-  switch(model_type,
+  switch(EXPR = model_type,
          PL = .kernelFct.PL(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
          EXP = .kernelFct.EXP(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
          EXPN = .kernelFct.EXPN(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
          PLN = .kernelFct.PLN(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
-         stop(sprintf("Unimplemented kernel option '%s'.", model_type)))
+        stop(sprintf("Unimplemented kernel option '%s'.", model_type)))
 }
 
 # calculates the influence of a given event at the givent time the event is a 2

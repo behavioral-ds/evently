@@ -27,15 +27,23 @@ ampl_output_from_r <- function(names, var, type) {
 }
 
 output_dat <- function(model, file) {
+  if (missing(file)) {
+    file <- prepare_tmp_file(type = 'dat')
+  }
   # allow model-specific data output
   declarations <- get_ampl_data_output(model)
   output_string <- paste0(declarations, collapse = '')
   write(output_string, file = file)
+  return(file)
 }
 
 output_mod <- function(model, file) {
+  if (missing(file)) {
+    file <- prepare_tmp_file(type = 'mod')
+  }
   # allow model-specific model output
   declarations <- get_ampl_model_output(model)
   output <- paste0(declarations, collapse = '')
   write(output, file = file)
+  return(file)
 }

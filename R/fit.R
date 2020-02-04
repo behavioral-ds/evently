@@ -27,6 +27,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
   preparation(data)
   model <- new_hawkes(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
+  ampl_dat_file <- output_dat(model) # output ampl data file for being reused by fits with different initializations
 
   if (!missing(init_pars)) {
     ## use the provided init_pars
@@ -54,10 +55,10 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
     # to make sure exact init_par is saved, mainly for lgo fitting
     saved_init_par <- model$init_par
     if (is.na(model$init_par[[1]])) {
-      lgo_model <- ampl_run(model = model, solver = "lgo")
+      lgo_model <- ampl_run(model = model, solver = "lgo", dat_file = ampl_dat_file)
       model[['init_par']] <- unlist(lgo_model$par)
     }
-    model <- ampl_run(model = model, solver = "ipopt", ...)
+    model <- ampl_run(model = model, solver = "ipopt", dat_file = ampl_dat_file, ...)
     # to emphasize the init_par is found by lgo
     model$init_par <- saved_init_par
 
@@ -67,7 +68,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
   ## start fitting
   fitted_models <- mclapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, mc.cores = cores, mc.silent = F)
 
-  model_selection(models = fitted_models, cores = cores)
+  model_selection(models = fitted_models, cores = cores, dat_file = ampl_dat_file)
 }
 
 #' Compute the negative log-likelihood values of a given model on a list of given
@@ -76,22 +77,22 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #' @param model An object of a specific model class where the `data` and the `par` fields
 #' are required
 #' @export
-get_hawkes_neg_likelihood_value <- function(model) {
+get_hawkes_neg_likelihood_value <- function(model, ...) {
   # par and data are required for computing log-likelihood values
   check_required_hawkes_fields(model, c('par', 'data', 'observation_time'))
 
   # a trick to reuse existing functions
   # have made sure this won't affect the original model object
   model$init_par <- model$par
-  ampl_run(model, goal = 'nll')
+  ampl_run(model, goal = 'nll', ...)
 }
 
-model_selection <- function(models, cores) {
+model_selection <- function(models, cores, ...) {
   if (length(models) == 1) return(models[[1]])
 
   ## score each model -- don't trust the algorithms own value, redo my own.
   nLLs <- simplify2array(mclapply(models, function(model) {
-    get_hawkes_neg_likelihood_value(model)
+    get_hawkes_neg_likelihood_value(model, ...)
   }, mc.cores = cores), higher = F)
   if (all(is.na(nLLs))) stop('something went wrong! All neg.likelihood values are missing')
 
