@@ -11,7 +11,7 @@ test_that('model object shoud not be created due to wrong parameters', {
   expect_error(new_hawkes(par = c(K = 1, theta = 0.3, N = 100), model_type = 'EXP'))
 })
 
-test_that('branching factor is correctly computed', {
+test_that('branching factors and viral scores are correctly computed', {
   model1 <- new_hawkes(par = c(K = 0.1, theta = 0.3), model_type = 'EXP')
   model2 <- new_hawkes(par = c(K = 0.1, beta = 1, theta = 0.3), model_type = 'mEXP')
   model3 <- new_hawkes(par = c(K = 0.1, c = 0.2, theta = 0.3), model_type = 'PL')
@@ -23,8 +23,12 @@ test_that('branching factor is correctly computed', {
   model8 <- new_hawkes(par = c(K = 0.1, beta = 1, c = 0.2, theta = 0.3, N = 100), model_type = 'mPLN')
 
   expect_equal(get_branching_factor(model1), 0.1, tolerance = 1e-6)
+  expect_equal(get_viral_score(model1, mu = 2), 2 / (1 - 0.1), tolerance = 1e-6)
   expect_equal(get_branching_factor(model2), 6.35, tolerance = 1e-6)
+  expect_equal(get_viral_score(model2, 1), Inf, tolerance = 1e-6)
+  expect_equal(get_viral_score(model2, 0), 0, tolerance = 1e-6)
   expect_equal(get_branching_factor(model3), 0.5402189, tolerance = 1e-6)
+  expect_equal(get_viral_score(model3, mu = 1.5), 1.5/(1 - 0.5402189), tolerance = 1e-6)
   expect_equal(get_branching_factor(model4), 34.3039, tolerance = 1e-6)
 
   expect_equal(get_branching_factor(model5), 0.1, tolerance = 1e-6)

@@ -141,6 +141,15 @@ print.hawkes <- function(x, ...) {
   }
 }
 
+#' @export
+get_viral_score.hawkes <- function(model, mu) {
+  check_required_hawkes_fields(model, c('par', 'model_type'))
+  if (mu == 0) return(0)
+  branching_factor <- get_branching_factor(model)
+  # branching factor cannot be larger than 1
+  if (branching_factor >= 1) return(Inf)
+  mu / (1 - branching_factor)
+}
 
 # ampl related functions --------------------------------------------------
 
