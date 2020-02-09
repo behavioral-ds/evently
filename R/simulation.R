@@ -2,6 +2,7 @@
 # it is the equivalent of the Richter-Gutenberg distribution in the Helmstetter model
 # the powerlaw distribution was determined from the twitter data, from the #retweets
 # alpha = 2.016, xmin = 1. Draw n values
+#' @param n the number of samples to be generated
 #' @import poweRlaw
 #' @export
 generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {

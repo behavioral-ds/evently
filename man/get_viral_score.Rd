@@ -5,7 +5,7 @@
 \title{Viral score is the total reaction of the system to a single promotion,
 i.e. the expected cascade size started by a single event of magnitude $\mu$}
 \usage{
-get_viral_score(model)
+get_viral_score(model, mu)
 }
 \arguments{
 \item{model}{a model object for computing the branching factor.}

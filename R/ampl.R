@@ -115,9 +115,8 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
 
   # allow to debug the ampl execution
   if (debug) {
-    cat(sprintf('Debugging is on! Please find the AMPL files in the following locations:\nModel: %s\nData: %s\nExecution: %s\n',
-                tmp_files$mod, tmp_files$dat, tmp_files$run))
-    stop('Debugging is on!')
+    stop(sprintf('Debugging is on! Please find the following AMPL files for inspection:\nModel: %s\nData: %s\nExecution: %s\n',
+                 tmp_files$mod, tmp_files$dat, tmp_files$run), call. = F)
   }
   ## run AMPL with the configs we created
   tryCatch(expr = {
@@ -165,9 +164,8 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
 
   # allow to debug the ampl execution
   if (debug) {
-    cat(sprintf('Debugging is on! Please find the following AMPL files for inspection:\nModel: %s\nData: %s\nExecution: %s\n',
-                tmp_files$mod, tmp_files$dat, tmp_files$run))
-    stop('Debugging is on!')
+    stop(sprintf('Debugging is on! Please find the following AMPL files for inspection:\nModel: %s\nData: %s\nExecution: %s\n',
+                 tmp_files$mod, tmp_files$dat, tmp_files$run), call. = F)
   }
 
   system(paste(.globals$execution, tmp_files$run))

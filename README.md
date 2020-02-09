@@ -1,5 +1,3 @@
-![](https://github.com/behavioral-ds/evently/workflows/unit-tests/badge.svg)
-
 evently: simulation, fitting of Hawkes processes
 ================
 
@@ -101,6 +99,45 @@ fitted_model
     ## upper_bound
     ##   K 1.00e+04; theta 3.00e+02
     ## convergence: 0
+
+## Cascades from real data
+
+We provide a function to help parse provided Tweet JSON objects to
+cascades. Tweet JSON objects are crawled from the Twitter API and one
+can refer to the
+[documentation](https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object)
+for more information.
+
+In this package, we provide a collection of tweets about the same topic
+for demonstration purpose. The file is in a
+[`jsonl`](http://jsonlines.org/) format where each line of this file is
+a Tweet JSON string. The content of the tweets have been encrypted due
+to the Twitter API agreement. One can find the file at
+`inst/extdata/tweets_anonymized.jsonl`. Let’s now extract cascades from
+the
+file.
+
+``` r
+filepath <- system.file('extdata', 'tweets_anonymized.jsonl', package = 'evently')
+cascades <- parse_raw_tweets_to_cascades(filepath)
+print(cascades[seq(3)])
+```
+
+    ## [[1]]
+    ##   magnitude time
+    ## 1       337    0
+    ## 
+    ## [[2]]
+    ##   magnitude time
+    ## 2       130    0
+    ## 
+    ## [[3]]
+    ##   magnitude time
+    ## 3       251    0
+
+As the file includes all raw tweets, it is natural to see that most
+cascades extracted only have single events in it. We can further fit
+Hawkes models on these cascades.
 
 ## Available models
 
