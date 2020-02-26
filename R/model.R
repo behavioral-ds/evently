@@ -54,7 +54,7 @@ get_branching_factor <- function(model) {
 }
 
 #' Viral score is the total reaction of the system to a single promotion,
-#' i.e. the expected cascade size started by a single event of magnitude $\mu$
+#' i.e. the expected cascade size started by a single event of magnitude
 #' @param model a model object for computing the branching factor.
 #' @param mu the magnitude of the initial event
 #' @export
