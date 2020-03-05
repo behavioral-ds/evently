@@ -178,8 +178,8 @@ preprocess_data <- function(data, observation_time) {
     observation_time <- max(data[[1]]$time)
   }
 
-  if (is.null(observation_time) ||
-      observation_time <= 0 ||
+  if (all(is.null(observation_time)) ||
+      any(observation_time <= 0) ||
       (length(observation_time) > 1 && length(observation_time) < length(data))) {
     stop('Please double check the observation time!')
   }

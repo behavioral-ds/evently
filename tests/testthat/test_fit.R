@@ -67,7 +67,7 @@ test_that('random observation times works for EXPN', {
   par <- c(K = 5, theta = 0.2, N = 50)
   observation_times <- runif(50, 5, 20)
   sims <- lapply(seq(50), function(i) generate_hawkes_event_series(par = par, model_type = 'EXPN', Tmax = observation_times[i], sim_no = 1)[[1]])
-  fitted <- fit_series(sims, cores = 10, model_type = 'EXPN', observation_time = observation_times)
+  fitted <- fit_series(sims, cores = 1, model_type = 'EXPN', observation_time = observation_times)
   expect_true(fitted$init_par[[1]] != fitted$par[[1]])
   expect_true(all(abs(fitted$par- par) < 5e-1))
 })
