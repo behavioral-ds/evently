@@ -25,16 +25,19 @@ be used if not provided.}
 \item{.init_no}{If initi_pars is not provided, currently 10 random starting parameters are generated
 for fitting. This controls which random points are used. Defaults to NULL}
 
-\item{observation_time}{the event cascades observation time. It is assumed that all cascades in data
-are observed until a common time.}
+\item{observation_time}{the event cascades observation time(s). This can either be a single number indicating
+a common observation time for all cascades or a vector of observation times which has the same length as
+the number of cascades.}
 
 \item{lower_bound}{model parameter lower bounds. A named vector where names are model parameters and
 values are the lowest possible values.}
 
+\item{upper_bound}{model parameter upper bounds. A named vector where names are model parameters and
+values are the largest possible values.}
+
 \item{model_vars}{a named list of extra variables provided to hawkes objects}
 
-\item{uppper_bound}{model parameter upper bounds. A named vector where names are model parameters and
-values are the largest possible values.}
+\item{...}{further arguments passed to ampl}
 }
 \description{
 Fit a Hawkes process or HawkesN process model on one or many event cascades

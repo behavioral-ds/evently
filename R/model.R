@@ -16,7 +16,7 @@ get_branching_factor.default <- function(model) {
 }
 
 #' @export
-get_viral_score.default <- function(model) {
+get_viral_score.default <- function(model, mu) {
   stop('Unknown model type!')
 }
 

@@ -10,6 +10,8 @@ get_hawkes_neg_likelihood_value(model, ...)
 \arguments{
 \item{model}{An object of a specific model class where the `data` and the `par` fields
 are required}
+
+\item{...}{further arguments passed to ampl}
 }
 \description{
 Compute the negative log-likelihood values of a given model on a list of given

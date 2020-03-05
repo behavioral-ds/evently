@@ -13,13 +13,15 @@
 #' be used if not provided.
 #' @param .init_no If initi_pars is not provided, currently 10 random starting parameters are generated
 #' for fitting. This controls which random points are used. Defaults to NULL
-#' @param observation_time the event cascades observation time. It is assumed that all cascades in data
-#' are observed until a common time.
+#' @param observation_time the event cascades observation time(s). This can either be a single number indicating
+#' a common observation time for all cascades or a vector of observation times which has the same length as
+#' the number of cascades.
 #' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
 #' values are the lowest possible values.
-#' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
+#' @param upper_bound model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
 #' @param model_vars a named list of extra variables provided to hawkes objects
+#' @param ... further arguments passed to ampl
 #' @import parallel
 #' @export
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
@@ -76,6 +78,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #'
 #' @param model An object of a specific model class where the `data` and the `par` fields
 #' are required
+#' @param ... further arguments passed to ampl
 #' @export
 get_hawkes_neg_likelihood_value <- function(model, ...) {
   # par and data are required for computing log-likelihood values

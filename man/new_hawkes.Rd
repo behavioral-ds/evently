@@ -26,10 +26,10 @@ are observed until a common time.}
 \item{lower_bound}{model parameter lower bounds. A named vector where names are model parameters and
 values are the lowest possible values.}
 
-\item{model_vars}{a named list of extra variables provided to hawkes objects}
-
-\item{uppper_bound}{model parameter upper bounds. A named vector where names are model parameters and
+\item{upper_bound}{model parameter upper bounds. A named vector where names are model parameters and
 values are the largest possible values.}
+
+\item{model_vars}{a named list of extra variables provided to hawkes objects}
 }
 \description{
 Create a new hawkes model with parameters available

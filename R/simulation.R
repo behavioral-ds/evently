@@ -1,8 +1,10 @@
-# Function for sampling from the powerlaw distribution of user influence
-# it is the equivalent of the Richter-Gutenberg distribution in the Helmstetter model
-# the powerlaw distribution was determined from the twitter data, from the #retweets
-# alpha = 2.016, xmin = 1. Draw n values
+#' Function for sampling from the powerlaw distribution of user influence
+#' it is the equivalent of the Richter-Gutenberg distribution in the Helmstetter model
+#' the powerlaw distribution was determined from the twitter data, from the #retweets
+#' alpha = 2.016, xmin = 1. Draw n values
 #' @param n the number of samples to be generated
+#' @param alpha powerlaw distribution parameters
+#' @param mmin powerlaw distribution parameters
 #' @import poweRlaw
 #' @export
 generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {
@@ -169,10 +171,10 @@ kernelFct <- function(event, t, par = c(K = 0.024, beta = 0.5, c = 0.001, theta 
   (val)
 }
 
-## The CIF function is necessary to simulate a non-stationary (NON-HOMOGENUOUS) poisson process
+# The CIF function is necessary to simulate a non-stationary (NON-HOMOGENUOUS) poisson process
 # conditional intensity function - the CIF
 # in here need to calculate the conditional intensity, by using the kernels
-CIF = function(x, history, ...) {
+CIF <- function(x, history, ...) {
   subst <- history[history$time <= x,]
   return(sum(kernelFct(event = subst, t = x, ...)))
 }
@@ -186,14 +188,15 @@ CIF = function(x, history, ...) {
 #' @param model_type model type
 #' @param sim_no the number of simulated cascades
 #' @param cores the number of cores (processes) used for simulation
-#' @param M - magnitude of the initial event (in case no initial history
+#' @param Tmax maximum time of simulation.
+#' @param maxEvents maximum number of events to be simulated.
+#' @param M magnitude of the initial event (in case no initial history
 #'   provided)
 #' @param history_init An initial history can be provided (R structure obtained
 #'   from a previous call of this function). Its purpose is to allow custom
 #'   initializations and to continue simulation of stopped processes.
-#' @param Tmax - maximum time of simulation.
 #' @export
-generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, alpha = 2.016, mmin = 1, M = 10000, Tmax = 10, history_init = NULL, maxEvents = NA) {
+generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = 10, maxEvents = NULL, M = NULL, history_init = NULL) {
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
     stop('Please either give model or (par, model_type) instead of both.')
   } else if (!missing(model)) {
@@ -212,7 +215,10 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
   }
 
   data <- mclapply(seq(sim_no), function(sim_iter) {
-    # initial event, magnitude M and time 0
+    if (is.null(M)) {
+      M <- generate_user_influence(1)
+    }
+    # initial event, M and time 0
     history <- as.data.frame(matrix(c(M, 0), nrow=1, byrow = TRUE))
     colnames(history) <- c("magnitude", "time")
     t <- history[1,]$time
@@ -225,7 +231,7 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     while(t <= Tmax){
       # generate the time of the next event, based on the previous events
       t.lambda.max <- t
-      intensityMax <- CIF(x = t.lambda.max, history = history, par = par, alpha = alpha, mmin = mmin, model_type = model_type)
+      intensityMax <- CIF(x = t.lambda.max, history = history, par = par, model_type = model_type)
       ## if intensityMax is too small then cut
       if (intensityMax < 1e-5) break
 
@@ -237,12 +243,12 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
       ## then perform rejection sampling
       s <- runif(1)
 
-      thr <- CIF(x = t, history = history, par = par, alpha = alpha, mmin = mmin, model_type = model_type) / intensityMax
+      thr <- CIF(x = t, history = history, par = par, model_type = model_type) / intensityMax
 
       if (s <= thr) {
         ## if here, it means we accept the event
         # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
-        mag <- ifelse(par[['beta']] == 0, 1, generate_user_influence(n = 1, alpha = alpha, mmin = mmin))
+        mag <- ifelse(par[['beta']] == 0, 1, generate_user_influence(n = 1))
 
         # add the next event to the history
         event <- matrix( c(mag, t), nrow=1, byrow = T)
@@ -258,8 +264,8 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
         }
       }
 
-      if (!is.na(maxEvents) && nrow(history) >= maxEvents)
-        break;
+      if (!is.null(maxEvents) && nrow(history) >= maxEvents)
+        break
     }
 
     return(history)

@@ -3,7 +3,7 @@
 \name{get_viral_score}
 \alias{get_viral_score}
 \title{Viral score is the total reaction of the system to a single promotion,
-i.e. the expected cascade size started by a single event of magnitude $\mu$}
+i.e. the expected cascade size started by a single event of magnitude}
 \usage{
 get_viral_score(model, mu)
 }
@@ -14,5 +14,5 @@ get_viral_score(model, mu)
 }
 \description{
 Viral score is the total reaction of the system to a single promotion,
-i.e. the expected cascade size started by a single event of magnitude $\mu$
+i.e. the expected cascade size started by a single event of magnitude
 }

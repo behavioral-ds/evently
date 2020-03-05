@@ -12,7 +12,7 @@
 #' @param init_par Initial parameter values used in fitting
 #' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
 #' values are the lowest possible values.
-#' @param uppper_bound model parameter upper bounds. A named vector where names are model parameters and
+#' @param upper_bound model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
 #' @param model_vars a named list of extra variables provided to hawkes objects
 #' @export
@@ -178,19 +178,24 @@ preprocess_data <- function(data, observation_time) {
     observation_time <- max(data[[1]]$time)
   }
 
-  if (is.null(observation_time)) stop('Please specify an observation time!')
-  if (observation_time <= 0) stop('Observation time must be greater than 0!')
-  if (is.infinite(observation_time)) {
-    # ampl doesn't recognize infinity so set to a large number
-    # didn't set to machine max as it will cause error in AMPL
-    observation_time <- 1e20
+  if (is.null(observation_time) ||
+      observation_time <= 0 ||
+      (length(observation_time) > 1 && length(observation_time) < length(data))) {
+    stop('Please double check the observation time!')
+  }
+  # ampl doesn't recognize infinity so set to a large number
+  # didn't set to machine max as it will cause error in AMPL
+  observation_time[is.infinite(observation_time)] <- 1e20
+  if (length(observation_time) == 1) {
+    observation_time <- rep(observation_time, length(data))
   }
 
-  data <- lapply(data, function(hist) {
-    if (observation_time < hist$time[nrow(hist)]) {
+  data <- lapply(seq_along(data), function(i) {
+    hist <- data[[i]]
+    if (observation_time[i] < hist$time[nrow(hist)]) {
       stop('The provided observation time is smaller than the last observed event.')
     }
-    new_row <- data.frame(time = observation_time, magnitude = 0)
+    new_row <- data.frame(time = observation_time[i], magnitude = 0)
     hist <- rbind(hist[, c('time', 'magnitude')], new_row)
     offset_same_time(hist)
   })

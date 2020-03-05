@@ -12,7 +12,7 @@ test_that('Debug is possible', {
 
 test_that('Errors for only single event cascades', {
   cascade <- data.frame(time = 0, magnitude = 1)
-  expect_error(fit_series(list(cascade), model_type = 'EXP'), regexp = 'Observation time must be greater than 0!')
+  expect_error(fit_series(list(cascade), model_type = 'EXP'), regexp = 'Please double check the observation time!')
 })
 
 test_that('fitting works', {
