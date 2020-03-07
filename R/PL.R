@@ -45,3 +45,29 @@ get_branching_factor.hawkes_mPL <- function(model) {
   # assuming alpha = 2.016
   (model$par[['K']] * 1.016 / (1.016-model$par[['beta']]) ) * (1 / model$par[['theta']]) * (1 / model$par[['c']])^model$par[['theta']]
 }
+
+#' @export
+get_a1.hawkes_PL <- function(model) {
+  processed_data <- preprocess_data(model$data, model$observation_time)
+  vapply(processed_data, function(history) {
+    sum(1 / (model$par[['theta']] * ((history$time[nrow(history)] + model$par[['c']] - history$time[-nrow(history)]) ^ model$par[['theta']]))) * model$par[['K']]
+  }, FUN.VALUE = NA_real_)
+}
+
+#' @export
+get_a1.hawkes_mPL <- function(model) {
+  processed_data <- preprocess_data(model$data, model$observation_time)
+  vapply(processed_data, function(history) {
+    sum((history$magnitude[-nrow(history)]) ^ model$par[['beta']] / (model$par[['theta']] * ((history$time[nrow(history)] + model$par[['c']] - history$time[-nrow(history)]) ^ model$par[['theta']]))) * model$par[['K']]
+  }, FUN.VALUE = NA_real_)
+}
+
+#' @export
+predict_final_popularity.hawkes_PL <- function(model) {
+  NextMethod()
+}
+
+#' @export
+predict_final_popularity.hawkes_mPL <- function(model) {
+  NextMethod()
+}

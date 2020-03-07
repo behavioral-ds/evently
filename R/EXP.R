@@ -40,3 +40,29 @@ get_branching_factor.hawkes_mEXP <- function(model) {
   # assuming alpha = 2.016
   (model$par[['K']] * 1.016) / (1.016 - model$par[['beta']])
 }
+
+#' @export
+get_a1.hawkes_EXP <- function(model) {
+  processed_data <- preprocess_data(model$data, model$observation_time)
+  vapply(processed_data, function(history) {
+    sum(1 / (exp((history$time[nrow(history)] - history$time[-nrow(history)]) * model$par[['theta']]))) * model$par[['K']]
+  }, FUN.VALUE = NA_real_)
+}
+
+#' @export
+get_a1.hawkes_mEXP <- function(model) {
+  processed_data <- preprocess_data(model$data, model$observation_time)
+  vapply(processed_data, function(history) {
+    sum((history$magnitude[-nrow(history)]) ^ model$par[['beta']] / (exp((history$time[nrow(history)] - history$time[-nrow(history)]) * model$par[['theta']]))) * model$par[['K']]
+  }, FUN.VALUE = NA_real_)
+}
+
+#' @export
+predict_final_popularity.hawkes_EXP <- function(model) {
+  NextMethod()
+}
+
+#' @export
+predict_final_popularity.hawkes_mEXP <- function(model) {
+  NextMethod()
+}

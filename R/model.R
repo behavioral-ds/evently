@@ -16,6 +16,16 @@ get_branching_factor.default <- function(model) {
 }
 
 #' @export
+predict_final_popularity.default <- function(model) {
+  stop('Unknown model type!')
+}
+
+#' @export
+get_a1.default <- function(model) {
+  stop('Unknown model type!')
+}
+
+#' @export
 get_viral_score.default <- function(model, mu) {
   stop('Unknown model type!')
 }
@@ -53,6 +63,27 @@ get_branching_factor <- function(model) {
   UseMethod('get_branching_factor')
 }
 
+#' Predict the final popularity (event count) of give histories and
+#' its model parameters.
+#' @param model a model object provides data, model_type, observation_time
+#' and model parameters
+#' @return a vector of predicted final popularities whose length is the same
+#' as the number of cascades in the provided model object
+#' @export
+predict_final_popularity <- function(model) {
+  UseMethod('predict_final_popularity')
+}
+
+#' Calculating the expected size of first level of descendants
+#' @param model a model object provides data, model_type, observation_time
+#' and model parameters
+#' @return a vector of the expected sizes of first level of descendants of the
+#' given cascades
+#' @export
+get_a1 <- function(model) {
+  UseMethod('get_a1')
+}
+
 #' Viral score is the total reaction of the system to a single promotion,
 #' i.e. the expected cascade size started by a single event of magnitude
 #' @param model a model object for computing the branching factor.
@@ -61,6 +92,7 @@ get_branching_factor <- function(model) {
 get_viral_score <- function(model, mu) {
   UseMethod('get_viral_score')
 }
+
 
 get_ampl_data_output <- function(obj) {
   UseMethod('get_ampl_data_output')

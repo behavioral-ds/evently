@@ -47,3 +47,23 @@ get_branching_factor.hawkes_mPLN <- function(model) {
   # assuming alpha = 2.016
   (model$par[['K']] * 1.016 / (1.016-model$par[['beta']]) ) * (1 / model$par[['theta']]) * (1 / model$par[['c']])^model$par[['theta']]
 }
+
+#' @export
+get_a1.hawkes_PLN <- function(model) {
+  stop('This method does not exist for PLN')
+}
+
+#' @export
+get_a1.hawkes_mPLN <- function(model) {
+  stop('This method does not exist for mPLN')
+}
+
+#' @export
+predict_final_popularity.hawkes_PLN <- function(model) {
+  stop('This method does not exist for PLN')
+}
+
+#' @export
+predict_final_popularity.hawkes_mPLN <- function(model) {
+  stop('This method does not exist for mPLN')
+}

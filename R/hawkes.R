@@ -142,6 +142,22 @@ print.hawkes <- function(x, ...) {
 }
 
 #' @export
+predict_final_popularity.hawkes <- function(model) {
+  check_required_hawkes_fields(model, c('par', 'model_type', 'data', 'observation_time'))
+  branching_factor <- get_branching_factor(model)
+  if (branching_factor >= 1) {
+    warning('Branching Factor greater than 1, not possible to predict the size(super critical)')
+    return(rep(Inf, length(model$data)))
+  } else {
+    # calculating the expected size of first level of descendants
+    a1s <- get_a1(model)
+    # calculating the final value
+    final_popularity <- vapply(model$data, nrow, FUN.VALUE = NA_integer_) + a1s / (1 - branching_factor)
+    return(final_popularity)
+  }
+}
+
+#' @export
 get_viral_score.hawkes <- function(model, mu) {
   check_required_hawkes_fields(model, c('par', 'model_type'))
   if (mu == 0) return(0)

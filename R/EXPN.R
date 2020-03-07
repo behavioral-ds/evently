@@ -43,3 +43,22 @@ get_branching_factor.hawkes_mEXPN <- function(model) {
   (model$par[['K']] * 1.016) / (1.016 - model$par[['beta']])
 }
 
+#' @export
+get_a1.hawkes_EXPN <- function(model) {
+  stop('This method does not exist for EXPN')
+}
+
+#' @export
+get_a1.hawkes_mEXPN <- function(model) {
+  stop('This method does not exist for mEXPN')
+}
+
+#' @export
+predict_final_popularity.hawkes_EXPN <- function(model) {
+  stop('This method does not exist for EXPN')
+}
+
+#' @export
+predict_final_popularity.hawkes_mEXPN <- function(model) {
+  stop('This method does not exist for mEXPN')
+}
