@@ -196,9 +196,9 @@ CIF <- function(x, history, ...) {
 #'   from a previous call of this function). Its purpose is to allow custom
 #'   initializations and to continue simulation of stopped processes.
 #' @export
-generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = 10, maxEvents = NULL, M = NULL, history_init = NULL) {
+generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, history_init = NULL) {
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
-    stop('Please either give model or (par, model_type) instead of both.')
+    stop('Please either give a model or (par, model_type) instead of both.')
   } else if (!missing(model)) {
     check_required_hawkes_fields(model, c('par', 'model_type'))
     par <- model$par
