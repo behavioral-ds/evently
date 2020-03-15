@@ -7,8 +7,8 @@ saves and continuing a stopped simulation. Creates a CSV file with two
 columns, each row is an event: (magnitude, time)}
 \usage{
 generate_hawkes_event_series(model, par, model_type, sim_no = 1,
-  cores = 1, Tmax = 10, maxEvents = NULL, M = NULL,
-  history_init = NULL)
+  cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL,
+  history_init = NULL, tol = 1e-05)
 }
 \arguments{
 \item{model}{a model class object with par and model_type presented. par and
@@ -32,6 +32,8 @@ provided)}
 \item{history_init}{An initial history can be provided (R structure obtained
 from a previous call of this function). Its purpose is to allow custom
 initializations and to continue simulation of stopped processes.}
+
+\item{tol}{simulation stops when intensity smaller than tol.}
 }
 \description{
 Main function to generate a Hawkes process sequence. It allows intermediary
