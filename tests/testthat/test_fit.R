@@ -15,6 +15,12 @@ test_that('Errors for only single event cascades', {
   expect_error(fit_series(list(cascade), model_type = 'EXP'), regexp = 'Please double check the observation time!')
 })
 
+test_that('Data sliced when observation time is smaller than last event time', {
+  cascade <- data.frame(time = c(0, 5), magnitude = c(1, 1))
+  expect_warning(fitted <- fit_series(list(cascade), model_type = 'EXP', observation_time = 1))
+  expect_warning(get_hawkes_neg_likelihood_value(fitted))
+})
+
 test_that('fitting works', {
   set.seed(888)
   par <- c(K = 1.3, theta = 1, N = 100)
@@ -79,4 +85,8 @@ test_that('compute holdout log-likelihood works', {
   model <- new_hawkes(model_type = 'EXP', data = list(data.frame(time = 0, magnitude = 1)), observation_time = Inf, par = par)
   nll <- get_hawkes_neg_likelihood_value(model)
   expect_lt(abs(nll - par[['K']]), 1e-10)
+  nll <- get_hawkes_neg_likelihood_value(par = model$par, data = model$data, model_type = model$model_type, observation_time = model$observation_time)
+  expect_lt(abs(nll - par[['K']]), 1e-10)
+  nll <- get_hawkes_neg_likelihood_value(model, observation_time = 1)
+  expect_lt(abs(nll - par[['K']] * (1 - exp(-1 * par['theta']))), 1e-5)
 })

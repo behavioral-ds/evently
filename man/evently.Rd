@@ -3,7 +3,6 @@
 \docType{package}
 \name{evently}
 \alias{evently}
-\alias{evently-package}
 \title{Fitting Hawkes processes with AMPL}
 \description{
 Fitting Hawkes processes with AMPL

@@ -6,9 +6,18 @@
 saves and continuing a stopped simulation. Creates a CSV file with two
 columns, each row is an event: (magnitude, time)}
 \usage{
-generate_hawkes_event_series(model, par, model_type, sim_no = 1,
-  cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL,
-  history_init = NULL, tol = 1e-05)
+generate_hawkes_event_series(
+  model,
+  par,
+  model_type,
+  sim_no = 1,
+  cores = 1,
+  Tmax = Inf,
+  maxEvents = NULL,
+  M = NULL,
+  history_init = NULL,
+  tol = 1e-05
+)
 }
 \arguments{
 \item{model}{a model class object with par and model_type presented. par and

@@ -5,13 +5,28 @@
 \title{Compute the negative log-likelihood values of a given model on a list of given
 event cascades.}
 \usage{
-get_hawkes_neg_likelihood_value(model, ...)
+get_hawkes_neg_likelihood_value(
+  model,
+  ...,
+  par,
+  data,
+  model_type,
+  observation_time
+)
 }
 \arguments{
 \item{model}{An object of a specific model class where the `data` and the `par` fields
-are required}
+are required.}
 
-\item{...}{further arguments passed to ampl}
+\item{...}{Further arguments passed to ampl}
+
+\item{par}{Hawkes model parameters}
+
+\item{data}{A list of data.frames of event cascades}
+
+\item{model_type}{The Hawkes model type}
+
+\item{observation_time}{The observation time of the given event cascades}
 }
 \description{
 Compute the negative log-likelihood values of a given model on a list of given

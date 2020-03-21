@@ -8,7 +8,7 @@ Description: This package is designed for simulating and fitting the Hawkes proc
 License: CC BY-NC 4.0
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Imports:
     poweRlaw
 Suggests: 

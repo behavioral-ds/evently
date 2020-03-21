@@ -190,7 +190,7 @@ preprocess_data <- function(data, observation_time) {
     history
   }
 
-  if (length(data) == 1 && (is.null(observation_time) || max(data[[1]]$time) > observation_time)) {
+  if (length(data) == 1 && (is.null(observation_time))) {
     observation_time <- max(data[[1]]$time)
   }
 
@@ -209,7 +209,8 @@ preprocess_data <- function(data, observation_time) {
   data <- lapply(seq_along(data), function(i) {
     hist <- data[[i]]
     if (observation_time[i] < hist$time[nrow(hist)]) {
-      stop('The provided observation time is smaller than the last observed event.')
+      warning('The provided observation time is smaller than the last observed event! Attempt to slice the data.')
+      hist <- hist[hist$time < observation_time[i], ]
     }
     new_row <- data.frame(time = observation_time[i], magnitude = 0)
     hist <- rbind(hist[, c('time', 'magnitude')], new_row)

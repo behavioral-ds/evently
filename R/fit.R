@@ -77,12 +77,26 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #' event cascades.
 #'
 #' @param model An object of a specific model class where the `data` and the `par` fields
-#' are required
-#' @param ... further arguments passed to ampl
+#' are required.
+#' @param ... Further arguments passed to ampl
+#' @param par Hawkes model parameters
+#' @param data A list of data.frames of event cascades
+#' @param model_type The Hawkes model type
+#' @param observation_time The observation time of the given event cascades
 #' @export
-get_hawkes_neg_likelihood_value <- function(model, ...) {
+get_hawkes_neg_likelihood_value <- function(model, ..., par, data, model_type, observation_time) {
   # par and data are required for computing log-likelihood values
-  check_required_hawkes_fields(model, c('par', 'data', 'observation_time'))
+  if (!missing(model)) {
+    if (!missing(par)) model$par <- par
+    if (!missing(data)) model$data <- data
+    if (!missing(model_type)) model$model_type <- model_type
+    if (!missing(observation_time)) model$observation_time <- observation_time
+    check_required_hawkes_fields(model, c('par', 'data', 'observation_time'))
+  } else if (missing(par) || missing(data) || missing(model_type) || missing(observation_time)) {
+    stop('Neither an model object nor par,data,model_type are provided!')
+  } else {
+    model <- new_hawkes(model_type = model_type, par = par, data = data, observation_time = observation_time)
+  }
 
   # a trick to reuse existing functions
   # have made sure this won't affect the original model object

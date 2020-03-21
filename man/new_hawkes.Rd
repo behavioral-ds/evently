@@ -4,9 +4,16 @@
 \alias{new_hawkes}
 \title{Create a new hawkes model with parameters available}
 \usage{
-new_hawkes(model_type, par = NULL, data = NULL, init_par = NULL,
-  observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
-  model_vars = NULL)
+new_hawkes(
+  model_type,
+  par = NULL,
+  data = NULL,
+  init_par = NULL,
+  observation_time = NULL,
+  lower_bound = NULL,
+  upper_bound = NULL,
+  model_vars = NULL
+)
 }
 \arguments{
 \item{model_type}{A string indicates the model tyep, e.g. EXP for a Hawkes process

@@ -5,9 +5,18 @@
 \title{Fit a Hawkes process or HawkesN process model on one or many event cascades
 and learn model parameters.}
 \usage{
-fit_series(data, model_type, cores = 1, init_pars, .init_no = NULL,
-  observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
-  model_vars = NULL, ...)
+fit_series(
+  data,
+  model_type,
+  cores = 1,
+  init_pars,
+  .init_no = NULL,
+  observation_time = NULL,
+  lower_bound = NULL,
+  upper_bound = NULL,
+  model_vars = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{a list of data.frame(s) where each data.frame is an event cascade with event
