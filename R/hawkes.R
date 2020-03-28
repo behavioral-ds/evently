@@ -218,7 +218,7 @@ preprocess_data <- function(data, observation_time) {
   })
 
   # sanity check
-  if (any(sapply(data, function(d) is.unsorted(d$time)))) stop('something went wrong..')
+  if (any(sapply(data, function(d) is.unsorted(d$time)))) stop('Something went wrong! The time is not strictly increasing.')
 
   data
 }
