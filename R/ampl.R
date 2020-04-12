@@ -119,6 +119,8 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
                  tmp_files$mod, tmp_files$dat, tmp_files$run), call. = F)
   }
   ## run AMPL with the configs we created
+  # double check AMPL path before running
+  if (length(.globals$execution) == 0) stop('The path to AMPL execution is empty!')
   tryCatch(expr = {
     system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)
 

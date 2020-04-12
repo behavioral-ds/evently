@@ -21,11 +21,12 @@
 #' @param upper_bound model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
 #' @param model_vars a named list of extra variables provided to hawkes objects
+#' @param parallel_type One of "PSOCK" or "FORK". Default to "PSOCK". See "Details" in makeCluster {parallel}.
 #' @param ... further arguments passed to ampl
 #' @import parallel
 #' @export
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
-                       lower_bound = NULL, upper_bound = NULL, model_vars = NULL, ...) {
+                       lower_bound = NULL, upper_bound = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
   preparation(data)
   model <- new_hawkes(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
@@ -53,7 +54,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
   ## if we are asked for an init larger than our initial parameters, report errors
   if (sum(.init_no > nrow(models_with_initial_point)) > 0) stop('init_no is too large')
 
-  inner_apply_func <- function(model){
+  inner_apply_func <- function(model, ...){
     # to make sure exact init_par is saved, mainly for lgo fitting
     saved_init_par <- model$init_par
     if (is.na(model$init_par[[1]])) {
@@ -68,7 +69,21 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
   }
 
   ## start fitting
-  fitted_models <- mclapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, mc.cores = cores, mc.silent = F)
+  if (cores == 1 || length(models_with_initial_point) == 1) {
+    fitted_models <- lapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, ...)
+  } else {
+    fitted_models <- switch (parallel_type,
+      PSOCK = {
+        cl <- makePSOCKcluster(cores)
+        clusterExport(cl, varlist = c('.globals'), envir = getNamespace('evently'))
+        res <- parLapply(cl = cl, X = models_with_initial_point[.init_no], fun = inner_apply_func,...)
+        stopCluster(cl)
+        res
+      },
+      FORK = mclapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, ..., mc.cores = cores, mc.silent = F),
+      stop('Unknown parallel type.')
+    )
+  }
 
   model_selection(models = fitted_models, cores = cores, dat_file = ampl_dat_file)
 }

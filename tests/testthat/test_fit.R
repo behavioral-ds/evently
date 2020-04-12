@@ -32,6 +32,17 @@ test_that('fitting works', {
   expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))
   expect_true(all(fitted$init_par == par))
 
+  # test parallel fitting
+  par_data_frame <- rbind(par_data_frame, par_data_frame)
+  fitted <- fit_series(data = sims, model_type = 'EXPN', observation_time = Inf, cores = 2, init_pars = par_data_frame)
+  expect_equal(fitted$convergence, 0)
+  expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))
+  expect_true(all(fitted$init_par == par))
+  fitted <- fit_series(data = sims, model_type = 'EXPN', observation_time = Inf, cores = 2, init_pars = par_data_frame, parallel_type = 'FORK')
+  expect_equal(fitted$convergence, 0)
+  expect_equal(nrow(fitted$data[[1]]), nrow(sims[[1]]))
+  expect_true(all(fitted$init_par == par))
+
   # a testing data.frame
   test_sim <- list(data.frame(time = c(0, 1, 1, 1, 2, 2, 2), magnitude = rep(1, 7)))
   fitted <- fit_series(test_sim, model_type = 'EXP', observation_time = 2)

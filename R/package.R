@@ -6,5 +6,5 @@
 NULL
 
 .globals <- new.env(parent = emptyenv())
-.globals$execution <- NULL
+.globals$execution <- if (Sys.which('ampl') != '') 'ampl' else NULL
 .globals$tmp <- '/tmp'

@@ -15,6 +15,7 @@ fit_series(
   lower_bound = NULL,
   upper_bound = NULL,
   model_vars = NULL,
+  parallel_type = "PSOCK",
   ...
 )
 }
@@ -45,6 +46,8 @@ values are the lowest possible values.}
 values are the largest possible values.}
 
 \item{model_vars}{a named list of extra variables provided to hawkes objects}
+
+\item{parallel_type}{One of "PSOCK" or "FORK". Default to "PSOCK". See "Details" in makeCluster {parallel}.}
 
 \item{...}{further arguments passed to ampl}
 }
