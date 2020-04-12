@@ -26,7 +26,7 @@ setup_ampl <- function(ampl_path) {
   ipopt_download_url <- switch (machine_ident,
     'Linuxx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-linux64.zip',
     'Darwinx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-osx.zip',
-    stop('Cannot infer the operating system your are using. Autodownload failed.')
+    stop('Failed to guess infer the operating system you are using. Autodownload failed.')
   )
   download.file(ipopt_download_url, destfile = '/tmp/ipopt.zip')
   unzip(zipfile = '/tmp/ipopt.zip', exdir = ampl_final_path)
@@ -60,7 +60,8 @@ prepare_tmp_file <- function(type) {
 # ampl main code ----------------------------------------------------------
 
 # fit with ampl
-ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal = 'fit', debug = F) {
+ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal = 'fit',
+                     debug = F, ampl_execution = .globals$execution) {
   if (missing(dat_file)) {
     dat_file <- output_dat(model)
     # if the file is created within this function then remove once finishes
@@ -71,13 +72,16 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
     # if the file is created within this function then remove once finishes
     if (!debug) on.exit(file.remove(mod_file), add = T)
   }
+  # double check AMPL path before running
+  if (length(ampl_execution) == 0) stop('The path to AMPL execution is empty!')
+
   tmp_run <- prepare_tmp_file(type = 'run')
   tmp_res <- prepare_tmp_file(type = 'res')
   tmp_files <- list(dat = dat_file, mod = mod_file, run = tmp_run, res = tmp_res)
   # what's the expected result
   res <- switch (goal,
-    fit = .run(model = model, solver = solver, tmp_files = tmp_files, debug),
-    nll = .run_get_likelihood(model = model, tmp_files = tmp_files, debug)
+    fit = .run(model = model, solver = solver, tmp_files = tmp_files, debug, ampl_execution),
+    nll = .run_get_likelihood(model = model, tmp_files = tmp_files, debug, ampl_execution)
   )
 
   return(res)
@@ -87,7 +91,7 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
 # the solver (default "minos"). Returns the fitted parameters, the value of the
 # log.likelihood function and the exit status.
 #' @importFrom utils read.csv
-.run <- function(model, solver = "minos", tmp_files, debug, ...) {
+.run <- function(model, solver = "minos", tmp_files, debug, ampl_execution, ...) {
   arguments <- list(...) # allow future extensions
 
   var_names <- paste(names(model$init_par), collapse = ", ")
@@ -119,10 +123,8 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
                  tmp_files$mod, tmp_files$dat, tmp_files$run), call. = F)
   }
   ## run AMPL with the configs we created
-  # double check AMPL path before running
-  if (length(.globals$execution) == 0) stop('The path to AMPL execution is empty!')
   tryCatch(expr = {
-    system(paste(.globals$execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)
+    system(paste(ampl_execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)
 
     tmp <- read.csv(tmp_files$res, sep = '=', header = FALSE)
     ret <- tmp[,2]
@@ -147,7 +149,7 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
   return(model)
 }
 
-.run_get_likelihood <- function(model, tmp_files, debug, ...) {
+.run_get_likelihood <- function(model, tmp_files, debug, ampl_execution, ...) {
   arguments <- list(...) # allow future extensions
 
   content <- paste(
@@ -170,7 +172,7 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
                  tmp_files$mod, tmp_files$dat, tmp_files$run), call. = F)
   }
 
-  system(paste(.globals$execution, tmp_files$run))
+  system(paste(ampl_execution, tmp_files$run))
 
   tmp <- readChar(tmp_files$res, file.info(tmp_files$res)$size)
   ret <- as.numeric(unlist(strsplit(tmp, '='))[2])

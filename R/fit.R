@@ -58,7 +58,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
     # to make sure exact init_par is saved, mainly for lgo fitting
     saved_init_par <- model$init_par
     if (is.na(model$init_par[[1]])) {
-      lgo_model <- ampl_run(model = model, solver = "lgo", dat_file = ampl_dat_file)
+      lgo_model <- ampl_run(model = model, solver = "lgo", dat_file = ampl_dat_file, ...)
       model[['init_par']] <- unlist(lgo_model$par)
     }
     model <- ampl_run(model = model, solver = "ipopt", dat_file = ampl_dat_file, ...)
@@ -75,8 +75,8 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
     fitted_models <- switch (parallel_type,
       PSOCK = {
         cl <- makePSOCKcluster(cores)
-        clusterExport(cl, varlist = c('.globals'), envir = getNamespace('evently'))
-        res <- parLapply(cl = cl, X = models_with_initial_point[.init_no], fun = inner_apply_func,...)
+        res <- parLapply(cl = cl, X = models_with_initial_point[.init_no], fun = inner_apply_func,
+                         ampl_execution = .globals$execution, ...)
         stopCluster(cl)
         res
       },
