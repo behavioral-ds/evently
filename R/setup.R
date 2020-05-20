@@ -4,8 +4,8 @@
 
 #' @importFrom utils menu
 .onAttach <- function(libname, pkgname) {
-  if (Sys.which('ampl') != '') {
-    .globals$execution <- 'ampl'
+  if (Sys.getenv('AMPL_PATH') != '' || Sys.which('ampl') != '') {
+    .globals$execution <- sprintf('export PATH=$PATH:%s; ampl', Sys.getenv('AMPL_PATH'))
   } else {
     packageStartupMessage("\n********************************************************")
     packageStartupMessage("  This package requires AMPL and ipopt")

@@ -33,8 +33,8 @@ setup_ampl <- function(ampl_path) {
   Sys.chmod(paste0(ampl_final_path, '/ipopt'), '777', use_umask = FALSE)
 
   # add ampl to path environment
-  write(paste0('PATH=', Sys.getenv('PATH'), ':', ampl_final_path), file = paste0(Sys.getenv('HOME'), '/.Renviron'), append = TRUE)
-
+  write(paste0('AMPL_PATH=', ampl_final_path), file = paste0(Sys.getenv('HOME'), '/.Renviron'), append = TRUE)
+  Sys.setenv(AMPL_PATH = ampl_final_path)
   .globals$execution <- paste0('export PATH=$PATH:', ampl_final_path, '; ampl')
 }
 

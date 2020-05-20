@@ -137,7 +137,7 @@ preparation <- function(data) {
   if (!valid) stop('Please provide cascade(s) as a list of data frame(s).')
 
   # check if ampl is set
-  if (any(Sys.which(c('ampl', 'ipopt')) == '') && is.null(.globals$execution)) {
+  if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '') {
     stop('Please set up ampl and ipopt before fitting!')
   }
 }

@@ -6,5 +6,5 @@
 NULL
 
 .globals <- new.env(parent = emptyenv())
-.globals$execution <- if (Sys.which('ampl') != '') 'ampl' else NULL
+.globals$execution <- sprintf('export PATH=$PATH:%s; ampl', Sys.getenv('AMPL_PATH'))
 .globals$tmp <- '/tmp'
