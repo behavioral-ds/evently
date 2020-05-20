@@ -2,6 +2,33 @@
 
 # default model class methods
 
+# translate the given model types to the right S3 class name.
+# The model types could be a combination of different models
+interpret_model_type <- function(model_type) {
+  if (length(model_type) == 1 && is.character(model_type)) {
+    return(hawkes_model_type(hawkes_decay_type = model_type))
+  } else if (length(model_type) == 2) {
+    if (is.null(names(model_type))) {
+      warning('Names for model_type are not provided, assuming first element as the decay function type.')
+      return(hawkes_model_type(hawkes_decay_type = model_type[[1]], hawkes_immigrant_type = model_type[[2]]))
+    } else {
+      stopifnot(all(c('hawkes_decay_type', 'hawkes_immigrant_type') %in% names(model_type)))
+      return(hawkes_model_type(hawkes_decay_type = model_type[['hawkes_decay_type']],
+                               hawkes_immigrant_type = model_type[['hawkes_immigrant_type']]))
+    }
+  } else {
+    stop('Unknown model type!')
+  }
+}
+
+hawkes_model_type <- function(hawkes_decay_type = NULL, hawkes_immigrant_type = NULL) {
+  ret <- list()
+  if (!is.null(hawkes_decay_type)) ret$hawkes_decay_type <- hawkes_decay_type
+  if (!is.null(hawkes_immigrant_type)) ret$hawkes_immigrant_type <- hawkes_immigrant_type
+  class(ret) <- 'hawkes_model_type'
+  ret
+}
+
 get_ampl_likelihood.default <- function(model) {
   stop('Unknown model type!')
 }
@@ -92,7 +119,6 @@ get_a1 <- function(model) {
 get_viral_score <- function(model, mu) {
   UseMethod('get_viral_score')
 }
-
 
 get_ampl_data_output <- function(obj) {
   UseMethod('get_ampl_data_output')

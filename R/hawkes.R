@@ -125,15 +125,15 @@ get_ampl_execution_options.hawkes <- function(model) {
 print.hawkes <- function(x, ...) {
   for (n in names(x)) {
     if (n %in% 'data') {
-      cat(paste('No. of cascades:', length(x$data), '\n'))
+      cat(paste('- No. of cascades:', length(x$data), '\n'))
     } else if (n %in% c('model_type')) {
-      cat(paste('Model:', x$model_type, '\n'))
+      cat(paste('- Model:', x$model_type, '\n'))
     } else if (n %in% c('value')) {
-      cat(paste('Neg Log Likelihood:', x$value, '\n'))
+      cat(paste('- Neg Log Likelihood:', x$value, '\n'))
     } else if (n %in% c('convergence')) {
-      cat(paste('convergence:', x$convergence, '\n'))
+      cat(paste('- Convergence:', x$convergence, '\n'))
     } else if (n %in% c('init_par', 'par', 'lower_bound', 'upper_bound')) {
-      cat(paste0(n, '\n'))
+      cat(paste0('- ', n, ':\n'))
       cat('  ')
       cat(paste(names(x[[n]]), formatC(x[[n]], format = "e", digits = 2), collapse = '; '))
       cat('\n')
