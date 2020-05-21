@@ -1,8 +1,8 @@
 context('Fit on cascades')
 
-test_that('only list of dataframe is accepted', {
+test_that('fit on a dataframe is allowed', {
   cascade <- data.frame(time = seq(10), magnitude = seq(10))
-  expect_error(fit_series(cascade, model_type = 'EXP'))
+  expect_equal(fit_series(cascade, model_type = 'EXP')$convergence, 0)
 })
 
 test_that('Debug is possible', {

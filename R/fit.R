@@ -27,7 +27,7 @@
 #' @export
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
                        lower_bound = NULL, upper_bound = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
-  preparation(data)
+  data <- preparation(data)
   model <- new_hawkes(data = data, model_type = model_type, observation_time = observation_time,
                             lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
   ampl_dat_file <- output_dat(model) # output ampl data file for being reused by fits with different initializations
@@ -105,13 +105,13 @@ get_hawkes_neg_likelihood_value <- function(model, ..., par, data, model_type, o
     if (!missing(par)) model$par <- par
     if (!missing(data)) model$data <- data
     if (!missing(model_type)) model$model_type <- model_type
-    if (!missing(observation_time)) model$observation_time <- observation_time
-    check_required_hawkes_fields(model, c('par', 'data', 'observation_time'))
-  } else if (missing(par) || missing(data) || missing(model_type) || missing(observation_time)) {
+    check_required_hawkes_fields(model, c('par', 'data'))
+  } else if (missing(par) || missing(data) || missing(model_type)) {
     stop('Neither an model object nor par,data,model_type are provided!')
   } else {
-    model <- new_hawkes(model_type = model_type, par = par, data = data, observation_time = observation_time)
+    model <- new_hawkes(model_type = model_type, par = par, data = data)
   }
+  if (!missing(observation_time)) model$observation_time <- observation_time
 
   # a trick to reuse existing functions
   # have made sure this won't affect the original model object
@@ -132,12 +132,20 @@ model_selection <- function(models, cores, ...) {
 }
 
 preparation <- function(data) {
-  # validate data format
-  valid <- is.list(data) && all(sapply(data, is.data.frame))
-  if (!valid) stop('Please provide cascade(s) as a list of data frame(s).')
+  # put data into a list if it is a data.frame
+  if (is.data.frame(data)) {
+    data <- list(data)
+  }
 
-  # check if ampl is set
+  # validate data format
+  if (!(is.list(data) && all(sapply(data, is.data.frame)))) {
+    stop('The provided cascade(s) is in a wrong format.')
+  }
+
+  # check if ampl is available
   if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '') {
     stop('Please set up ampl and ipopt before fitting!')
   }
+
+  data
 }
