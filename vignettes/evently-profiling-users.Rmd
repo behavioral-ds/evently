@@ -11,6 +11,7 @@ vignette: >
 
 ```{r setup, include = FALSE}
 library(evently)
+library(ggplot2)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -21,6 +22,29 @@ This vignette gives a tutorial on profiling Twitter users with their initiated d
 We use the dataset `auspol` shipped with `evently` in this task. It is a list of data frames (`r length(auspol)` in total) where each data frame represents a diffusion cascade. For each cascade, three fields are presented: `time` is the retweeting time relative to the original tweet (i.e., the first event); `user` is the corresponding Twitter user of the event;  `magnitude` is the number of followers the Twitter user has.
 
 ```{r}
-print(auspol[1:3])
+head(auspol, n = 3)
+```
+
+
+```{r}
+names(auspol) <- sapply(auspol, function(data) data$user[[1]])
+auspol_group_fits_by_user <- group_fit_series(data = auspol, model_type = 'mPL', observation_times = Inf, cores = 10)
+
+head(auspol_group_fits_by_user, n = 3)
+```
+
+```{r}
+# keep only users with more than 5 cascades
+auspol_group_fits_by_user <- Filter(function(x) length(x) >= 5, auspol_group_fits_by_user)
+dist_matrix <- fits_dist_matrix(auspol_group_fits_by_user)
+
+positions <- tsne::tsne(dist_matrix, k = 2)
+```
+
+
+```{r}
+ggplot(as.data.frame(positions), aes(V1, V2)) +
+  geom_point() +
+  theme_void()
 ```
 

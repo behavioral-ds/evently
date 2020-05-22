@@ -9,7 +9,7 @@ License: CC BY-NC 4.0
 Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Imports:
     poweRlaw
 Suggests:
