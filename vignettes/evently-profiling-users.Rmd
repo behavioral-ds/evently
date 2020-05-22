@@ -1,0 +1,26 @@
+---
+title: "Profiling Twitter users with diffusions"
+author: "Quyu Kong"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Profiling Twitter users with diffusions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+library(evently)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette gives a tutorial on profiling Twitter users with their initiated diffusions via modeling methods provided by `evently`. 
+We use the dataset `auspol` shipped with `evently` in this task. It is a list of data frames (`r length(auspol)` in total) where each data frame represents a diffusion cascade. For each cascade, three fields are presented: `time` is the retweeting time relative to the original tweet (i.e., the first event); `user` is the corresponding Twitter user of the event;  `magnitude` is the number of followers the Twitter user has.
+
+```{r}
+print(auspol[1:3])
+```
+

@@ -4,8 +4,9 @@
 #' This function extracts cascades from a given jsonl file where each line is a tweet
 #' json object. Please refer to the Twitter developer documentation: https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
 #' @param path file path to the tweets jsonl file
+#' @param keep_user Twitter user ids will be kept
 #' @export
-parse_raw_tweets_to_cascades <- function(path) {
+parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
   if (!requireNamespace("jsonlite", quietly = TRUE)) {
     stop("jsonlite package required for parse_raw_tweets_to_cascades(). \nPlease install.packages(\"jsonlite\") to use this functionality.", call. = FALSE)
   }
@@ -32,7 +33,10 @@ parse_raw_tweets_to_cascades <- function(path) {
     return(as.numeric(difftime(T1,T2, units = "secs")))
   }
 
-  for (tweet in tweets) {
+  pb <- txtProgressBar(min = 0, max = length(tweets), style = 3)
+  for (k in seq_along(tweets)) {
+    tweet <- tweets[[k]]
+    setTxtProgressBar(pb, k)
     tryCatch({
       json_tweet <- jsonlite::fromJSON(tweet)
       current_id <- json_tweet$id_str
@@ -72,6 +76,7 @@ parse_raw_tweets_to_cascades <- function(path) {
       warning(sprintf('Error processing json: %s', e))
     })
   }
+  close(pb)
 
   # define vectors for final outputs
   res_time <- c()
@@ -102,7 +107,7 @@ parse_raw_tweets_to_cascades <- function(path) {
   # formatted as two dataframes in case we want to output as the usual csv formats
   index <- data.frame(start_ind = res_start, end_ind = res_end, tweet_time = res_tweet_time)
   data <- data.frame(magnitude = res_mag, time = res_time)
-
+  if (keep_user) data <- data.frame(magnitude = res_mag, time = res_time, user = res_user, stringsAsFactors = F)
   # return as a list of datas
   datas <- lapply(seq(nrow(index)), function(i) {
     data[index$start_ind[i]:index$end_ind[i], ]

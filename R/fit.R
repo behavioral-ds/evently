@@ -29,7 +29,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
                        lower_bound = NULL, upper_bound = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
   data <- preparation(data)
   model <- new_hawkes(data = data, model_type = model_type, observation_time = observation_time,
-                            lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
+                      lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
   ampl_dat_file <- output_dat(model) # output ampl data file for being reused by fits with different initializations
 
   if (!missing(init_pars)) {

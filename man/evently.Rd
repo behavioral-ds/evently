@@ -4,6 +4,3 @@
 \name{evently}
 \alias{evently}
 \title{Fitting Hawkes processes with AMPL}
-\description{
-Fitting Hawkes processes with AMPL
-}
