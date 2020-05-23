@@ -101,3 +101,9 @@ test_that('compute holdout log-likelihood works', {
   nll <- get_hawkes_neg_likelihood_value(model, observation_time = 1)
   expect_lt(abs(nll - par[['K']] * (1 - exp(-1 * par['theta']))), 1e-5)
 })
+
+test_that('fit with constant background rate works', {
+  cascade <- data.frame(time = seq(0, 10), magnitude = seq(11))
+  expect_warning(fitted <- fit_series(cascade, model_type = c('EXP', 'CONST')))
+  expect_s3_class(fitted, 'hawkes')
+})

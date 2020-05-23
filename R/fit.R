@@ -101,10 +101,9 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #' @export
 get_hawkes_neg_likelihood_value <- function(model, ..., par, data, model_type, observation_time) {
   # par and data are required for computing log-likelihood values
-  if (!missing(model)) {
+  if (!missing(model) && missing(model_type)) {
     if (!missing(par)) model$par <- par
     if (!missing(data)) model$data <- data
-    if (!missing(model_type)) model$model_type <- model_type
     check_required_hawkes_fields(model, c('par', 'data'))
   } else if (missing(par) || missing(data) || missing(model_type)) {
     stop('Neither an model object nor par,data,model_type are provided!')

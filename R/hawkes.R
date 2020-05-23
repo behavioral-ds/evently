@@ -19,8 +19,13 @@
 new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
                        observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
                        model_vars = NULL) {
+  model_type <- interpret_model_type(model_type)
   model <- list(model_type = model_type)
-  class(model) <- c(paste0('hawkes_', model_type), 'hawkes')
+  if (length(model_type) > 1) {
+    class(model) <- c('hawkes_MULTI', 'hawkes')
+  } else {
+    class(model) <- c(paste0('hawkes_', model_type[[1]]), 'hawkes')
+  }
   param_names <- get_param_names(model)
 
   if (!is.null(data)) model$data <- data
@@ -82,10 +87,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
 
 #' @importFrom utils hasName
 check_required_hawkes_fields <- function(model, fields) {
-  stopifnot('hawkes' %in% class(model))
-  for (f in fields) {
-    stopifnot(hasName(model, f))
-  }
+  stopifnot('hawkes' %in% class(model) && all(hasName(model, fields)))
 }
 
 #' @importFrom stats runif
@@ -287,7 +289,7 @@ get_ampl_model_output.hawkes <- function(model) {
     # allow for model-specific data output
     '# define objective function to maximize',
     'maximize Likelihood:',
-    get_ampl_likelihood(model),
+    paste0(get_ampl_likelihood(model), ';'),
     sep = '\n'
   )
   output.contraints <- paste(
