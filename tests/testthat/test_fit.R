@@ -104,6 +104,6 @@ test_that('compute holdout log-likelihood works', {
 
 test_that('fit with constant background rate works', {
   cascade <- data.frame(time = seq(0, 10), magnitude = seq(11))
-  expect_warning(fitted <- fit_series(cascade, model_type = c('EXP', 'CONST')))
+  fitted <- fit_series(cascade, model_type = c('EXP', 'CONST'))
   expect_s3_class(fitted, 'hawkes')
 })

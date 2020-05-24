@@ -15,7 +15,6 @@ generate_hawkes_event_series(
   Tmax = Inf,
   maxEvents = NULL,
   M = NULL,
-  history_init = NULL,
   tol = 1e-05
 )
 }
@@ -37,10 +36,6 @@ model_type are not requird once this is given}
 
 \item{M}{magnitude of the initial event (in case no initial history
 provided)}
-
-\item{history_init}{An initial history can be provided (R structure obtained
-from a previous call of this function). Its purpose is to allow custom
-initializations and to continue simulation of stopped processes.}
 
 \item{tol}{simulation stops when intensity smaller than tol.}
 }

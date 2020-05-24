@@ -5,14 +5,17 @@
 # translate the given model types to the right S3 class name.
 # The model types could be a combination of different models
 interpret_model_type <- function(model_type) {
+  IMMIGRANT_TYPES <- c('CONST')
+  DECAY_TYPES <- c('EXPN', 'EXP', 'mEXP', 'mEXPN', 'PL', 'mPL', 'PLN', 'mPLN')
   if (class(model_type) == 'hawkes_model_type') {
     return(model_type)
   } else if (length(model_type) == 1 && is.character(model_type)) {
-    return(hawkes_model_type(hawkes_decay_type = model_type))
+    if (model_type %in% IMMIGRANT_TYPES) return(hawkes_model_type(hawkes_immigrant_type = model_type))
+    else return(hawkes_model_type(hawkes_decay_type = model_type))
   } else if (length(model_type) == 2) {
     if (is.null(names(model_type))) {
-      warning('Names for model_type are not provided, assuming first element is the decay function type.')
-      return(hawkes_model_type(hawkes_decay_type = model_type[[1]], hawkes_immigrant_type = model_type[[2]]))
+      return(hawkes_model_type(hawkes_decay_type = DECAY_TYPES[DECAY_TYPES %in% model_type],
+                               hawkes_immigrant_type = IMMIGRANT_TYPES[IMMIGRANT_TYPES %in% model_type]))
     } else {
       stopifnot(all(c('hawkes_decay_type', 'hawkes_immigrant_type') %in% names(model_type)))
       return(hawkes_model_type(hawkes_decay_type = model_type[['hawkes_decay_type']],

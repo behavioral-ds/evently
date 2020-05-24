@@ -8,7 +8,6 @@
 #' @import poweRlaw
 #' @export
 generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {
-
   if ( is.null(.globals$user_infl) ) {
     .globals$user_infl <- conpl$new()
   }
@@ -179,6 +178,101 @@ CIF <- function(x, history, ...) {
   return(sum(kernelFct(event = subst, t = x, ...)))
 }
 
+# Generate Hawkes porcess events without the background rate
+generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tmax = Inf, maxEvents = NULL, M = NULL, history_init = NULL, tol = 1e-5) {
+  # determine if this is a marked model or not
+  if (substr(model_type, 1, 1) == 'm') {
+    stopifnot('beta' %in% names(par))
+    model_type <- substr(model_type, 2, nchar(model_type))
+  } else {
+    par[['beta']] <- 0
+    M <- 1
+  }
+
+  if (is.null(M)) {
+    M <- generate_user_influence(1)
+  }
+
+  # initial event, M and time 0
+  history <- as.data.frame(matrix(c(M, 0), nrow=1, byrow = TRUE))
+  colnames(history) <- c("magnitude", "time")
+
+  if (!is.null(history_init)) {
+    history <- history_init[, c("magnitude", "time")]
+  }
+  t <- tail(history$time, n = 1)
+
+  while(t <= Tmax){
+    # generate the time of the next event, based on the previous events
+    t.lambda.max <- t
+    intensityMax <- CIF(x = t.lambda.max, history = history, par = par, model_type = model_type)
+    ## if intensityMax is too small then cut
+    if (intensityMax < tol) break
+
+    ## first, sample one event time from the maximum intensity
+    r <- runif(1)
+    t <- t - log(r) / intensityMax
+    if (t > Tmax) break
+
+    ## then perform rejection sampling
+    s <- runif(1)
+
+    thr <- CIF(x = t, history = history, par = par, model_type = model_type) / intensityMax
+
+    if (s <= thr) {
+      ## if here, it means we accept the event
+      # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
+      mag <- ifelse(par[['beta']] == 0, 1, generate_user_influence(n = 1))
+
+      # add the next event to the history
+      event <- matrix( c(mag, t), nrow=1, byrow = T)
+      colnames(event) <- c("magnitude", "time")
+
+      ## now, find out where to insert the new event
+      pos <- findInterval(x = event[1, "time"], vec = unlist(history$time) )
+      ## if there is a tail in history (i.e. there are later events than the one sampled just now)
+      if (pos < nrow(history) ) {
+        history <- rbind(history[1:pos,], event, history[(pos+1):nrow(history),])
+      } else {
+        history <- rbind(history[1:pos,], event)
+      }
+    }
+
+    if (!is.null(maxEvents) && nrow(history) >= maxEvents)
+      break
+  }
+
+  return(history)
+}
+
+get_new_magnitude <- function(model_type = NULL) {
+  if (!is.null(model_type) && substr(model_type, 1, 1) == 'm') {
+    return(generate_user_influence(1))
+  } else {
+    return(1)
+  }
+}
+
+generate_immigrant_event_series.CONST <- function(par, model_type, Tmax) {
+  stopifnot('lambda' %in% names(par) || !is.infinite(Tmax))
+  # first event is at time 0
+  immigrants <- data.frame(magnitude = get_new_magnitude(model_type$hawkes_decay_type), time = 0)
+
+  repeat {
+    new_event <- data.frame(magnitude = get_new_magnitude(model_type$hawkes_decay_type),
+                            time = tail(immigrants$time, n = 1) + rexp(1, rate = par[['lambda']]))
+    if (new_event$time > Tmax) break()
+    immigrants <- rbind(immigrants, new_event)
+  }
+  immigrants
+}
+
+generate_immigrant_event_series <- function(par, model_type, Tmax) {
+  switch (model_type$hawkes_immigrant_type,
+    CONST = generate_immigrant_event_series.CONST(par, model_type, Tmax)
+  )
+}
+
 #' Main function to generate a Hawkes process sequence. It allows intermediary
 #' saves and continuing a stopped simulation. Creates a CSV file with two
 #' columns, each row is an event: (magnitude, time)
@@ -190,14 +284,11 @@ CIF <- function(x, history, ...) {
 #' @param cores the number of cores (processes) used for simulation
 #' @param Tmax maximum time of simulation.
 #' @param maxEvents maximum number of events to be simulated.
-#' @param M magnitude of the initial event (in case no initial history
-#'   provided)
-#' @param history_init An initial history can be provided (R structure obtained
-#'   from a previous call of this function). Its purpose is to allow custom
-#'   initializations and to continue simulation of stopped processes.
+#' @param M magnitude of the initial event
 #' @param tol simulation stops when intensity smaller than tol.
 #' @export
-generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, history_init = NULL, tol = 1e-5) {
+generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5) {
+  # stopifnot(is.null(history_init) || is.data.frame(history_init))
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
     stop('Please either provide a model or (par, model_type) instead of both.')
   } else if (!missing(model)) {
@@ -205,71 +296,26 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     par <- model$par
     model_type <- model$model_type
   }
-
-  # determine if this is a marked model or not
-  if (substr(model_type, 1, 1) == 'm') {
-    stopifnot('beta' %in% names(par))
-    model_type <- substr(model_type, 2, nchar(model_type))
-  } else {
-    par[['beta']] <- 0
-    M <- 1
-  }
+  model_type <- interpret_model_type(model_type)
 
   data <- mclapply(seq(sim_no), function(sim_iter) {
-    if (is.null(M)) {
-      M <- generate_user_influence(1)
+    immigrant_events <- data.frame(magnitude = ifelse(is.null(M), get_new_magnitude(model_type$hawkes_decay_type), M),
+                                   time = 0)
+    if (!is.null(model_type$hawkes_immigrant_type)) {
+      immigrant_events <- generate_immigrant_event_series(par, model_type, Tmax)
     }
-    # initial event, M and time 0
-    history <- as.data.frame(matrix(c(M, 0), nrow=1, byrow = TRUE))
-    colnames(history) <- c("magnitude", "time")
-    t <- history[1,]$time
-
-    if (!is.null(history_init)) {
-      history <- history_init
-      t <- history[nrow(history), "time"]
+    if (!is.null(model_type$hawkes_decay_type)) {
+      cascades <- lapply(seq(nrow(immigrant_events)), function(i) {
+        generate_hawkes_event_series_no_background_rate(par, model_type$hawkes_decay_type, Tmax = Tmax,
+                                                        maxEvents = maxEvents, M = M,
+                                                        history_init = immigrant_events[i, ], tol = tol)
+      })
+      cascade <- do.call(rbind, cascades)
+      if (nrow(immigrant_events) > 1) cascade[order(cascade$time), ]
+    } else {
+      cascade <- immigrant_events
     }
-
-    while(t <= Tmax){
-      # generate the time of the next event, based on the previous events
-      t.lambda.max <- t
-      intensityMax <- CIF(x = t.lambda.max, history = history, par = par, model_type = model_type)
-      ## if intensityMax is too small then cut
-      if (intensityMax < tol) break
-
-      ## first, sample one event time from the maximum intensity
-      r <- runif(1)
-      t <- t - log(r) / intensityMax
-      if (t > Tmax) break
-
-      ## then perform rejection sampling
-      s <- runif(1)
-
-      thr <- CIF(x = t, history = history, par = par, model_type = model_type) / intensityMax
-
-      if (s <= thr) {
-        ## if here, it means we accept the event
-        # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
-        mag <- ifelse(par[['beta']] == 0, 1, generate_user_influence(n = 1))
-
-        # add the next event to the history
-        event <- matrix( c(mag, t), nrow=1, byrow = T)
-        colnames(event) <- c("magnitude", "time")
-
-        ## now, find out where to insert the new event
-        pos <- findInterval(x = event[1, "time"], vec = unlist(history$time) )
-        ## if there is a tail in history (i.e. there are later events than the one sampled just now)
-        if (pos < nrow(history) ) {
-          history <- rbind(history[1:pos,], event, history[(pos+1):nrow(history),])
-        } else {
-          history <- rbind(history[1:pos,], event)
-        }
-      }
-
-      if (!is.null(maxEvents) && nrow(history) >= maxEvents)
-        break
-    }
-
-    return(history)
+    cascade
   }, mc.cores = cores)
 
   data
