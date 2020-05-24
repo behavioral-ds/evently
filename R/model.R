@@ -67,6 +67,11 @@ get_viral_score.default <- function(model, mu) {
   stop('Unknown model type!')
 }
 
+#' @export
+get_model_intensity_at.default <- function(model, t) {
+  stop('Unknown model type!')
+}
+
 # function dispatchers
 generate_random_points <- function(obj) {
   UseMethod('generate_random_points', obj)
@@ -128,6 +133,15 @@ get_a1 <- function(model) {
 #' @export
 get_viral_score <- function(model, mu) {
   UseMethod('get_viral_score')
+}
+
+#' Compute the intensity value of a given model at time t
+#' @param model a model object for computing the intensity value
+#' @param t the given time to compute the intensity
+#' @param cascade_index determine which cascade in the list of cascades to compute, defaults to 1
+#' @export
+get_model_intensity_at <- function(model, t, cascade_index = 1) {
+  UseMethod('get_model_intensity_at')
 }
 
 get_ampl_data_output <- function(obj) {

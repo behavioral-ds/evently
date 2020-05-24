@@ -19,173 +19,12 @@ generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {
 
 ##################################### SIMULATION OF THE HAWKES PROCESS ##############################################
 
-# calculates the influence of a given event at the givent time. The event is a 2
-# elements list (mi, ti). Inclusive parameter means that if an event is present
-# at time t, then it contributes to the conditional intensity. If inclusive ==
-# F, then events at time t are removed.
-kernelFct <- function(event, t, par = c(K = 0.024, beta = 0.5, c = 0.001, theta = 0.2, N = 1000), alpha = 2.016, mmin = 1, inclusive = T, model_type='PL') {
-  switch(EXPR = model_type,
-         PL = .kernelFct.PL(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
-         EXP = .kernelFct.EXP(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
-         EXPN = .kernelFct.EXPN(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
-         PLN = .kernelFct.PLN(event, t, par = par, alpha = alpha, mmin = mmin, inclusive = inclusive),
-        stop(sprintf("Unimplemented kernel option '%s'.", model_type)))
-}
-
-# calculates the influence of a given event at the givent time the event is a 2
-# elements list (mi, ti). Inclusive parameter means that if an event is present
-# at time t, then it contributes to the conditional intensity. If inclusive ==
-# F, then events at time t are removed.
-.kernelFct.PL <- function(event, t, par = c(K = 0.024, beta = 0.5, c = 0.001, theta = 0.2), alpha = 2.016, mmin = 1, inclusive = T) {
-  par <- unlist(par)
-  # the event has 2 components: (magnitude_i, time_i)
-  mat_event = matrix(unlist(event), ncol = 2, byrow = F)
-  mi = mat_event[,1]
-  ti = mat_event[,2]
-
-  # f(p_j) part - virality of a video. Constant for a given video
-  fun_f <- par["K"]
-
-  # ro(m_i) part - the influence of the user of the event
-  fun_ro <- (mi / mmin) ^ par["beta"]
-
-  # psi(t, ti) part - the decaying / relaxation kernel
-  fun_psi <- 1 / (t - ti + par["c"])^(1+par["theta"])
-
-  val = fun_f * fun_ro * fun_psi
-  val[t<ti] = 0
-  val[mi<mmin] = 0
-  if (!inclusive) {
-    val[t == ti] = 0
-    val[mi == mmin] = 0
-  }
-
-  (val)
-}
-
-# calculates the influence of a given event at the givent time the event is a 2
-# elements list (mi, ti). Inclusive parameter means that if an event is present
-# at time t, then it contributes to the conditional intensity. If inclusive ==
-# F, then events at time t are removed.
-.kernelFct.EXP <- function(event, t, par = c(K = 0.024, beta = 0.5, theta = 0.2), alpha = 2.016, mmin = 1, inclusive = T) {
-  par <- unlist(par)
-  # the event has 2 components: (magnitude_i, time_i)
-  mat_event = matrix(unlist(event), ncol = 2, byrow = F)
-  mi = mat_event[,1]
-  ti = mat_event[,2]
-
-  # f(p_j) part - virality of a video. Constant for a given video
-  fun_f <- par["K"]
-
-  # ro(m_i) part - the influence of the user of the event
-  fun_ro <- (mi / mmin) ^ par["beta"]
-
-  # psi(t, ti) part - the decaying / relaxation kernel
-  fun_psi <- par["theta"] * (exp(-par["theta"] * (t - ti)))
-
-  val = fun_f * fun_ro * fun_psi
-  val[t<ti] = 0
-  val[mi<mmin] = 0
-  if (!inclusive) {
-    val[t == ti] = 0
-    val[mi == mmin] = 0
-  }
-
-  (val)
-}
-
-# calculates the influence of a given event at the givent time the event is a 2
-# elements list (mi, ti). Inclusive parameter means that if an event is present
-# at time t, then it contributes to the conditional intensity. If inclusive ==
-# F, then events at time t are removed.
-.kernelFct.EXPN <- function(event, t, par = c(K = 0.024, beta = 0.5, theta = 0.2, N = 1000), alpha = 2.016, mmin = 1, inclusive = T) {
-  par <- unlist(par)
-  # the event has 2 components: (magnitude_i, time_i)
-  mat_event = matrix(unlist(event), ncol = 2, byrow = F)
-  mi = mat_event[,1]
-  ti = mat_event[,2]
-
-  ## compute correponding Nt at the current time t
-  if (inclusive) {
-    Nt <- min(sum(ti <= t), par["N"])
-  } else {
-    Nt <- min(sum(ti < t), par["N"])
-  }
-
-  # f(p_j) part - virality of a diffusion. Constant for a given diffusion. Furthermore, discount for available events.
-  fun_f <- par["K"] * (1 - Nt / par["N"])
-
-  # ro(m_i) part - the influence of the user of the event
-  fun_ro <- (mi / mmin) ^ par["beta"]
-
-  # psi(t, ti) part - the decaying / relaxation kernel
-  fun_psi <- par["theta"] * (exp(-par["theta"] * (t - ti)))
-
-  val = fun_f * fun_ro * fun_psi
-  val[t<ti] = 0
-  val[mi<mmin] = 0
-  if (!inclusive) {
-    val[t == ti] = 0
-    val[mi == mmin] = 0
-  }
-
-  return(val)
-}
-
-# calculates the influence of a given event at the givent time the event is a 2
-# elements list (mi, ti). Inclusive parameter means that if an event is present
-# at time t, then it contributes to the conditional intensity. If inclusive ==
-# F, then events at time t are removed.
-.kernelFct.PLN <- function(event, t, par = c(K = 0.024, beta = 0.5, c = 0.001, theta = 0.2, N = 1000), alpha = 2.016, mmin = 1, inclusive = T) {
-  par <- unlist(par)
-  # the event has 2 components: (magnitude_i, time_i)
-  mat_event = matrix(unlist(event), ncol = 2, byrow = F)
-  mi = mat_event[,1]
-  ti = mat_event[,2]
-
-  ## compute correponding Nt at the current time t
-  if (inclusive) {
-    Nt <- min(sum(ti <= t), par["N"])
-  } else {
-    Nt <- min(sum(ti < t), par["N"])
-  }
-
-  # f(p_j) part - virality of a video. Constant for a given video
-  fun_f <- par["K"] * (1 - Nt / par["N"])
-
-  # ro(m_i) part - the influence of the user of the event
-  fun_ro <- (mi / mmin) ^ par["beta"]
-
-  # psi(t, ti) part - the decaying / relaxation kernel
-  fun_psi <- 1 / (t - ti + par["c"])^(1+par["theta"])
-
-  val = fun_f * fun_ro * fun_psi
-  val[t<ti] = 0
-  val[mi<mmin] = 0
-  if (!inclusive) {
-    val[t == ti] = 0
-    val[mi == mmin] = 0
-  }
-
-  (val)
-}
-
-# The CIF function is necessary to simulate a non-stationary (NON-HOMOGENUOUS) poisson process
-# conditional intensity function - the CIF
-# in here need to calculate the conditional intensity, by using the kernels
-CIF <- function(x, history, ...) {
-  subst <- history[history$time <= x,]
-  return(sum(kernelFct(event = subst, t = x, ...)))
-}
-
 # Generate Hawkes porcess events without the background rate
 generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tmax = Inf, maxEvents = NULL, M = NULL, history_init = NULL, tol = 1e-5) {
   # determine if this is a marked model or not
-  if (substr(model_type, 1, 1) == 'm') {
-    stopifnot('beta' %in% names(par))
-    model_type <- substr(model_type, 2, nchar(model_type))
-  } else {
-    par[['beta']] <- 0
+  marked <- T
+  if (substr(model_type, 1, 1) != 'm') {
+    marked <- F
     M <- 1
   }
 
@@ -201,11 +40,12 @@ generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tma
     history <- history_init[, c("magnitude", "time")]
   }
   t <- tail(history$time, n = 1)
-
+  model <- new_hawkes(model_type = model_type, par = par)
   while(t <= Tmax){
     # generate the time of the next event, based on the previous events
     t.lambda.max <- t
-    intensityMax <- CIF(x = t.lambda.max, history = history, par = par, model_type = model_type)
+    model$data <- list(history)
+    intensityMax <- get_model_intensity_at(model, t = t.lambda.max)
     ## if intensityMax is too small then cut
     if (intensityMax < tol) break
 
@@ -216,13 +56,13 @@ generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tma
 
     ## then perform rejection sampling
     s <- runif(1)
-
-    thr <- CIF(x = t, history = history, par = par, model_type = model_type) / intensityMax
+    model$data <- list(history)
+    thr <- get_model_intensity_at(model, t = t) / intensityMax
 
     if (s <= thr) {
       ## if here, it means we accept the event
       # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
-      mag <- ifelse(par[['beta']] == 0, 1, generate_user_influence(n = 1))
+      mag <- ifelse(marked, generate_user_influence(n = 1), 1)
 
       # add the next event to the history
       event <- matrix( c(mag, t), nrow=1, byrow = T)
@@ -306,7 +146,8 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     }
     if (!is.null(model_type$hawkes_decay_type)) {
       cascades <- lapply(seq(nrow(immigrant_events)), function(i) {
-        generate_hawkes_event_series_no_background_rate(par, model_type$hawkes_decay_type, Tmax = Tmax,
+        generate_hawkes_event_series_no_background_rate(par[get_param_names(new_hawkes(model_type = model_type$hawkes_decay_type))],
+                                                        model_type$hawkes_decay_type, Tmax = Tmax,
                                                         maxEvents = maxEvents, M = M,
                                                         history_init = immigrant_events[i, ], tol = tol)
       })

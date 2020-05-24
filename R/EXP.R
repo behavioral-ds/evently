@@ -66,3 +66,30 @@ predict_final_popularity.hawkes_EXP <- function(model) {
 predict_final_popularity.hawkes_mEXP <- function(model) {
   NextMethod()
 }
+
+#' @export
+get_model_intensity_at.hawkes_EXP <- function(model, t, cascade_index = 1) {
+  get_model_intensity_at.hawkes_mEXP(list(model_type = 'mEXP', par = c(model$par, beta = 0), data = model$data),
+                         t = t, cascade_index = cascade_index)
+}
+
+#' @export
+get_model_intensity_at.hawkes_mEXP <- function(model, t, cascade_index = 1) {
+  event <- model$data[[cascade_index]]
+  event <- event[event$time <= t, ]
+  par <- model$par
+  mi <- event$magnitude
+  ti <- event$time
+
+  fun_f <- par[["K"]]
+
+  # ro(m_i) part - the influence of the user of the event
+  fun_ro <- (mi) ^ par[["beta"]]
+
+  # psi(t, ti) part - the decaying / relaxation kernel
+  fun_psi <- par[["theta"]] * (exp(-par[["theta"]] * (t - ti)))
+
+  val <- fun_f * fun_ro * fun_psi
+
+  sum(val)
+}

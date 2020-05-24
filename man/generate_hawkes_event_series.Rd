@@ -34,8 +34,7 @@ model_type are not requird once this is given}
 
 \item{maxEvents}{maximum number of events to be simulated.}
 
-\item{M}{magnitude of the initial event (in case no initial history
-provided)}
+\item{M}{magnitude of the initial event}
 
 \item{tol}{simulation stops when intensity smaller than tol.}
 }

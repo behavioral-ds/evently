@@ -67,3 +67,33 @@ predict_final_popularity.hawkes_PLN <- function(model) {
 predict_final_popularity.hawkes_mPLN <- function(model) {
   stop('This method does not exist for mPLN')
 }
+
+#' @export
+get_model_intensity_at.hawkes_PLN <- function(model, t, cascade_index = 1) {
+  get_model_intensity_at.hawkes_mPLN(list(model_type = 'mPLN', par = c(model$par, beta = 0), data = model$data),
+                         t = t, cascade_index = cascade_index)
+}
+
+#' @export
+get_model_intensity_at.hawkes_mPLN <- function(model, t, cascade_index = 1) {
+  event <- model$data[[cascade_index]][model$data[[cascade_index]]$time <= t, ]
+  par <- model$par
+  mi <- event$magnitude
+  ti <- event$time
+
+  ## compute correponding Nt at the current time t
+  Nt <- min(sum(ti <= t), par[["N"]])
+
+  # f(p_j) part - virality of a video. Constant for a given video
+  fun_f <- par[["K"]] * (1 - Nt / par[["N"]])
+
+  # ro(m_i) part - the influence of the user of the event
+  fun_ro <- (mi) ^ par[["beta"]]
+
+  # psi(t, ti) part - the decaying / relaxation kernel
+  fun_psi <- 1 / (t - ti + par[["c"]])^(1+par[["theta"]])
+
+  val <- fun_f * fun_ro * fun_psi
+
+  sum(val)
+}

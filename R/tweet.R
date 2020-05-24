@@ -7,9 +7,7 @@
 #' @param keep_user Twitter user ids will be kept
 #' @export
 parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
-  if (!requireNamespace("jsonlite", quietly = TRUE)) {
-    stop("jsonlite package required for parse_raw_tweets_to_cascades(). \nPlease install.packages(\"jsonlite\") to use this functionality.", call. = FALSE)
-  }
+  check_required_packages('jsonlite')
   con <- file(path, "r")
   tweets <- readLines(con, n = -1)
   close(con)

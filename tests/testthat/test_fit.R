@@ -100,6 +100,8 @@ test_that('compute holdout log-likelihood works', {
   expect_lt(abs(nll - par[['K']]), 1e-10)
   nll <- get_hawkes_neg_likelihood_value(model, observation_time = 1)
   expect_lt(abs(nll - par[['K']] * (1 - exp(-1 * par['theta']))), 1e-5)
+  nll <- get_hawkes_neg_likelihood_value(par = model$par, data = model$data[[1]], model_type = model$model_type, observation_time = model$observation_time)
+  expect_lt(abs(nll - par[['K']]), 1e-10)
 })
 
 test_that('fit with constant background rate works', {

@@ -103,7 +103,7 @@ get_hawkes_neg_likelihood_value <- function(model, ..., par, data, model_type, o
   # par and data are required for computing log-likelihood values
   if (!missing(model) && missing(model_type)) {
     if (!missing(par)) model$par <- par
-    if (!missing(data)) model$data <- data
+    if (!missing(data)) model$data <- preparation(data)
     check_required_hawkes_fields(model, c('par', 'data'))
   } else if (missing(par) || missing(data) || missing(model_type)) {
     stop('Neither an model object nor par,data,model_type are provided!')

@@ -62,3 +62,35 @@ predict_final_popularity.hawkes_EXPN <- function(model) {
 predict_final_popularity.hawkes_mEXPN <- function(model) {
   stop('This method does not exist for mEXPN')
 }
+
+#' @export
+get_model_intensity_at.hawkes_EXPN <- function(model, t, cascade_index = 1) {
+  get_model_intensity_at.hawkes_mEXPN(list(model_type = 'mEXPN', par = c(model$par, beta = 0), data = model$data),
+                         t = t, cascade_index = cascade_index)
+}
+
+#' @export
+get_model_intensity_at.hawkes_mEXPN <- function(model, t, cascade_index = 1) {
+  event <- model$data[[cascade_index]]
+  event <- event[event$time <= t, ]
+  par <- model$par
+  mi <- event$magnitude
+  ti <- event$time
+
+  ## compute correponding Nt at the current time t
+  Nt <- min(sum(ti <= t), par[["N"]])
+
+
+  # f(p_j) part - virality of a diffusion. Constant for a given diffusion. Furthermore, discount for available events.
+  fun_f <- par[["K"]] * (1 - Nt / par[["N"]])
+
+  # ro(m_i) part - the influence of the user of the event
+  fun_ro <- mi ^ par[["beta"]]
+
+  # psi(t, ti) part - the decaying / relaxation kernel
+  fun_psi <- par[["theta"]] * (exp(-par[["theta"]] * (t - ti)))
+
+  val <- fun_f * fun_ro * fun_psi
+
+  sum(val)
+}

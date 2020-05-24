@@ -28,7 +28,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   }
   param_names <- get_param_names(model)
 
-  if (!is.null(data)) model$data <- data
+  if (!is.null(data)) model$data <- preparation(data)
 
   # check if provided parameters are of the same length as required
   if (!is.null(par)) {
