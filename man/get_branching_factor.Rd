@@ -8,7 +8,10 @@ by a single event.}
 get_branching_factor(model)
 }
 \arguments{
-\item{model}{a model object for computing the branching factor.}
+\item{model}{A model object for computing the branching factor.}
+}
+\value{
+A single number, the branching factor of the given model
 }
 \description{
 Branching factor is the expected number of events generated

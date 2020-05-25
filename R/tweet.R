@@ -2,9 +2,11 @@
 # crawled from Twitter API
 
 #' This function extracts cascades from a given jsonl file where each line is a tweet
-#' json object. Please refer to the Twitter developer documentation: https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
-#' @param path file path to the tweets jsonl file
+#' json object. Please refer to the Twitter developer documentation:
+#' https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
+#' @param path File path to the tweets jsonl file
 #' @param keep_user Twitter user ids will be kept
+#' @return A list of data.frames where each data.frame is a retweet cascade
 #' @export
 parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
   check_required_packages('jsonlite')
@@ -31,10 +33,10 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
     return(as.numeric(difftime(T1,T2, units = "secs")))
   }
 
-  pb <- txtProgressBar(min = 0, max = length(tweets), style = 3)
+  pb <- utils::txtProgressBar(min = 0, max = length(tweets), style = 3)
   for (k in seq_along(tweets)) {
     tweet <- tweets[[k]]
-    setTxtProgressBar(pb, k)
+    utils::setTxtProgressBar(pb, k)
     tryCatch({
       json_tweet <- jsonlite::fromJSON(tweet)
       current_id <- json_tweet$id_str

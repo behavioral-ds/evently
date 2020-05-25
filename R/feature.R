@@ -1,22 +1,22 @@
 # This script hosts functions for extracting diffusion features from groups of cascades
 
-#' Given a list of cascades, this function fits each cascade individually by calling {fit_series}.
+#' Given a list of cascades, this function fits each cascade individually by calling [fit_series].
 #' If the given cascades are in a named list, the names will be regarded as groups and the result will be reformatted as a list of
 #' group fits.
-#' @param data a (named) list of data.frame(s) where each data.frame is an event cascade with
+#' @param data A (named) list of data.frame(s) where each data.frame is an event cascade with
 #' event tims and event magnitudes (optional). The list names (if present) will be used for grouping cascades with same names.
-#' @param model_type a string representing the model type, e.g. EXP for Hawkes processes with an exponential kernel function
-#' @param observation_times a list or an vector of observation times for the cascades in data
-#' @param cores the number of cores used for parallel fitting, defaults to 1 (non-parallel)
-#' @param ... check the available arguments of {fit_series}
+#' @param model_type A string representing the model type, e.g. EXP for Hawkes processes with an exponential kernel function
+#' @param observation_times A list or an vector of observation times for the cascades in data
+#' @param cores The number of cores used for parallel fitting, defaults to 1 (non-parallel)
+#' @param ... Check the available arguments of {fit_series}
+#' @return A list of model obejcts where each object fits on an invidual cascade in data
 #' @export
-group_fit_series <- function(data, model_type, observation_times = NULL, cores = 1, verbose = F, ...) {
+group_fit_series <- function(data, model_type, observation_times = NULL, cores = 1, ...) {
   stopifnot(is.list(data))
   stopifnot(length(data) == length(observation_times) || is.null(observation_times) || length(observation_times) == 1)
   if (length(observation_times) == 1) {
     observation_times <- rep(observation_times, length(data))
   }
-  if (verbose) cat('Start fitting individual groups in data... This could take some time...\n')
 
   fits <- mclapply(seq_along(data), function(i) fit_series(data = data[[i]], model_type = model_type,
                                                            observation_time = observation_times[[i]],
@@ -39,17 +39,16 @@ group_fit_series <- function(data, model_type, observation_times = NULL, cores =
 generate_features_from_list_fits <- function(list_fits) {
   # determine if list_fits is a list of hawkes.group.fits
   stopifnot(is.list(list_fits) && all(sapply(list_fits, function(fits) 'hawkes.group.fits' %in% class(fits))))
-
-
+  stop('Not implemented')
 }
 
 # Compute order 1 wassersterin distance between the empirical distributions of v1 and v2
 wasserstein1d <- function(v1, v2) {
-  ecdf1 <- ecdf(v1)
-  ecdf2 <- ecdf(v2)
+  ecdf1 <- stats::ecdf(v1)
+  ecdf2 <- stats::ecdf(v2)
   v <- sort(c(v1, v2))
   diff_v <- diff(v)
-  sum(sapply(head(v, n = -1), function(p) abs(ecdf1(p) - ecdf2(p))) * diff_v)
+  sum(sapply(utils::head(v, n = -1), function(p) abs(ecdf1(p) - ecdf2(p))) * diff_v)
 }
 
 compute_fits_distance <- function(fits1, fits2) {
@@ -65,7 +64,7 @@ compute_fits_distance <- function(fits1, fits2) {
 }
 
 #' Given a list of grouped fits, compute a distance matrix
-#' @param group_fits a list of grouped fits returned by {group_fit_series}
+#' @param group_fits A list of grouped fits returned by {group_fit_series}
 #' @export
 fits_dist_matrix <- function(group_fits) {
   group_no <- length(group_fits)

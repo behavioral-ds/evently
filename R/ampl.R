@@ -1,6 +1,6 @@
 #' Set up the AMPL environment by downloading an AMPL demo version and the compiled
 #' ipopt binary. Only supports UNIX compatible OSs.
-#' @param ampl_path the path where the AMPL folder will be placed
+#' @param ampl_path The path where the AMPL folder will be placed
 #' @importFrom utils download.file
 #' @importFrom utils untar
 #' @importFrom utils unzip
@@ -39,7 +39,7 @@ setup_ampl <- function(ampl_path) {
 }
 
 #' Set up the folder for placing temporary files, defaults to /tmp
-#' @param path a string of path to the folder where you would like to place temporary files
+#' @param path A string of path to the folder where you would like to place temporary files
 #' @export
 set_tmp_folder <- function(path) {
   .globals$tmp <- path
@@ -47,7 +47,7 @@ set_tmp_folder <- function(path) {
 
 # preparation code --------------------------------------------------------
 #' Prepare the temporary auxilixry files for AMPL
-#' @param type is one of "mod" (AMPL model file), "dat" (AMPL data file),
+#' @param type One of "mod" (AMPL model file), "dat" (AMPL data file),
 #' "run" (AMPL run file) and "res" (file hosts AMPL runned output)
 prepare_tmp_file <- function(type) {
   pid <- Sys.getpid()

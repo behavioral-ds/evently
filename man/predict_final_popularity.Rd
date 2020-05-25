@@ -8,7 +8,7 @@ its model parameters.}
 predict_final_popularity(model)
 }
 \arguments{
-\item{model}{a model object provides data, model_type, observation_time
+\item{model}{A model object provides data, model_type, observation_time
 and model parameters}
 }
 \value{

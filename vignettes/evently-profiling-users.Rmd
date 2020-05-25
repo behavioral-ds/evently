@@ -12,6 +12,7 @@ vignette: >
 ```{r setup, include = FALSE}
 library(evently)
 library(ggplot2)
+library(tsne)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -38,7 +39,7 @@ head(auspol_group_fits_by_user, n = 3)
 auspol_group_fits_by_user <- Filter(function(x) length(x) >= 5, auspol_group_fits_by_user)
 dist_matrix <- fits_dist_matrix(auspol_group_fits_by_user)
 
-positions <- tsne::tsne(dist_matrix, k = 2)
+positions <- tsne(dist_matrix, k = 2)
 ```
 
 

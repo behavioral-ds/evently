@@ -19,27 +19,35 @@ generate_hawkes_event_series(
 )
 }
 \arguments{
-\item{model}{a model class object with par and model_type presented. par and
+\item{model}{A model class object with par and model_type presented. par and
 model_type are not requird once this is given}
 
-\item{par}{a named vector of model parameters, K, alpha, beta, mmin, c, theta - parameters of the Hawkes kernel}
+\item{par}{A named vector of model parameters, K, alpha, beta, mmin, c, theta - parameters of the Hawkes kernel}
 
-\item{model_type}{model type}
+\item{model_type}{Model type}
 
-\item{sim_no}{the number of simulated cascades}
+\item{sim_no}{The number of simulated cascades}
 
-\item{cores}{the number of cores (processes) used for simulation}
+\item{cores}{The number of cores (processes) used for simulation}
 
-\item{Tmax}{maximum time of simulation.}
+\item{Tmax}{Maximum time of simulation.}
 
-\item{maxEvents}{maximum number of events to be simulated.}
+\item{maxEvents}{Maximum number of events to be simulated.}
 
-\item{M}{magnitude of the initial event}
+\item{M}{Magnitude of the initial event}
 
-\item{tol}{simulation stops when intensity smaller than tol.}
+\item{tol}{Simulation stops when intensity smaller than tol.}
+}
+\value{
+A list of data.frames where each data.frame is a simualted event cascade with the given model
 }
 \description{
 Main function to generate a Hawkes process sequence. It allows intermediary
 saves and continuing a stopped simulation. Creates a CSV file with two
 columns, each row is an event: (magnitude, time)
+}
+\examples{
+generate_hawkes_event_series(model_type = 'EXP',
+                             par = c(K = 0.9, theta = 1),
+                             sim_no = 10, Tmax = Inf)
 }

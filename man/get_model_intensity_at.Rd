@@ -7,11 +7,14 @@
 get_model_intensity_at(model, t, cascade_index = 1)
 }
 \arguments{
-\item{model}{a model object for computing the intensity value}
+\item{model}{A model object for computing the intensity value}
 
-\item{t}{the given time to compute the intensity}
+\item{t}{The given time to compute the intensity}
 
-\item{cascade_index}{determine which cascade in the list of cascades to compute, defaults to 1}
+\item{cascade_index}{Determine which cascade in the list of cascades to compute, defaults to 1}
+}
+\value{
+A single number, the intensity value of the given model evaluated at t
 }
 \description{
 Compute the intensity value of a given model at time t

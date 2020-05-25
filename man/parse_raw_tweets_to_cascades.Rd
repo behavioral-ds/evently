@@ -8,9 +8,12 @@ json object. Please refer to the Twitter developer documentation: https://develo
 parse_raw_tweets_to_cascades(path, keep_user = F)
 }
 \arguments{
-\item{path}{file path to the tweets jsonl file}
+\item{path}{File path to the tweets jsonl file}
 
 \item{keep_user}{Twitter user ids will be kept}
+}
+\value{
+A list of data.frames where each data.frame is a retweet cascade
 }
 \description{
 This function extracts cascades from a given jsonl file where each line is a tweet

@@ -3,28 +3,38 @@
 #' Fit a Hawkes process or HawkesN process model on one or many event cascades
 #' and learn model parameters.
 #'
-#' @param data a list of data.frame(s) where each data.frame is an event cascade with event
+#' @param data A list of data.frame(s) where each data.frame is an event cascade with event
 #' tims and event magnitudes (optional)
-#' @param model_type a string representing the model type, e.g. EXP for Hawkes processes with
+#' @param model_type A string representing the model type, e.g. EXP for Hawkes processes with
 #' an exponential kernel function
-#' @param cores the number of cores used for parallel fitting, defaults to 1 (non-parallel)
-#' @param init_pars a data.frame of initial parameters passed to the fitting program. Parameters should be
+#' @param cores The number of cores used for parallel fitting, defaults to 1 (non-parallel)
+#' @param init_pars A data.frame of initial parameters passed to the fitting program. Parameters should be
 #' aligned with required ones for the corresponding "model_type". The default initial parameters will
 #' be used if not provided.
 #' @param .init_no If initi_pars is not provided, currently 10 random starting parameters are generated
 #' for fitting. This controls which random points are used. Defaults to NULL
-#' @param observation_time the event cascades observation time(s). This can either be a single number indicating
+#' @param observation_time The event cascades observation time(s). This can either be a single number indicating
 #' a common observation time for all cascades or a vector of observation times which has the same length as
 #' the number of cascades.
-#' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
+#' @param lower_bound Model parameter lower bounds. A named vector where names are model parameters and
 #' values are the lowest possible values.
-#' @param upper_bound model parameter upper bounds. A named vector where names are model parameters and
+#' @param upper_bound Model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
-#' @param model_vars a named list of extra variables provided to hawkes objects
+#' @param model_vars A named list of extra variables provided to hawkes objects
 #' @param parallel_type One of "PSOCK" or "FORK". Default to "PSOCK". See "Details" in makeCluster {parallel}.
-#' @param ... further arguments passed to ampl
+#' @param ... Further arguments passed to ampl
 #' @import parallel
+#' @return A model object where the [par] is fitted on [data]. [convergence] indicates the fitting convergence
+#' status and [value] is the negative log-likelihood value of the fitted model on [data].
 #' @export
+#' @examples
+#' data <- generate_hawkes_event_series(model_type = 'EXP',
+#'                                      par = c(K = 0.9, theta = 1),
+#'                                      sim_no = 10, Tmax = Inf)
+#' fitted <- fit_series(data, 'EXP', observation_time = Inf)
+#' fitted$par # fitted parameters
+#' fitted$convergence # convergence status
+#' fitted$value # negative log-likelihood value
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
                        lower_bound = NULL, upper_bound = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
   data <- preparation(data)
@@ -98,12 +108,22 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #' @param data A list of data.frames of event cascades
 #' @param model_type The Hawkes model type
 #' @param observation_time The observation time of the given event cascades
+#' @return A single number, the negative log-likelihood of the given model on data
 #' @export
+#' @examples
+#' data <- generate_hawkes_event_series(model_type = 'EXP',
+#'                                      par = c(K = 0.9, theta = 1),
+#'                                      sim_no = 10, Tmax = Inf)
+#' fitted <- fit_series(data, 'EXP', observation_time = Inf)
+#' data_test <- generate_hawkes_event_series(model_type = 'EXP',
+#'                                           par = c(K = 0.9, theta = 1),
+#'                                           sim_no = 10, Tmax = Inf)
+#' get_hawkes_neg_likelihood_value(fitted, data = data_test)
 get_hawkes_neg_likelihood_value <- function(model, ..., par, data, model_type, observation_time) {
   # par and data are required for computing log-likelihood values
   if (!missing(model) && missing(model_type)) {
     if (!missing(par)) model$par <- par
-    if (!missing(data)) model$data <- preparation(data)
+    if (!missing(data)) model$data <- convert_data_format(data)
     check_required_hawkes_fields(model, c('par', 'data'))
   } else if (missing(par) || missing(data) || missing(model_type)) {
     stop('Neither an model object nor par,data,model_type are provided!')
@@ -131,20 +151,10 @@ model_selection <- function(models, cores, ...) {
 }
 
 preparation <- function(data) {
-  # put data into a list if it is a data.frame
-  if (is.data.frame(data)) {
-    data <- list(data)
-  }
-
-  # validate data format
-  if (!(is.list(data) && all(sapply(data, is.data.frame)))) {
-    stop('The provided cascade(s) is in a wrong format.')
-  }
-
   # check if ampl is available
   if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '') {
     stop('Please set up ampl and ipopt before fitting!')
   }
 
-  data
+  convert_data_format(data)
 }

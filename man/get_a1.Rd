@@ -7,7 +7,7 @@
 get_a1(model)
 }
 \arguments{
-\item{model}{a model object provides data, model_type, observation_time
+\item{model}{A model object provides data, model_type, observation_time
 and model parameters}
 }
 \value{

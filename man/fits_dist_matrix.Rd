@@ -7,7 +7,7 @@
 fits_dist_matrix(group_fits)
 }
 \arguments{
-\item{group_fits}{a list of grouped fits returned by {group_fit_series}}
+\item{group_fits}{A list of grouped fits returned by {group_fit_series}}
 }
 \description{
 Given a list of grouped fits, compute a distance matrix

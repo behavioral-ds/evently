@@ -4,3 +4,7 @@
 \name{evently}
 \alias{evently}
 \title{Fitting Hawkes processes with AMPL}
+\description{
+To learn more about evently, start with the vignettes:
+`browseVignettes(package = "evently")`
+}

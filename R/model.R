@@ -35,7 +35,7 @@ hawkes_model_type <- function(hawkes_decay_type = NULL, hawkes_immigrant_type = 
 }
 
 #' @export
-as.character.hawkes_model_type <- function(x, ..) {
+as.character.hawkes_model_type <- function(x, ...) {
   paste(unlist(x), collapse = '_')
 }
 
@@ -68,7 +68,7 @@ get_viral_score.default <- function(model, mu) {
 }
 
 #' @export
-get_model_intensity_at.default <- function(model, t) {
+get_model_intensity_at.default <- function(model, t, cascade_index = 1) {
   stop('Unknown model type!')
 }
 
@@ -99,7 +99,8 @@ get_ampl_constraints <- function(obj) {
 
 #' Branching factor is the expected number of events generated
 #' by a single event.
-#' @param model a model object for computing the branching factor.
+#' @param model A model object for computing the branching factor.
+#' @return A single number, the branching factor of the given model
 #' @export
 get_branching_factor <- function(model) {
   UseMethod('get_branching_factor')
@@ -107,7 +108,7 @@ get_branching_factor <- function(model) {
 
 #' Predict the final popularity (event count) of give histories and
 #' its model parameters.
-#' @param model a model object provides data, model_type, observation_time
+#' @param model A model object provides data, model_type, observation_time
 #' and model parameters
 #' @return a vector of predicted final popularities whose length is the same
 #' as the number of cascades in the provided model object
@@ -117,7 +118,7 @@ predict_final_popularity <- function(model) {
 }
 
 #' Calculating the expected size of first level of descendants
-#' @param model a model object provides data, model_type, observation_time
+#' @param model A model object provides data, model_type, observation_time
 #' and model parameters
 #' @return a vector of the expected sizes of first level of descendants of the
 #' given cascades
@@ -128,17 +129,19 @@ get_a1 <- function(model) {
 
 #' Viral score is the total reaction of the system to a single promotion,
 #' i.e. the expected cascade size started by a single event of magnitude
-#' @param model a model object for computing the branching factor.
-#' @param mu the magnitude of the initial event
+#' @param model A model object for computing the branching factor.
+#' @param mu The magnitude of the initial event
+#' @return A single number, the viral score of the given model
 #' @export
 get_viral_score <- function(model, mu) {
   UseMethod('get_viral_score')
 }
 
 #' Compute the intensity value of a given model at time t
-#' @param model a model object for computing the intensity value
-#' @param t the given time to compute the intensity
-#' @param cascade_index determine which cascade in the list of cascades to compute, defaults to 1
+#' @param model A model object for computing the intensity value
+#' @param t The given time to compute the intensity
+#' @param cascade_index Determine which cascade in the list of cascades to compute, defaults to 1
+#' @return A single number, the intensity value of the given model evaluated at t
 #' @export
 get_model_intensity_at <- function(model, t, cascade_index = 1) {
   UseMethod('get_model_intensity_at')

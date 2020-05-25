@@ -8,7 +8,7 @@ ipopt binary. Only supports UNIX compatible OSs.}
 setup_ampl(ampl_path)
 }
 \arguments{
-\item{ampl_path}{the path where the AMPL folder will be placed}
+\item{ampl_path}{The path where the AMPL folder will be placed}
 }
 \description{
 Set up the AMPL environment by downloading an AMPL demo version and the compiled

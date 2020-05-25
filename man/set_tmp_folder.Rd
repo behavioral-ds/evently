@@ -7,7 +7,7 @@
 set_tmp_folder(path)
 }
 \arguments{
-\item{path}{a string of path to the folder where you would like to place temporary files}
+\item{path}{A string of path to the folder where you would like to place temporary files}
 }
 \description{
 Set up the folder for placing temporary files, defaults to /tmp

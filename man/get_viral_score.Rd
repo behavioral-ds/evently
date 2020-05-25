@@ -8,9 +8,12 @@ i.e. the expected cascade size started by a single event of magnitude}
 get_viral_score(model, mu)
 }
 \arguments{
-\item{model}{a model object for computing the branching factor.}
+\item{model}{A model object for computing the branching factor.}
 
-\item{mu}{the magnitude of the initial event}
+\item{mu}{The magnitude of the initial event}
+}
+\value{
+A single number, the viral score of the given model
 }
 \description{
 Viral score is the total reaction of the system to a single promotion,

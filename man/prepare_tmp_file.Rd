@@ -7,7 +7,7 @@
 prepare_tmp_file(type)
 }
 \arguments{
-\item{type}{is one of "mod" (AMPL model file), "dat" (AMPL data file),
+\item{type}{One of "mod" (AMPL model file), "dat" (AMPL data file),
 "run" (AMPL run file) and "res" (file hosts AMPL runned output)}
 }
 \description{

@@ -20,38 +20,51 @@ fit_series(
 )
 }
 \arguments{
-\item{data}{a list of data.frame(s) where each data.frame is an event cascade with event
+\item{data}{A list of data.frame(s) where each data.frame is an event cascade with event
 tims and event magnitudes (optional)}
 
-\item{model_type}{a string representing the model type, e.g. EXP for Hawkes processes with
+\item{model_type}{A string representing the model type, e.g. EXP for Hawkes processes with
 an exponential kernel function}
 
-\item{cores}{the number of cores used for parallel fitting, defaults to 1 (non-parallel)}
+\item{cores}{The number of cores used for parallel fitting, defaults to 1 (non-parallel)}
 
-\item{init_pars}{a data.frame of initial parameters passed to the fitting program. Parameters should be
+\item{init_pars}{A data.frame of initial parameters passed to the fitting program. Parameters should be
 aligned with required ones for the corresponding "model_type". The default initial parameters will
 be used if not provided.}
 
 \item{.init_no}{If initi_pars is not provided, currently 10 random starting parameters are generated
 for fitting. This controls which random points are used. Defaults to NULL}
 
-\item{observation_time}{the event cascades observation time(s). This can either be a single number indicating
+\item{observation_time}{The event cascades observation time(s). This can either be a single number indicating
 a common observation time for all cascades or a vector of observation times which has the same length as
 the number of cascades.}
 
-\item{lower_bound}{model parameter lower bounds. A named vector where names are model parameters and
+\item{lower_bound}{Model parameter lower bounds. A named vector where names are model parameters and
 values are the lowest possible values.}
 
-\item{upper_bound}{model parameter upper bounds. A named vector where names are model parameters and
+\item{upper_bound}{Model parameter upper bounds. A named vector where names are model parameters and
 values are the largest possible values.}
 
-\item{model_vars}{a named list of extra variables provided to hawkes objects}
+\item{model_vars}{A named list of extra variables provided to hawkes objects}
 
 \item{parallel_type}{One of "PSOCK" or "FORK". Default to "PSOCK". See "Details" in makeCluster {parallel}.}
 
-\item{...}{further arguments passed to ampl}
+\item{...}{Further arguments passed to ampl}
+}
+\value{
+A model object where the [par] is fitted on [data]. [convergence] indicates the fitting convergence
+status and [value] is the negative log-likelihood value of the fitted model on [data].
 }
 \description{
 Fit a Hawkes process or HawkesN process model on one or many event cascades
 and learn model parameters.
+}
+\examples{
+data <- generate_hawkes_event_series(model_type = 'EXP',
+                                     par = c(K = 0.9, theta = 1),
+                                     sim_no = 10, Tmax = Inf)
+fitted <- fit_series(data, 'EXP', observation_time = Inf)
+fitted$par # fitted parameters
+fitted$convergence # convergence status
+fitted$value # negative log-likelihood value
 }

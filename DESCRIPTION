@@ -19,4 +19,5 @@ Suggests:
     jsonlite,
     rmarkdown,
     knitr,
-    ggplot2
+    ggplot2,
+    tsne

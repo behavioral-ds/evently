@@ -7,11 +7,23 @@
 plot_event_series(model, cascade_index = 1)
 }
 \arguments{
-\item{model}{a model object where data, model_type and par are required}
+\item{model}{A model object where data, model_type and par are required}
 
-\item{cascade_index}{determine which cascade in the list of cascades to plot
+\item{cascade_index}{Determine which cascade in the list of cascades to plot
 default to the first cascade}
+}
+\value{
+A ggplot object
 }
 \description{
 Plot a Hawkes process and its intensity function
+}
+\examples{
+par <- c(K = 0.95, theta = 1)
+data <- generate_hawkes_event_series(model_type = 'EXP',
+                                     par = par,
+                                     sim_no = 1, Tmax = Inf)
+plot_event_series(new_hawkes(model_type = 'EXP',
+                             par = par,
+                             data = data))
 }

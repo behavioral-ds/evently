@@ -2,12 +2,15 @@
 #' it is the equivalent of the Richter-Gutenberg distribution in the Helmstetter model
 #' the powerlaw distribution was determined from the twitter data, from the #retweets
 #' alpha = 2.016, xmin = 1. Draw n values
-#' @param n the number of samples to be generated
-#' @param alpha powerlaw distribution parameters
-#' @param mmin powerlaw distribution parameters
+#' @param n The number of samples to be generated
+#' @param alpha Powerlaw distribution parameters
+#' @param mmin Powerlaw distribution parameters
 #' @import poweRlaw
+#' @return A single number, a random user magnitude
 #' @export
-generate_user_influence <- function(n, alpha = 2.016, mmin = 1) {
+#' @examples
+#' generate_user_magnitude(n = 1)
+generate_user_magnitude <- function(n, alpha = 2.016, mmin = 1) {
   if ( is.null(.globals$user_infl) ) {
     .globals$user_infl <- conpl$new()
   }
@@ -29,7 +32,7 @@ generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tma
   }
 
   if (is.null(M)) {
-    M <- generate_user_influence(1)
+    M <- generate_user_magnitude(1)
   }
 
   # initial event, M and time 0
@@ -39,7 +42,7 @@ generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tma
   if (!is.null(history_init)) {
     history <- history_init[, c("magnitude", "time")]
   }
-  t <- tail(history$time, n = 1)
+  t <- utils::tail(history$time, n = 1)
   model <- new_hawkes(model_type = model_type, par = par)
   while(t <= Tmax){
     # generate the time of the next event, based on the previous events
@@ -62,7 +65,7 @@ generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tma
     if (s <= thr) {
       ## if here, it means we accept the event
       # generate the influence of the next event, by sampling the powerlaw distribution of the #retweets
-      mag <- ifelse(marked, generate_user_influence(n = 1), 1)
+      mag <- ifelse(marked, generate_user_magnitude(n = 1), 1)
 
       # add the next event to the history
       event <- matrix( c(mag, t), nrow=1, byrow = T)
@@ -87,7 +90,7 @@ generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tma
 
 get_new_magnitude <- function(model_type = NULL) {
   if (!is.null(model_type) && substr(model_type, 1, 1) == 'm') {
-    return(generate_user_influence(1))
+    return(generate_user_magnitude(1))
   } else {
     return(1)
   }
@@ -100,7 +103,7 @@ generate_immigrant_event_series.CONST <- function(par, model_type, Tmax) {
 
   repeat {
     new_event <- data.frame(magnitude = get_new_magnitude(model_type$hawkes_decay_type),
-                            time = tail(immigrants$time, n = 1) + rexp(1, rate = par[['lambda']]))
+                            time = utils::tail(immigrants$time, n = 1) + stats::rexp(1, rate = par[['lambda']]))
     if (new_event$time > Tmax) break()
     immigrants <- rbind(immigrants, new_event)
   }
@@ -116,17 +119,22 @@ generate_immigrant_event_series <- function(par, model_type, Tmax) {
 #' Main function to generate a Hawkes process sequence. It allows intermediary
 #' saves and continuing a stopped simulation. Creates a CSV file with two
 #' columns, each row is an event: (magnitude, time)
-#' @param model a model class object with par and model_type presented. par and
+#' @param model A model class object with par and model_type presented. par and
 #' model_type are not requird once this is given
-#' @param par a named vector of model parameters, K, alpha, beta, mmin, c, theta - parameters of the Hawkes kernel
-#' @param model_type model type
-#' @param sim_no the number of simulated cascades
-#' @param cores the number of cores (processes) used for simulation
-#' @param Tmax maximum time of simulation.
-#' @param maxEvents maximum number of events to be simulated.
-#' @param M magnitude of the initial event
-#' @param tol simulation stops when intensity smaller than tol.
+#' @param par A named vector of model parameters, K, alpha, beta, mmin, c, theta - parameters of the Hawkes kernel
+#' @param model_type Model type
+#' @param sim_no The number of simulated cascades
+#' @param cores The number of cores (processes) used for simulation
+#' @param Tmax Maximum time of simulation.
+#' @param maxEvents Maximum number of events to be simulated.
+#' @param M Magnitude of the initial event
+#' @param tol Simulation stops when intensity smaller than tol.
+#' @return A list of data.frames where each data.frame is a simualted event cascade with the given model
 #' @export
+#' @examples
+#' generate_hawkes_event_series(model_type = 'EXP',
+#'                              par = c(K = 0.9, theta = 1),
+#'                              sim_no = 10, Tmax = Inf)
 generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5) {
   # stopifnot(is.null(history_init) || is.data.frame(history_init))
   if (!missing(model) && (!missing(par) || !missing(model_type))) {

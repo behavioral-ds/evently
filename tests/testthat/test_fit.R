@@ -5,6 +5,11 @@ test_that('fit on a dataframe is allowed', {
   expect_equal(fit_series(cascade, model_type = 'EXP')$convergence, 0)
 })
 
+test_that('data without magnitudes is allowed', {
+  cascade <- data.frame(time = seq(10))
+  expect_equal(fit_series(cascade, model_type = 'EXP')$convergence, 0)
+})
+
 test_that('Debug is possible', {
   cascade <- data.frame(time = seq(0, 10), magnitude = seq(11))
   expect_error(fit_series(list(cascade), model_type = 'EXP', observation_time = Inf, debug = T), regexp = 'Debugging is on!')

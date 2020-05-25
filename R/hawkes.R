@@ -1,21 +1,27 @@
 # this script implements default methods for the hawkes class
 
-#' Create a new hawkes model with parameters available
+#' Create a new hawkes model with given arguments
 #' @param model_type A string indicates the model tyep, e.g. EXP for a Hawkes process
 #' with an exponential kernel
 #' @param par A named vector denotes the model parameters where the names are model
 #' parameters and the values are the corresponding parameter values
-#' @param data a list of data.frame(s) where each data.frame is an event cascade with event
+#' @param data A list of data.frame(s) where each data.frame is an event cascade with event
 #' tims and event magnitudes (optional)
-#' @param observation_time the event cascades observation time. It is assumed that all cascades in data
+#' @param observation_time The event cascades observation time. It is assumed that all cascades in data
 #' are observed until a common time.
 #' @param init_par Initial parameter values used in fitting
-#' @param lower_bound model parameter lower bounds. A named vector where names are model parameters and
+#' @param lower_bound Model parameter lower bounds. A named vector where names are model parameters and
 #' values are the lowest possible values.
-#' @param upper_bound model parameter upper bounds. A named vector where names are model parameters and
+#' @param upper_bound Model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
-#' @param model_vars a named list of extra variables provided to hawkes objects
+#' @param model_vars A named list of extra variables provided to hawkes objects
+#' @return A model object with class [hawkes] and [hawkes_`model_type`] where `model_type` is replaced
+#' by the given model_type
 #' @export
+#' @examples
+#' data <- list(data.frame(time = c(0, 0.5, 1)))
+#' new_hawkes(model_type = 'EXP', par = c(K = 0.9, theta = 1),
+#'            data = data, observation_time = Inf)
 new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
                        observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
                        model_vars = NULL) {
@@ -28,7 +34,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   }
   param_names <- get_param_names(model)
 
-  if (!is.null(data)) model$data <- preparation(data)
+  if (!is.null(data)) model$data <- convert_data_format(data)
 
   # check if provided parameters are of the same length as required
   if (!is.null(par)) {
@@ -59,7 +65,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   if (!is.null(lower_bound)) {
     if (length(lower_bound) <= length(final_lower_bound)) {
       final_lower_bound[names(lower_bound)] <- lower_bound
-    } else if (length(lower_bound) > length(final_lower_bound)) {
+    } else {
       stop('Wrong lower bound provided!')
     }
   }
@@ -67,7 +73,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   if (!is.null(upper_bound)) {
     if (length(upper_bound) <= length(final_upper_bound)) {
       final_upper_bound[names(upper_bound)] <- upper_bound
-    } else if (length(upper_bound) > length(final_upper_bound)) {
+    } else {
       stop('Wrong upper bound provided!')
     }
   }
@@ -83,6 +89,20 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   }
 
   model
+}
+
+convert_data_format <- function(data) {
+  # put data into a list if it is a data.frame
+  if (is.data.frame(data)) {
+    data <- list(data)
+  }
+
+  # validate data format
+  if (!(is.list(data) && all(sapply(data, is.data.frame)))) {
+    stop('The provided cascade(s) is in a wrong format.')
+  }
+
+  data
 }
 
 #' @importFrom utils hasName
@@ -211,6 +231,9 @@ preprocess_data <- function(data, observation_time) {
 
   data <- lapply(seq_along(data), function(i) {
     hist <- data[[i]]
+    if (!'magnitude' %in% names(hist)) {
+      hist <- cbind(hist, data.frame(magnitude = rep(1, nrow(hist))))
+    }
     if (observation_time[i] < hist$time[nrow(hist)]) {
       warning('The provided observation time is smaller than the last observed event! Attempt to slice the data.')
       hist <- hist[hist$time < observation_time[i], ]
