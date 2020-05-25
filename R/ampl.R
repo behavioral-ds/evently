@@ -26,7 +26,7 @@ setup_ampl <- function(ampl_path) {
   ipopt_download_url <- switch (machine_ident,
     'Linuxx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-linux64.zip',
     'Darwinx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-osx.zip',
-    stop('Failed to guess infer the operating system you are using. Autodownload failed.')
+    stop('Failed to guess the operating system you are using. Autodownload failed.')
   )
   download.file(ipopt_download_url, destfile = '/tmp/ipopt.zip')
   unzip(zipfile = '/tmp/ipopt.zip', exdir = ampl_final_path)

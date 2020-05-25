@@ -152,7 +152,7 @@ model_selection <- function(models, cores, ...) {
 
 preparation <- function(data) {
   # check if ampl is available
-  if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '') {
+  if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '' && grepl(':;', .globals$execution)) {
     stop('Please set up ampl and ipopt before fitting!')
   }
 
