@@ -28,6 +28,7 @@
 #' status and [value] is the negative log-likelihood value of the fitted model on [data].
 #' @export
 #' @examples
+#' \dontrun{
 #' data <- generate_hawkes_event_series(model_type = 'EXP',
 #'                                      par = c(K = 0.9, theta = 1),
 #'                                      sim_no = 10, Tmax = Inf)
@@ -35,6 +36,7 @@
 #' fitted$par # fitted parameters
 #' fitted$convergence # convergence status
 #' fitted$value # negative log-likelihood value
+#' }
 fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, observation_time = NULL,
                        lower_bound = NULL, upper_bound = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
   data <- preparation(data)
@@ -111,6 +113,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #' @return A single number, the negative log-likelihood of the given model on data
 #' @export
 #' @examples
+#' \dontrun{
 #' data <- generate_hawkes_event_series(model_type = 'EXP',
 #'                                      par = c(K = 0.9, theta = 1),
 #'                                      sim_no = 10, Tmax = Inf)
@@ -119,6 +122,7 @@ fit_series <- function(data, model_type, cores = 1, init_pars, .init_no = NULL, 
 #'                                           par = c(K = 0.9, theta = 1),
 #'                                           sim_no = 10, Tmax = Inf)
 #' get_hawkes_neg_likelihood_value(fitted, data = data_test)
+#' }
 get_hawkes_neg_likelihood_value <- function(model, ..., par, data, model_type, observation_time) {
   # par and data are required for computing log-likelihood values
   if (!missing(model) && missing(model_type)) {
@@ -152,7 +156,7 @@ model_selection <- function(models, cores, ...) {
 
 preparation <- function(data) {
   # check if ampl is available
-  if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '' && grepl(':;', .globals$execution)) {
+  if (any(Sys.which(c('ampl', 'ipopt')) == '') && Sys.getenv('AMPL_PATH') == '') {
     stop('Please set up ampl and ipopt before fitting!')
   }
 
