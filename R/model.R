@@ -72,6 +72,10 @@ get_model_intensity_at.default <- function(model, t, cascade_index = 1) {
   stop('Unknown model type!')
 }
 
+fit_series_by_model.default <- function(model, cores, init_pars, parallel_type, .init_no, ...) {
+  stop('Unknown model type!')
+}
+
 # function dispatchers
 generate_random_points <- function(obj) {
   UseMethod('generate_random_points', obj)
@@ -155,6 +159,10 @@ get_ampl_model_output <- function(obj) {
   UseMethod('get_ampl_model_output')
 }
 
-get_ampl_execution_options <- function(obj) {
+get_ampl_execution_options <- function(model) {
   UseMethod('get_ampl_execution_options')
+}
+
+fit_series_by_model <- function(model, cores, init_pars, parallel_type, .init_no, ...) {
+  UseMethod('fit_series_by_model')
 }

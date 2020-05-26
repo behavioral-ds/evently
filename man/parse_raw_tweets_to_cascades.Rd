@@ -3,7 +3,8 @@
 \name{parse_raw_tweets_to_cascades}
 \alias{parse_raw_tweets_to_cascades}
 \title{This function extracts cascades from a given jsonl file where each line is a tweet
-json object. Please refer to the Twitter developer documentation: https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object}
+json object. Please refer to the Twitter developer documentation:
+https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object}
 \usage{
 parse_raw_tweets_to_cascades(path, keep_user = F)
 }
@@ -17,5 +18,6 @@ A list of data.frames where each data.frame is a retweet cascade
 }
 \description{
 This function extracts cascades from a given jsonl file where each line is a tweet
-json object. Please refer to the Twitter developer documentation: https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
+json object. Please refer to the Twitter developer documentation:
+https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
 }

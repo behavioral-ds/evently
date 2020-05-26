@@ -9,7 +9,7 @@ fit_series(
   data,
   model_type,
   cores = 1,
-  init_pars,
+  init_pars = NULL,
   .init_no = NULL,
   observation_time = NULL,
   lower_bound = NULL,
@@ -60,6 +60,7 @@ Fit a Hawkes process or HawkesN process model on one or many event cascades
 and learn model parameters.
 }
 \examples{
+\dontrun{
 data <- generate_hawkes_event_series(model_type = 'EXP',
                                      par = c(K = 0.9, theta = 1),
                                      sim_no = 10, Tmax = Inf)
@@ -67,4 +68,5 @@ fitted <- fit_series(data, 'EXP', observation_time = Inf)
 fitted$par # fitted parameters
 fitted$convergence # convergence status
 fitted$value # negative log-likelihood value
+}
 }

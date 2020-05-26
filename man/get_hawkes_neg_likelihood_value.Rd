@@ -36,6 +36,7 @@ Compute the negative log-likelihood values of a given model on a list of given
 event cascades.
 }
 \examples{
+\dontrun{
 data <- generate_hawkes_event_series(model_type = 'EXP',
                                      par = c(K = 0.9, theta = 1),
                                      sim_no = 10, Tmax = Inf)
@@ -44,4 +45,5 @@ data_test <- generate_hawkes_event_series(model_type = 'EXP',
                                           par = c(K = 0.9, theta = 1),
                                           sim_no = 10, Tmax = Inf)
 get_hawkes_neg_likelihood_value(fitted, data = data_test)
+}
 }

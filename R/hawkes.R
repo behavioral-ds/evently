@@ -337,3 +337,62 @@ get_ampl_model_output.hawkes <- function(model) {
   ## finally peace it all together
   c(output.PARAM, output.VAR, output.OJ, output.contraints, output.BOX)
 }
+
+fit_series_by_model.hawkes <- function(model, cores, init_pars, parallel_type, .init_no, ...) {
+  ampl_dat_file <- output_dat(model) # output ampl data file for being reused by fits with different initializations
+
+  if (!is.null(init_pars)) {
+    ## use the provided init_pars
+    if (all(get_param_names(model) %in% names(init_pars))) {
+      points <- init_pars[names(init_pars) %in% get_param_names(model)]
+    } else {
+      stop('The provided initial parameters have a wrong parameter set!')
+    }
+  } else {
+    ## get the initial points
+    points <- generate_random_points(model)
+  }
+  models_with_initial_point <- lapply(seq(nrow(points)), function(i) {
+    model$init_par <- unlist(points[i, , drop = F])
+    model
+  })
+
+  ## if no .init_no, then do all and model selection at the end
+  if (is.null(.init_no)) .init_no <- seq(models_with_initial_point)
+
+  ## if we are asked for an init larger than our initial parameters, report errors
+  if (sum(.init_no > nrow(models_with_initial_point)) > 0) stop('init_no is too large')
+
+  inner_apply_func <- function(model, ...){
+    # to make sure exact init_par is saved, mainly for lgo fitting
+    saved_init_par <- model$init_par
+    if (is.na(model$init_par[[1]])) {
+      lgo_model <- ampl_run(model = model, solver = "lgo", dat_file = ampl_dat_file, ...)
+      model[['init_par']] <- unlist(lgo_model$par)
+    }
+    model <- ampl_run(model = model, solver = "ipopt", dat_file = ampl_dat_file, ...)
+    # to emphasize the init_par is found by lgo
+    model$init_par <- saved_init_par
+
+    return(model)
+  }
+
+  ## start fitting
+  if (cores == 1 || length(models_with_initial_point) == 1) {
+    fitted_models <- lapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, ...)
+  } else {
+    fitted_models <- switch (parallel_type,
+                             PSOCK = {
+                               cl <- makePSOCKcluster(cores)
+                               res <- parLapply(cl = cl, X = models_with_initial_point[.init_no], fun = inner_apply_func,
+                                                ampl_execution = .globals$execution, ...)
+                               stopCluster(cl)
+                               res
+                             },
+                             FORK = mclapply(X = models_with_initial_point[.init_no], FUN = inner_apply_func, ..., mc.cores = cores, mc.silent = F),
+                             stop('Unknown parallel type.')
+    )
+  }
+
+  model_selection(models = fitted_models, cores = cores, dat_file = ampl_dat_file)
+}

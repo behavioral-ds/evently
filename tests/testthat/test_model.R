@@ -58,3 +58,14 @@ test_that('fianl popularities are correctly computed', {
   model <- new_hawkes(model_type = 'EXPN', par = c(K=0.8, theta = 1, N = 100), data = data, observation_time = 10)
   expect_error(predict_final_popularity(model))
 })
+
+test_that('SEISMIC prediction works', {
+  library(seismic)
+  data(tweet)
+  pred.time <- 1000
+  infectiousness <- get.infectiousness(tweet[, 1], tweet[, 2], pred.time)
+  pred <- pred.cascade(pred.time, infectiousness$infectiousness, tweet[, 1], tweet[, 2], n.star = 100)[1,1] + 1
+  names(tweet) <- c('time', 'magnitude')
+  fitted <- fit_series(data = tweet, model_type = 'SEISMIC', observation_time = pred.time)
+  expect_lt(abs(pred - predict_final_popularity(fitted)), 1e-7)
+})
