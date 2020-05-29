@@ -61,7 +61,7 @@ and learn model parameters.
 }
 \examples{
 \dontrun{
-data <- generate_hawkes_event_series(model_type = 'EXP',
+data <- generate_series(model_type = 'EXP',
                                      par = c(K = 0.9, theta = 1),
                                      sim_no = 10, Tmax = Inf)
 fitted <- fit_series(data, 'EXP', observation_time = Inf)

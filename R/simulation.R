@@ -23,7 +23,7 @@ generate_user_magnitude <- function(n, alpha = 2.016, mmin = 1) {
 ##################################### SIMULATION OF THE HAWKES PROCESS ##############################################
 
 # Generate Hawkes porcess events without the background rate
-generate_hawkes_event_series_no_background_rate <- function(par, model_type, Tmax = Inf, maxEvents = NULL, M = NULL, history_init = NULL, tol = 1e-5) {
+generate_series_no_background_rate <- function(par, model_type, Tmax = Inf, maxEvents = NULL, M = NULL, history_init = NULL, tol = 1e-5) {
   # determine if this is a marked model or not
   marked <- T
   if (substr(model_type, 1, 1) != 'm') {
@@ -132,10 +132,10 @@ generate_immigrant_event_series <- function(par, model_type, Tmax) {
 #' @return A list of data.frames where each data.frame is a simualted event cascade with the given model
 #' @export
 #' @examples
-#' generate_hawkes_event_series(model_type = 'EXP',
+#' generate_series(model_type = 'EXP',
 #'                              par = c(K = 0.9, theta = 1),
 #'                              sim_no = 10, Tmax = Inf)
-generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5) {
+generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5) {
   # stopifnot(is.null(history_init) || is.data.frame(history_init))
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
     stop('Please either provide a model or (par, model_type) instead of both.')
@@ -154,7 +154,7 @@ generate_hawkes_event_series <- function(model, par, model_type, sim_no = 1, cor
     }
     if (!is.null(model_type$hawkes_decay_type)) {
       cascades <- lapply(seq(nrow(immigrant_events)), function(i) {
-        generate_hawkes_event_series_no_background_rate(par[get_param_names(new_hawkes(model_type = model_type$hawkes_decay_type))],
+        generate_series_no_background_rate(par[get_param_names(new_hawkes(model_type = model_type$hawkes_decay_type))],
                                                         model_type$hawkes_decay_type, Tmax = Tmax,
                                                         maxEvents = maxEvents, M = M,
                                                         history_init = immigrant_events[i, ], tol = tol)

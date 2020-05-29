@@ -9,6 +9,9 @@ fits_dist_matrix(group_fits)
 \arguments{
 \item{group_fits}{A list of grouped fits returned by {group_fit_series}}
 }
+\value{
+A dist matrix of pairwise distances between each group-fit
+}
 \description{
 Given a list of grouped fits, compute a distance matrix
 }

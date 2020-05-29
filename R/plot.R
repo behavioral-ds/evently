@@ -8,7 +8,7 @@
 #' @export
 #' @examples
 #' par <- c(K = 0.95, theta = 1)
-#' data <- generate_hawkes_event_series(model_type = 'EXP',
+#' data <- generate_series(model_type = 'EXP',
 #'                                      par = par,
 #'                                      sim_no = 1, Tmax = Inf)
 #' plot_event_series(new_hawkes(model_type = 'EXP',

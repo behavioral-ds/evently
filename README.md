@@ -44,11 +44,11 @@ where each cascade is a `data.frame`.
 ``` r
 set.seed(4)
 sim_no <- 100
-data <- generate_hawkes_event_series(par = c(K = 0.9, theta = 1), model_type = 'EXP', Tmax = 5, sim_no = sim_no)
-# alternatively, `generate_hawkes_event_series` also accepts a model class object
+data <- generate_series(par = c(K = 0.9, theta = 1), model_type = 'EXP', Tmax = 5, sim_no = sim_no)
+# alternatively, `generate_series` also accepts a model class object
 # e.g.
 # model <- new_hawkes(par = c(K = 0.9, theta = 1), model_type = 'EXP')
-# generate_hawkes_event_series(model = model, Tmax = 5, sim_no = sim_no)
+# generate_series(model = model, Tmax = 5, sim_no = sim_no)
 
 head(data[[1]])
 ```

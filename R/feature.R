@@ -23,12 +23,10 @@ group_fit_series <- function(data, model_type, observation_times = NULL, cores =
                                                            cores = 1, ...), mc.cores = cores)
   # data is named then start grouping cascades
   if (!is.null(names(data))) {
-    fits <- lapply(unique(names(data)), function(n) {
-      fits_group <- fits[names(data) == n]
-      class(fits_group) <- 'hawkes.group.fits'
-      fits_group
-    })
-    names(fits) <- unique(names(data))
+    fits <- split(fits, f = names(data))
+    for (i in seq_along(fits)) {
+      class(fits[[i]]) <- 'hawkes.group.fits'
+    }
   } else {
     class(fits) <- 'hawkes.group.fits'
   }
@@ -36,10 +34,53 @@ group_fit_series <- function(data, model_type, observation_times = NULL, cores =
   fits
 }
 
-generate_features_from_list_fits <- function(list_fits) {
+#' Given a list of group-fits produced by 'group_fit_series', this function generates features
+#' for each group-fit by summarizing the fitted parameters.
+#' @param list_fits A list of group fits returned by {group_fit_series}
+#' @return A data frame of features for each group. If features are all -1, it means all the
+#' fits of the group are NAs
+#' @export
+generate_features <- function(list_fits) {
   # determine if list_fits is a list of hawkes.group.fits
   stopifnot(is.list(list_fits) && all(sapply(list_fits, function(fits) 'hawkes.group.fits' %in% class(fits))))
-  stop('Not implemented')
+  conver_to_feature <- function(values, param) {
+    summarized <- as.list(summary(values))
+    names(summarized) <- paste(param, names(summarized))
+    summarized
+  }
+
+  params <- get_param_names(list_fits[[1]][[1]])
+
+  # # v1 simple summary
+  # res <- lapply(list_fits, function(fits) {
+  #   do.call(c, lapply(params, function(param) {
+  #     param_values <- sapply(fits, function(single_fit) single_fit$par[[param]])
+  #     param_values <- param_values[!is.na(param_values)]
+  #     if (length(param_values) == 0) param_values <- -1 # assign -1 to all NAs
+  #     conver_to_feature(param_values, param)
+  #   }))
+  # })
+  # v2 discretization
+  params_quantiles <- lapply(params, function(param) {
+    all_param <- unlist(lapply(list_fits, function(fits) {
+      sapply(fits, function(single_fit) single_fit$par[[param]])
+    }))
+    unique(quantile(all_param, seq(0, 1, by = 0.05), na.rm = T, names = F))
+  })
+  names(params_quantiles) <- params
+  res <- lapply(list_fits, function(fits) {
+    do.call(c, lapply(params, function(param) {
+      param_values <- sapply(fits, function(single_fit) single_fit$par[[param]])
+      param_values <- as.numeric(param_values[!is.na(param_values)])
+      quantile_counts <- as.list(table(cut(param_values, breaks = params_quantiles[[param]], include.lowest = T)))
+      names(quantile_counts) <- paste(param, seq(length(quantile_counts)))
+      quantile_counts
+    }))
+  })
+  res_df <- do.call(rbind.data.frame, res)
+  res_df <- cbind(data.frame(id = rownames(res_df)), res_df)
+  rownames(res_df) <- NULL
+  res_df
 }
 
 # Compute order 1 wassersterin distance between the empirical distributions of v1 and v2
@@ -65,6 +106,7 @@ compute_fits_distance <- function(fits1, fits2) {
 
 #' Given a list of grouped fits, compute a distance matrix
 #' @param group_fits A list of grouped fits returned by {group_fit_series}
+#' @return A dist matrix of pairwise distances between each group-fit
 #' @export
 fits_dist_matrix <- function(group_fits) {
   group_no <- length(group_fits)

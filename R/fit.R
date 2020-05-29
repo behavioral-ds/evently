@@ -29,7 +29,7 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' data <- generate_hawkes_event_series(model_type = 'EXP',
+#' data <- generate_series(model_type = 'EXP',
 #'                                      par = c(K = 0.9, theta = 1),
 #'                                      sim_no = 10, Tmax = Inf)
 #' fitted <- fit_series(data, 'EXP', observation_time = Inf)
@@ -60,11 +60,11 @@ fit_series <- function(data, model_type, cores = 1, init_pars = NULL, .init_no =
 #' @export
 #' @examples
 #' \dontrun{
-#' data <- generate_hawkes_event_series(model_type = 'EXP',
+#' data <- generate_series(model_type = 'EXP',
 #'                                      par = c(K = 0.9, theta = 1),
 #'                                      sim_no = 10, Tmax = Inf)
 #' fitted <- fit_series(data, 'EXP', observation_time = Inf)
-#' data_test <- generate_hawkes_event_series(model_type = 'EXP',
+#' data_test <- generate_series(model_type = 'EXP',
 #'                                           par = c(K = 0.9, theta = 1),
 #'                                           sim_no = 10, Tmax = Inf)
 #' get_hawkes_neg_likelihood_value(fitted, data = data_test)
