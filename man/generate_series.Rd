@@ -15,7 +15,8 @@ generate_series(
   Tmax = Inf,
   maxEvents = NULL,
   M = NULL,
-  tol = 1e-05
+  tol = 1e-05,
+  return_as_object = F
 )
 }
 \arguments{
@@ -37,9 +38,13 @@ model_type are not requird once this is given}
 \item{M}{Magnitude of the initial event}
 
 \item{tol}{Simulation stops when intensity smaller than tol.}
+
+\item{return_as_object}{wether return the cascades within a model object}
 }
 \value{
-A list of data.frames where each data.frame is a simualted event cascade with the given model
+A list of data.frames where each data.frame is a simualted event
+cascade with the given model by default. Or a model object with the data.frames
+if return_as_object is True
 }
 \description{
 Main function to generate a Hawkes process sequence. It allows intermediary

@@ -6,9 +6,10 @@
 #' https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
 #' @param path File path to the tweets jsonl file
 #' @param keep_user Twitter user ids will be kept
+#' @param keep_absolute_time Keep the absolute tweeting times
 #' @return A list of data.frames where each data.frame is a retweet cascade
 #' @export
-parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
+parse_raw_tweets_to_cascades <- function(path, keep_user = F, keep_absolute_time = F) {
   check_required_packages('jsonlite')
   con <- file(path, "r")
   tweets <- readLines(con, n = -1)
@@ -26,11 +27,8 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
   }
 
   # compute the time difference between two time strings from tweet objects
-  time_difference <- function(t1, t2){
-    time_format <- "%a %b %d %T %z %Y"
-    T1 <- strptime(t1, time_format, tz = 'GMT')
-    T2 <- strptime(t2, time_format, tz = 'GMT')
-    return(as.numeric(difftime(T1,T2, units = "secs")))
+  convert_time_epoch <- function(t) {
+    as.numeric(strptime(t, "%a %b %d %T %z %Y", tz = 'GMT'))
   }
 
   pb <- utils::txtProgressBar(min = 0, max = length(tweets), style = 3)
@@ -40,11 +38,11 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
     tryCatch({
       json_tweet <- jsonlite::fromJSON(tweet)
       current_id <- json_tweet$id_str
-      current_time <- json_tweet$created_at
+      current_time <- convert_time_epoch(json_tweet$created_at)
 
       if (!is.null(json_tweet[['retweeted_status']])) {
         # if this tweet is a retweet, get original tweet's information
-        original_time <- json_tweet$retweeted_status$created_at
+        original_time <- convert_time_epoch(json_tweet$retweeted_status$created_at)
         original_id <- json_tweet$retweeted_status$id_str
 
         if (is.null(cascades_time[[original_id]])) {
@@ -55,7 +53,7 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
           cascades_user[[original_id]] <- json_tweet$retweeted_status$user$id_str
           cascades_tweet_time[[original_id]] <- original_time
         }
-        cascades_time[[original_id]][length(cascades_time[[original_id]]) + 1] <- time_difference(current_time, original_time)
+        cascades_time[[original_id]][length(cascades_time[[original_id]]) + 1] <- current_time - original_time
         cascades_magnitude[[original_id]][length(cascades_magnitude[[original_id]]) + 1] <- zero_if_null(json_tweet$user$followers_count)
         cascades_user[[original_id]][length(cascades_user[[original_id]]) + 1] <- json_tweet$user$id_str
       } else {
@@ -107,10 +105,14 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F) {
   # formatted as two dataframes in case we want to output as the usual csv formats
   index <- data.frame(start_ind = res_start, end_ind = res_end, tweet_time = res_tweet_time)
   data <- data.frame(magnitude = res_mag, time = res_time)
-  if (keep_user) data <- data.frame(magnitude = res_mag, time = res_time, user = res_user, stringsAsFactors = F)
+  cascade_sizes <- index$end_ind - index$start_ind + 1
+  if (keep_user) data <- cbind(data, data.frame(user = res_user, stringsAsFactors = F))
+  if (keep_absolute_time) {
+    data <- cbind(data,
+                  data.frame(absolute_time = rep(res_tweet_time, cascade_sizes) + data$time,
+                             stringsAsFactors = F))
+  }
   # return as a list of datas
-  datas <- lapply(seq(nrow(index)), function(i) {
-    data[index$start_ind[i]:index$end_ind[i], ]
-  })
-  return(datas)
+  datas <- split(data, rep(1:nrow(index), cascade_sizes))
+  return(unname(datas))
 }

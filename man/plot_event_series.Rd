@@ -4,10 +4,12 @@
 \alias{plot_event_series}
 \title{Plot a Hawkes process and its intensity function}
 \usage{
-plot_event_series(model, cascade_index = 1)
+plot_event_series(model, cascade = NULL, cascade_index = 1)
 }
 \arguments{
 \item{model}{A model object where data, model_type and par are required}
+
+\item{cascade}{This cascade data.frame will be used if provided}
 
 \item{cascade_index}{Determine which cascade in the list of cascades to plot
 default to the first cascade}

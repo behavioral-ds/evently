@@ -6,12 +6,14 @@
 json object. Please refer to the Twitter developer documentation:
 https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object}
 \usage{
-parse_raw_tweets_to_cascades(path, keep_user = F)
+parse_raw_tweets_to_cascades(path, keep_user = F, keep_absolute_time = F)
 }
 \arguments{
 \item{path}{File path to the tweets jsonl file}
 
 \item{keep_user}{Twitter user ids will be kept}
+
+\item{keep_absolute_time}{Keep the absolute tweeting times}
 }
 \value{
 A list of data.frames where each data.frame is a retweet cascade

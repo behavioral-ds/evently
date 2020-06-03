@@ -129,13 +129,16 @@ generate_immigrant_event_series <- function(par, model_type, Tmax) {
 #' @param maxEvents Maximum number of events to be simulated.
 #' @param M Magnitude of the initial event
 #' @param tol Simulation stops when intensity smaller than tol.
-#' @return A list of data.frames where each data.frame is a simualted event cascade with the given model
+#' @param return_as_object wether return the cascades within a model object
+#' @return A list of data.frames where each data.frame is a simualted event
+#' cascade with the given model by default. Or a model object with the data.frames
+#' if return_as_object is True
 #' @export
 #' @examples
 #' generate_series(model_type = 'EXP',
 #'                              par = c(K = 0.9, theta = 1),
 #'                              sim_no = 10, Tmax = Inf)
-generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5) {
+generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5, return_as_object = F) {
   # stopifnot(is.null(history_init) || is.data.frame(history_init))
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
     stop('Please either provide a model or (par, model_type) instead of both.')
@@ -167,5 +170,9 @@ generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax 
     cascade
   }, mc.cores = cores)
 
-  data
+  if (!return_as_object) {
+    data
+  } else {
+    new_hawkes(model_type = model_type, par = par, data = data, observation_time = Tmax)
+  }
 }
