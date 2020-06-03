@@ -34,13 +34,30 @@ group_fit_series <- function(data, model_type, observation_times = NULL, cores =
   fits
 }
 
+construct_temporal_features <- function(cascades) {
+  sizes <- sapply(cascades, nrow)
+  times <- sapply(cascades, function(.x) .x$time[nrow(.x)])
+  intervals <- unlist(lapply(cascades, function(.x) diff(.x$time)))
+  if (length(intervals) == 0) intervals <- -1
+
+  magnitudes <- unlist(lapply(cascades, function(.x) .x$magnitude))
+  rename <- function(x, name) {
+    names(x) <- paste(name, names(x))
+    x
+  }
+  c(rename(summary(sizes), 'size'), rename(summary(times), 'final event time'),
+    rename(summary(intervals), 'event time interval'), rename(summary(magnitudes), 'user magnitude'),
+    c(`number of cascades` = length(cascades)))
+}
+
 #' Given a list of group-fits produced by 'group_fit_series', this function generates features
 #' for each group-fit by summarizing the fitted parameters.
 #' @param list_fits A list of group fits returned by {group_fit_series}
+#' @param data A named list of cascades
 #' @return A data frame of features for each group. If features are all -1, it means all the
 #' fits of the group are NAs
 #' @export
-generate_features <- function(list_fits) {
+generate_features <- function(list_fits, data = NULL) {
   # determine if list_fits is a list of hawkes.group.fits
   stopifnot(is.list(list_fits) && all(sapply(list_fits, function(fits) 'hawkes.group.fits' %in% class(fits))))
   conver_to_feature <- function(values, param) {
@@ -79,6 +96,14 @@ generate_features <- function(list_fits) {
   })
   res_df <- do.call(rbind.data.frame, res)
   res_df <- cbind(data.frame(id = rownames(res_df)), res_df)
+
+
+  if (!is.null(data)) {
+    data_features <- do.call(rbind.data.frame,
+                             lapply(split(unname(data), names(data)),
+                                 function(.x) as.list(construct_temporal_features(.x))))
+    res_df <- cbind(res_df, data_features)
+  }
   rownames(res_df) <- NULL
   res_df
 }

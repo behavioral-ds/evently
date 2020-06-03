@@ -5,10 +5,12 @@
 \title{Given a list of group-fits produced by 'group_fit_series', this function generates features
 for each group-fit by summarizing the fitted parameters.}
 \usage{
-generate_features(list_fits)
+generate_features(list_fits, data = NULL)
 }
 \arguments{
 \item{list_fits}{A list of group fits returned by {group_fit_series}}
+
+\item{data}{A named list of cascades}
 }
 \value{
 A data frame of features for each group. If features are all -1, it means all the
