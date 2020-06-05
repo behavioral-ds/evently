@@ -38,8 +38,7 @@ plot_event_series <- function(model, cascade = NULL, cascade_index = 1) {
                           ggplot2::aes(x = .data$time,
                                        y = .data$magnitude / max(.data$magnitude) * max_intensity/2 + max_intensity,
                                        xend = .data$time, yend = 0)) +
-    ggplot2::xlab('time') + ggplot2::ylab('intensity') +
-    ggplot2::theme_bw()
+    ggplot2::xlab('time') + ggplot2::ylab('intensity')
 }
 
 #' Plot the kernel functions of Hawkes processes
@@ -64,5 +63,5 @@ plot_kernel_function <- function(fitted_models) {
   for (f_i in seq_along(kernel_functions)) {
     g <- g + stat_function(fun = kernel_functions[[f_i]], aes(color = !!as.character(f_i)))
   }
-  g + xlab('relative time') + ylab('kernel function value') + labs(color='model') + theme_bw()
+  g + xlab('relative time') + ylab('kernel function value') + labs(color='model')
 }

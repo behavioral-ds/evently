@@ -130,6 +130,8 @@ generate_immigrant_event_series <- function(par, model_type, Tmax) {
 #' @param M Magnitude of the initial event
 #' @param tol Simulation stops when intensity smaller than tol.
 #' @param return_as_object wether return the cascades within a model object
+#' @param init_history If given, the simulation will start after the last
+#' event in the given init_history
 #' @return A list of data.frames where each data.frame is a simualted event
 #' cascade with the given model by default. Or a model object with the data.frames
 #' if return_as_object is True
@@ -138,7 +140,9 @@ generate_immigrant_event_series <- function(par, model_type, Tmax) {
 #' generate_series(model_type = 'EXP',
 #'                              par = c(K = 0.9, theta = 1),
 #'                              sim_no = 10, Tmax = Inf)
-generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf, maxEvents = NULL, M = NULL, tol = 1e-5, return_as_object = F) {
+generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax = Inf,
+                            maxEvents = NULL, M = NULL, tol = 1e-5, return_as_object = F,
+                            init_history = NULL) {
   # stopifnot(is.null(history_init) || is.data.frame(history_init))
   if (!missing(model) && (!missing(par) || !missing(model_type))) {
     stop('Please either provide a model or (par, model_type) instead of both.')
@@ -153,9 +157,10 @@ generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax 
     immigrant_events <- data.frame(magnitude = ifelse(is.null(M), get_new_magnitude(model_type$hawkes_decay_type), M),
                                    time = 0)
     if (!is.null(model_type$hawkes_immigrant_type)) {
+      if (!is.null(init_history)) stop('Cannot simulate Hawkes processes with both background rate and given history')
       immigrant_events <- generate_immigrant_event_series(par, model_type, Tmax)
     }
-    if (!is.null(model_type$hawkes_decay_type)) {
+    if (!is.null(model_type$hawkes_decay_type) && is.null(init_history)) {
       cascades <- lapply(seq(nrow(immigrant_events)), function(i) {
         generate_series_no_background_rate(par[get_param_names(new_hawkes(model_type = model_type$hawkes_decay_type))],
                                                         model_type$hawkes_decay_type, Tmax = Tmax,
@@ -164,6 +169,11 @@ generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax 
       })
       cascade <- do.call(rbind, cascades)
       if (nrow(immigrant_events) > 1) cascade[order(cascade$time), ]
+    } else if (!is.null(model_type$hawkes_decay_type) && !is.null(init_history)) {
+      cascade <- generate_series_no_background_rate(par[get_param_names(new_hawkes(model_type = model_type$hawkes_decay_type))],
+                                                    model_type$hawkes_decay_type, Tmax = Tmax,
+                                                    maxEvents = maxEvents, M = M,
+                                                    history_init = init_history, tol = tol)
     } else {
       cascade <- immigrant_events
     }

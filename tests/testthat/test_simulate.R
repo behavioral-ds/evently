@@ -68,3 +68,9 @@ test_that('simulation with immgrants works', {
   sizes <- sapply(sims, nrow)
   expect_lt(abs(mean(sizes) - 10*par[['lambda']] - 1), 0.2) # HPP of intensity 5
 })
+
+test_that('simulate with a given history works', {
+  hist <- data.frame(magnitude = seq(3), time = seq(0, 2))
+  sim <- generate_series(par = c(K = 0.8, theta = 1), model_type = 'EXP', init_history = hist)
+  expect_true(all(sim[[1]][1:3,] == hist))
+})

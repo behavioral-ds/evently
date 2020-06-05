@@ -16,7 +16,8 @@ generate_series(
   maxEvents = NULL,
   M = NULL,
   tol = 1e-05,
-  return_as_object = F
+  return_as_object = F,
+  init_history = NULL
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ model_type are not requird once this is given}
 \item{tol}{Simulation stops when intensity smaller than tol.}
 
 \item{return_as_object}{wether return the cascades within a model object}
+
+\item{init_history}{If given, the simulation will start after the last
+event in the given init_history}
 }
 \value{
 A list of data.frames where each data.frame is a simualted event
