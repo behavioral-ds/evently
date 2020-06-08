@@ -58,12 +58,12 @@ get_a1.hawkes_mEXP <- function(model) {
 }
 
 #' @export
-predict_final_popularity.hawkes_EXP <- function(model) {
+predict_final_popularity.hawkes_EXP <- function(model, data = NULL, observation_time = NULL) {
   NextMethod()
 }
 
 #' @export
-predict_final_popularity.hawkes_mEXP <- function(model) {
+predict_final_popularity.hawkes_mEXP <- function(model, data = NULL, observation_time = NULL) {
   NextMethod()
 }
 

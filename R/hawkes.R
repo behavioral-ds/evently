@@ -165,7 +165,7 @@ print.hawkes <- function(x, ...) {
 }
 
 #' @export
-predict_final_popularity.hawkes <- function(model, data, observation_time) {
+predict_final_popularity.hawkes <- function(model, data = NULL, observation_time = NULL) {
   if (!is.null(data) && !is.null(observation_time)) {
     model$data <- if (is.data.frame(data)) list(data) else data
     model$observation_time <- observation_time

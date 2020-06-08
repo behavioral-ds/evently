@@ -9,7 +9,11 @@ get_param_names.hawkes_SEISMIC <- function(model) {
 }
 
 #' @export
-predict_final_popularity.hawkes_SEISMIC <- function(model) {
+predict_final_popularity.hawkes_SEISMIC <- function(model, data = NULL, observation_time = NULL) {
+  if (!is.null(data) && !is.null(observation_time)) {
+    model$data <- if (is.data.frame(data)) list(data) else data
+    model$observation_time <- observation_time
+  }
   check_required_packages('seismic')
   library(seismic)
   sum(sapply(seq_along(model$data), function(i) {

@@ -59,12 +59,12 @@ get_a1.hawkes_mPLN <- function(model) {
 }
 
 #' @export
-predict_final_popularity.hawkes_PLN <- function(model) {
+predict_final_popularity.hawkes_PLN <- function(model, data = NULL, observation_time = NULL) {
   stop('This method does not exist for PLN')
 }
 
 #' @export
-predict_final_popularity.hawkes_mPLN <- function(model) {
+predict_final_popularity.hawkes_mPLN <- function(model, data = NULL, observation_time = NULL) {
   stop('This method does not exist for mPLN')
 }
 

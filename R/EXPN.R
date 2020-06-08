@@ -54,12 +54,12 @@ get_a1.hawkes_mEXPN <- function(model) {
 }
 
 #' @export
-predict_final_popularity.hawkes_EXPN <- function(model) {
+predict_final_popularity.hawkes_EXPN <- function(model, data = NULL, observation_time = NULL) {
   stop('This method does not exist for EXPN')
 }
 
 #' @export
-predict_final_popularity.hawkes_mEXPN <- function(model) {
+predict_final_popularity.hawkes_mEXPN <- function(model, data = NULL, observation_time = NULL) {
   stop('This method does not exist for mEXPN')
 }
 

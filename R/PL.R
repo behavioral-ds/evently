@@ -63,12 +63,12 @@ get_a1.hawkes_mPL <- function(model) {
 }
 
 #' @export
-predict_final_popularity.hawkes_PL <- function(model) {
+predict_final_popularity.hawkes_PL <- function(model, data = NULL, observation_time = NULL) {
   NextMethod()
 }
 
 #' @export
-predict_final_popularity.hawkes_mPL <- function(model) {
+predict_final_popularity.hawkes_mPL <- function(model, data = NULL, observation_time = NULL) {
   NextMethod()
 }
 
