@@ -27,14 +27,14 @@ head(auspol, n = 3)
 ```
 
 
-```{r}
+```{r, eval=F}
 names(auspol) <- sapply(auspol, function(data) data$user[[1]])
 auspol_group_fits_by_user <- group_fit_series(data = auspol, model_type = 'mPL', observation_times = Inf, cores = 10)
 
 head(auspol_group_fits_by_user, n = 3)
 ```
 
-```{r}
+```{r, eval=F}
 # keep only users with more than 5 cascades
 auspol_group_fits_by_user <- Filter(function(x) length(x) >= 5, auspol_group_fits_by_user)
 dist_matrix <- fits_dist_matrix(auspol_group_fits_by_user)
@@ -43,7 +43,7 @@ positions <- tsne(dist_matrix, k = 2)
 ```
 
 
-```{r}
+```{r, eval=F}
 ggplot(as.data.frame(positions), aes(V1, V2)) +
   geom_point() +
   theme_void()

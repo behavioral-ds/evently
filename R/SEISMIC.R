@@ -11,6 +11,7 @@ get_param_names.hawkes_SEISMIC <- function(model) {
 #' @export
 predict_final_popularity.hawkes_SEISMIC <- function(model) {
   check_required_packages('seismic')
+  library(seismic)
   sum(sapply(seq_along(model$data), function(i) {
     cascade <- model$data[[i]]
     observation_time <- if (length(model$observation_time) == length(model$data)) model$observation_time[[i]] else model$observation_time

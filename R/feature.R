@@ -57,14 +57,14 @@ construct_temporal_features <- function(cascades) {
 #' @return A data frame of features for each group. If features are all -1, it means all the
 #' fits of the group are NAs
 #' @export
-generate_features <- function(list_fits, data = NULL) {
+generate_features <- function(list_fits, data = F) {
   # determine if list_fits is a list of hawkes.group.fits
   stopifnot(is.list(list_fits) && all(sapply(list_fits, function(fits) 'hawkes.group.fits' %in% class(fits))))
-  conver_to_feature <- function(values, param) {
-    summarized <- as.list(summary(values))
-    names(summarized) <- paste(param, names(summarized))
-    summarized
-  }
+  #conver_to_feature <- function(values, param) {
+  #  summarized <- as.list(summary(values))
+  #  names(summarized) <- paste(param, names(summarized))
+  #  summarized
+  #}
 
   params <- get_param_names(list_fits[[1]][[1]])
 
@@ -89,7 +89,8 @@ generate_features <- function(list_fits, data = NULL) {
     do.call(c, lapply(params, function(param) {
       param_values <- sapply(fits, function(single_fit) single_fit$par[[param]])
       param_values <- as.numeric(param_values[!is.na(param_values)])
-      quantile_counts <- as.list(table(cut(param_values, breaks = params_quantiles[[param]], include.lowest = T)))
+      quantile_counts <- table(cut(param_values, breaks = params_quantiles[[param]], include.lowest = T))
+      quantile_counts <- as.list(quantile_counts / sum(quantile_counts))
       names(quantile_counts) <- paste(param, seq(length(quantile_counts)))
       quantile_counts
     }))
@@ -98,9 +99,14 @@ generate_features <- function(list_fits, data = NULL) {
   res_df <- cbind(data.frame(id = rownames(res_df)), res_df)
 
 
-  if (!is.null(data)) {
+  if (!is.null(data) && data) {
+    data <- unlist(lapply(seq_along(list_fits), function(i) {
+        datas <- lapply(list_fits[[i]], function(model) model$data[[1]])
+	names(datas) <- rep(names(list_fits)[[i]], length(datas))
+	datas
+    }), recursive = F)
     data_features <- do.call(rbind.data.frame,
-                             lapply(split(unname(data), names(data)),
+                             lapply(split(unname(data), names(data))[names(list_fits)],
                                  function(.x) as.list(construct_temporal_features(.x))))
     res_df <- cbind(res_df, data_features)
   }
