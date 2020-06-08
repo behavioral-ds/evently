@@ -5,7 +5,7 @@
 \title{Given a list of group-fits produced by 'group_fit_series', this function generates features
 for each group-fit by summarizing the fitted parameters.}
 \usage{
-generate_features(list_fits, data = NULL)
+generate_features(list_fits, data = F)
 }
 \arguments{
 \item{list_fits}{A list of group fits returned by {group_fit_series}}

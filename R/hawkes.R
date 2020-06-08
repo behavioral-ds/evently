@@ -165,7 +165,11 @@ print.hawkes <- function(x, ...) {
 }
 
 #' @export
-predict_final_popularity.hawkes <- function(model) {
+predict_final_popularity.hawkes <- function(model, data, observation_time) {
+  if (!is.null(data) && !is.null(observation_time)) {
+    model$data <- if (is.data.frame(data)) list(data) else data
+    model$observation_time <- observation_time
+  }
   check_required_hawkes_fields(model, c('par', 'model_type', 'data', 'observation_time'))
   branching_factor <- get_branching_factor(model)
   if (branching_factor >= 1) {

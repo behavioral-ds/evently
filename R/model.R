@@ -53,7 +53,7 @@ get_branching_factor.default <- function(model) {
 }
 
 #' @export
-predict_final_popularity.default <- function(model) {
+predict_final_popularity.default <- function(model, data, observation_time) {
   stop('Unknown model type!')
 }
 
@@ -114,10 +114,12 @@ get_branching_factor <- function(model) {
 #' its model parameters.
 #' @param model A model object provides data, model_type, observation_time
 #' and model parameters
+#' @param data A given cascade whose final popularity will be predicted
+#' @param observation_time The observation time of the given cascade
 #' @return a vector of predicted final popularities whose length is the same
 #' as the number of cascades in the provided model object
 #' @export
-predict_final_popularity <- function(model) {
+predict_final_popularity <- function(model, data = NULL, observation_time = NULL) {
   UseMethod('predict_final_popularity')
 }
 

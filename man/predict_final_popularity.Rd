@@ -5,11 +5,15 @@
 \title{Predict the final popularity (event count) of give histories and
 its model parameters.}
 \usage{
-predict_final_popularity(model)
+predict_final_popularity(model, data = NULL, observation_time = NULL)
 }
 \arguments{
 \item{model}{A model object provides data, model_type, observation_time
 and model parameters}
+
+\item{data}{A given cascade whose final popularity will be predicted}
+
+\item{observation_time}{The observation time of the given cascade}
 }
 \value{
 a vector of predicted final popularities whose length is the same
