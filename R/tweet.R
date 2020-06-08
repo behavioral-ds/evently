@@ -7,9 +7,10 @@
 #' @param path File path to the tweets jsonl file
 #' @param keep_user Twitter user ids will be kept
 #' @param keep_absolute_time Keep the absolute tweeting times
+#' @param progress A progress bar will present if set to True (default)
 #' @return A list of data.frames where each data.frame is a retweet cascade
 #' @export
-parse_raw_tweets_to_cascades <- function(path, keep_user = F, keep_absolute_time = F) {
+parse_raw_tweets_to_cascades <- function(path, keep_user = F, keep_absolute_time = F, progress = T) {
   check_required_packages('jsonlite')
   con <- file(path, "r")
   tweets <- readLines(con, n = -1)
@@ -31,10 +32,10 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F, keep_absolute_time
     as.numeric(strptime(t, "%a %b %d %T %z %Y", tz = 'GMT'))
   }
 
-  pb <- utils::txtProgressBar(min = 0, max = length(tweets), style = 3)
+  if (progress) pb <- utils::txtProgressBar(min = 0, max = length(tweets), style = 3)
   for (k in seq_along(tweets)) {
     tweet <- tweets[[k]]
-    utils::setTxtProgressBar(pb, k)
+    if (progress) utils::setTxtProgressBar(pb, k)
     tryCatch({
       json_tweet <- jsonlite::fromJSON(tweet)
       current_id <- json_tweet$id_str
@@ -74,7 +75,7 @@ parse_raw_tweets_to_cascades <- function(path, keep_user = F, keep_absolute_time
       warning(sprintf('Error processing json: %s', e))
     })
   }
-  close(pb)
+  if (progress) close(pb)
 
   # define vectors for final outputs
   res_time <- c()

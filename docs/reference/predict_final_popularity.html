@@ -129,7 +129,7 @@ its model parameters.</h1>
 its model parameters.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>predict_final_popularity</span>(<span class='no'>model</span>)</pre>
+    <pre class="usage"><span class='fu'>predict_final_popularity</span>(<span class='no'>model</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>observation_time</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -138,6 +138,14 @@ its model parameters.</p>
       <th>model</th>
       <td><p>A model object provides data, model_type, observation_time
 and model parameters</p></td>
+    </tr>
+    <tr>
+      <th>data</th>
+      <td><p>A given cascade whose final popularity will be predicted</p></td>
+    </tr>
+    <tr>
+      <th>observation_time</th>
+      <td><p>The observation time of the given cascade</p></td>
     </tr>
     </table>
 

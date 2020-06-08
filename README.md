@@ -7,7 +7,7 @@ This package is designed for simulating and fitting the Hawkes processes
 and the HawkesN processes with several options of kernel functions.
 Currently, it assumes univariate processes without background event
 rates. Prior knowledge about the models is assumed in the following
-tutorial and please refer to \[1\] and \[2\] for details about the
+tutorial and please refer to `[1]` and `[2]` for details about the
 models.
 
 ``` r
@@ -87,18 +87,18 @@ fitted_model <- fit_series(data, model_type = 'EXP', observation_time = 5, cores
 fitted_model
 ```
 
-    ## Model: EXP 
-    ## No. of cascades: 100 
-    ## init_par
+    ## - Model: EXP 
+    ## - No. of cascades: 100 
+    ## - init_par:
     ##   K 7.92e+00; theta 1.32e+00
-    ## par
+    ## - par:
     ##   K 8.51e-01; theta 1.06e+00
-    ## Neg Log Likelihood: 285.488 
-    ## lower_bound
+    ## - Neg Log Likelihood: 285.488 
+    ## - lower_bound:
     ##   K 1.00e-100; theta 1.00e-100
-    ## upper_bound
+    ## - upper_bound:
     ##   K 1.00e+04; theta 3.00e+02
-    ## convergence: 0
+    ## - Convergence: 0
 
 ## Cascades from real data
 
@@ -119,7 +119,7 @@ file.
 
 ``` r
 filepath <- system.file('extdata', 'tweets_anonymized.jsonl', package = 'evently')
-cascades <- parse_raw_tweets_to_cascades(filepath)
+cascades <- parse_raw_tweets_to_cascades(filepath, progress = F)
 print(cascades[seq(3)])
 ```
 
@@ -168,21 +168,27 @@ license](https://creativecommons.org/licenses/by-nc/4.0/). If you
 require a different license, please contact us at <Quyu.Kong@anu.edu.au>
 or <Marian-Andrei@rizoiu.eu>.
 
+## Documentation
+
+Please consult the package
+[documentation](https://www.behavioral-ds.ml/evently) for more details
+and tutorials
+
 ## Reference
 
-> \[1\] Rizoiu, M. A., Lee, Y., Mishra, S., & Xie, L. (2017, December).
+> `[1]` Rizoiu, M. A., Lee, Y., Mishra, S., & Xie, L. (2017, December).
 > Hawkes processes for events in social media. In Frontiers of
 > Multimedia Research (pp. 191-218). Association for Computing Machinery
 > and Morgan & Claypool.  
-> \[2\] Rizoiu, M. A., Mishra, S., Kong, Q., Carman, M., & Xie, L.
+> `[2]` Rizoiu, M. A., Mishra, S., Kong, Q., Carman, M., & Xie, L.
 > (2018, April). SIR-Hawkes: Linking epidemic models and Hawkes
 > processes to model diffusions in finite populations. In Proceedings of
 > the 2018 World Wide Web Conference (pp. 419-428). International World
 > Wide Web Conferences Steering Committee.  
-> \[3\] Mishra, S., Rizoiu, M. A., & Xie, L. (2016, October). Feature
+> `[3]` Mishra, S., Rizoiu, M. A., & Xie, L. (2016, October). Feature
 > driven and point process approaches for popularity prediction. In
 > Proceedings of the 25th ACM International on Conference on Information
 > and Knowledge Management (pp. 1069-1078). ACM.  
-> \[4\] Kong, Q., Rizoiu, M. A., & Xie, L. (2019). Modeling Information
+> `[4]` Kong, Q., Rizoiu, M. A., & Xie, L. (2019). Modeling Information
 > Cascades with Self-exciting Processes via Generalized Epidemic Models.
 > arXiv preprint arXiv:1910.05451.
