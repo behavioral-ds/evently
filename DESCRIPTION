@@ -2,7 +2,10 @@ Package: evently
 Type: Package
 Title: Fit Hawkes and HawkesN Processes with AMPL and Ipopt
 Version: 0.2.0
-Author: Quyu Kong; Marian-Andrei Rizoiu
+Authors@R: c(
+    person("Quyu", "Kong", email = "quyu.kong@anu.edu.au", role = c("aut", "cre")),
+    person("Marian-Andrei", "Rizoiu", email = "marian-andrei.rizoiu@uts.edu.au", role = c("aut"))
+    )
 Maintainer: Quyu Kong <quyu.kong@anu.edu.au>
 Description: This package is designed for simulating and fitting the Hawkes processes and the HawkesN processes with several options of kernel functions. 
 License: CC BY-NC 4.0
