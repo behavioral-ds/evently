@@ -5,12 +5,13 @@
 \title{Viral score is the total reaction of the system to a single promotion,
 i.e. the expected cascade size started by a single event of magnitude}
 \usage{
-get_viral_score(model, mu)
+get_viral_score(model, m_0 = NULL)
 }
 \arguments{
 \item{model}{A model object for computing the branching factor.}
 
-\item{mu}{The magnitude of the initial event}
+\item{m_0}{The magnitude of the initial post for computing its viral score.
+The first magnitude value in model$data[[1]] will be used if not provided.}
 }
 \value{
 A single number, the viral score of the given model

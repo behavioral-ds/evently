@@ -129,7 +129,7 @@ i.e. the expected cascade size started by a single event of magnitude</h1>
 i.e. the expected cascade size started by a single event of magnitude</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_viral_score</span>(<span class='no'>model</span>, <span class='no'>mu</span>)</pre>
+    <pre class="usage"><span class='fu'>get_viral_score</span>(<span class='no'>model</span>, <span class='kw'>m_0</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -139,8 +139,9 @@ i.e. the expected cascade size started by a single event of magnitude</p>
       <td><p>A model object for computing the branching factor.</p></td>
     </tr>
     <tr>
-      <th>mu</th>
-      <td><p>The magnitude of the initial event</p></td>
+      <th>m_0</th>
+      <td><p>The magnitude of the initial post for computing its viral score.
+The first magnitude value in model$data[[1]] will be used if not provided.</p></td>
     </tr>
     </table>
 

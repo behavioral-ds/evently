@@ -63,7 +63,7 @@ get_a1.default <- function(model) {
 }
 
 #' @export
-get_viral_score.default <- function(model, mu) {
+get_viral_score.default <- function(model, m_0 = NULL) {
   stop('Unknown model type!')
 }
 
@@ -136,10 +136,11 @@ get_a1 <- function(model) {
 #' Viral score is the total reaction of the system to a single promotion,
 #' i.e. the expected cascade size started by a single event of magnitude
 #' @param model A model object for computing the branching factor.
-#' @param mu The magnitude of the initial event
+#' @param m_0 The magnitude of the initial post for computing its viral score.
+#' The first magnitude value in model$data[[1]] will be used if not provided.
 #' @return A single number, the viral score of the given model
 #' @export
-get_viral_score <- function(model, mu) {
+get_viral_score <- function(model, m_0 = NULL) {
   UseMethod('get_viral_score')
 }
 

@@ -22,19 +22,23 @@ test_that('branching factors and viral scores are correctly computed', {
   model7 <- new_hawkes(par = c(K = 0.1, c = 0.2, theta = 0.3, N = 100), model_type = 'PLN')
   model8 <- new_hawkes(par = c(K = 0.1, beta = 1, c = 0.2, theta = 0.3, N = 100), model_type = 'mPLN')
 
+  model9 <- new_hawkes(par = c(K = 0.5, beta = 0.4, theta = 0.3), model_type = 'mEXP')
+  model10 <- new_hawkes(par = c(K = 0.5, theta = 0.3), model_type = 'EXP')
   expect_equal(get_branching_factor(model1), 0.1, tolerance = 1e-6)
-  expect_equal(get_viral_score(model1, mu = 2), 2 / (1 - 0.1), tolerance = 1e-6)
+  expect_equal(get_viral_score(model1), 0.1 / (1 - 0.1), tolerance = 1e-6)
   expect_equal(get_branching_factor(model2), 6.35, tolerance = 1e-6)
-  expect_equal(get_viral_score(model2, 1), Inf, tolerance = 1e-6)
-  expect_equal(get_viral_score(model2, 0), 0, tolerance = 1e-6)
+  expect_equal(get_viral_score(model2, m_0 = 2), Inf, tolerance = 1e-6)
+  expect_equal(get_viral_score(model2, m_0 = 0), 0, tolerance = 1e-6)
   expect_equal(get_branching_factor(model3), 0.5402189, tolerance = 1e-6)
-  expect_equal(get_viral_score(model3, mu = 1.5), 1.5/(1 - 0.5402189), tolerance = 1e-6)
+  expect_equal(get_viral_score(model3), 0.5402189/(1 - 0.5402189), tolerance = 1e-6)
   expect_equal(get_branching_factor(model4), 34.3039, tolerance = 1e-6)
 
   expect_equal(get_branching_factor(model5), 0.1, tolerance = 1e-6)
   expect_equal(get_branching_factor(model6), 6.35, tolerance = 1e-6)
   expect_equal(get_branching_factor(model7), 0.5402189, tolerance = 1e-6)
   expect_equal(get_branching_factor(model8), 34.3039, tolerance = 1e-6)
+
+  expect_equal(get_viral_score(model9, m_0 = 100), 100^0.4*get_branching_factor(model10)/(1-get_branching_factor(model9)), tolerance = 1e-6)
 })
 
 test_that('fianl popularities are correctly computed', {

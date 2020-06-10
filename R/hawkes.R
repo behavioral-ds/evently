@@ -185,12 +185,19 @@ predict_final_popularity.hawkes <- function(model, data = NULL, observation_time
 }
 
 #' @export
-get_viral_score.hawkes <- function(model, mu) {
+get_viral_score.hawkes <- function(model, m_0 = NULL) {
   check_required_hawkes_fields(model, c('par', 'model_type'))
-  if (mu == 0) return(0)
   branching_factor <- get_branching_factor(model)
+  if ('beta' %in% get_param_names(model)) {
+    if (is.null(m_0)) check_required_hawkes_fields(model, 'data')
+    m_0_beta <- if (is.null(m_0)) model$data[[1]]$magnitude[[1]]^model$par[['beta']] else m_0^model$par[['beta']]
+    model$par[['beta']] <- 0
+    mu <- m_0_beta * get_branching_factor(model)
+  } else {
+    mu <- branching_factor
+  }
   # branching factor cannot be larger than 1
-  if (branching_factor >= 1) return(Inf)
+  if (branching_factor >= 1 && m_0 != 0) return(Inf)
   mu / (1 - branching_factor)
 }
 
