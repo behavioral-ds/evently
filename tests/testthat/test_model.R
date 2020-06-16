@@ -45,19 +45,19 @@ test_that('fianl popularities are correctly computed', {
   data <- list(data.frame(time = seq(0, 5), magnitude = rep(1, 6)),
                data.frame(time = seq(0, 5), magnitude = rep(1, 6)))
   model <- new_hawkes(model_type = 'EXP', par = c(K=0.8, theta = 1), data = data, observation_time = 10)
-  expect_equal(predict_final_popularity(model), c(6.042531, 6.042531), tolerance = 1e-6)
+  expect_equal(predict_final_popularity(model), c(12.08506), tolerance = 1e-6)
 
   model <- new_hawkes(model_type = 'mEXP', par = c(K=0.8, beta = 0.1, theta = 1), data = data, observation_time = 10)
-  expect_equal(predict_final_popularity(model), c(6.075501502, 6.075501502), tolerance = 1e-6)
+  expect_equal(predict_final_popularity(model), c(12.151), tolerance = 1e-6)
 
   model <- new_hawkes(model_type = 'mEXP', par = c(K=1, beta = 0.1, theta = 1), data = data, observation_time = 10)
-  expect_warning(expect_equal(predict_final_popularity(model), c(Inf, Inf), tolerance = 1e-6))
+  expect_warning(expect_equal(predict_final_popularity(model), c(Inf), tolerance = 1e-6))
 
   model <- new_hawkes(model_type = 'PL', par = c(K=0.8, theta = 1, c = 1), data = data, observation_time = 10)
-  expect_equal(predict_final_popularity(model), c(8.9461760, 8.9461760), tolerance = 1e-6)
+  expect_equal(predict_final_popularity(model), c(8.9461760*2), tolerance = 1e-6)
 
   model <- new_hawkes(model_type = 'mPL', par = c(K=0.8, beta = 0.1, theta = 1, c = 1), data = data, observation_time = 10)
-  expect_equal(predict_final_popularity(model), c(11.2300334, 11.2300334), tolerance = 1e-6)
+  expect_equal(predict_final_popularity(model), c(11.2300334*2), tolerance = 1e-6)
 
   model <- new_hawkes(model_type = 'EXPN', par = c(K=0.8, theta = 1, N = 100), data = data, observation_time = 10)
   expect_error(predict_final_popularity(model))

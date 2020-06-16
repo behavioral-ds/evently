@@ -70,6 +70,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     }
     processed_tweets_batch[[i]] <- processed_tweets_batch_list
     cat('\r')
+    rm(tweets) # to clear up memory
   }
   cat('\n')
   close(con)
