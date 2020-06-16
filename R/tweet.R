@@ -24,7 +24,7 @@
 #' @export
 parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output_path = NULL,
                                          keep_user = F, keep_absolute_time = F, progress = T,
-                                         return_as_list = T) {
+                                         return_as_list = T, save_temp = F) {
   check_required_packages(c('jsonlite', 'data.table', 'bit64'))
   library(data.table)
   # a helper function
@@ -56,6 +56,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
   i <- 1
   total_tweets <- 0
   processed_tweets_batch <- list()
+  temp_prefix <- 'processed_tweets_tmp_'
   repeat {
     tweets <- readLines(con, n = batch)
     if (progress) cat(sprintf('Total tweets processed so far: %s; tweets to process at this iteration: %s',
@@ -64,18 +65,23 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     if (length(tweets) == 0) break()
 
     processed_tweets_batch_list <- rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
-    if (!is.null(output_path)) {
+    if (save_temp) {
+      stopifnot(!is.null(output_path))
       # save this intermediate results in case the function fails
-      fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('processed_tweets_tmp_%s.csv', i)))
+      fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
+    } else {
+      processed_tweets_batch[[i]] <- processed_tweets_batch_list
     }
-    processed_tweets_batch[[i]] <- processed_tweets_batch_list
     cat('\r')
     rm(tweets) # to clear up memory
+    rm(processed_tweets_batch_list)
     i <- i + 1
   }
   cat('\n')
   close(con)
 
+  if (save_temp) processed_tweets_batch <- lapply(list.files(path = output_path, pattern = temp_prefix),
+                                                  function(f) fread(file.path(output_path, f)))
   processed_tweets <- as.data.table(rbindlist(processed_tweets_batch))
   processed_tweets[is.na(retweet_id), retweet_id := id]
   processed_tweets <- processed_tweets[(retweet_id %in% id)]
