@@ -180,7 +180,7 @@ predict_final_popularity.hawkes <- function(model, data = NULL, observation_time
     a1s <- get_a1(model)
     # calculating the final value
     final_popularity <- vapply(model$data, nrow, FUN.VALUE = NA_integer_) + a1s / (1 - branching_factor)
-    return(final_popularity)
+    return(sum(final_popularity))
   }
 }
 
