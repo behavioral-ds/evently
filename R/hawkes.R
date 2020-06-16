@@ -174,7 +174,7 @@ predict_final_popularity.hawkes <- function(model, data = NULL, observation_time
   branching_factor <- get_branching_factor(model)
   if (branching_factor >= 1) {
     warning('Branching Factor greater than 1, not possible to predict the size(super critical)')
-    return(rep(Inf, length(model$data)))
+    return(Inf)
   } else {
     # calculating the expected size of first level of descendants
     a1s <- get_a1(model)
