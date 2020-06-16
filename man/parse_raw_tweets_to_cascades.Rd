@@ -8,22 +8,38 @@ https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-obje
 \usage{
 parse_raw_tweets_to_cascades(
   path,
+  batch = 1e+05,
+  cores = 1,
+  output_path = NULL,
   keep_user = F,
   keep_absolute_time = F,
-  progress = T
+  progress = T,
+  return_as_list = T
 )
 }
 \arguments{
 \item{path}{File path to the tweets jsonl file}
 
+\item{batch}{Number of tweets to be read for processing at each iteration, choose
+the best number for your memory load. Defaults to at most 10000 tweets each iteration.}
+
+\item{cores}{Number of cores to be used for processing each batch in parallel.}
+
+\item{output_path}{If provided, the index.csv and data.csv files which define the cascaddes
+will be generated. In index.csv, each row is a cascade where events can be obtained from data.csv
+by corresponding indics (start_ind to end_ind). Defaults to NULL.}
+
 \item{keep_user}{Twitter user ids will be kept}
 
 \item{keep_absolute_time}{Keep the absolute tweeting times}
 
-\item{progress}{A progress bar will present if set to True (default)}
+\item{progress}{The progress will be reported if set to True (default)}
+
+\item{return_as_list}{If true then a list of cascades (data.frames) will be returned.}
 }
 \value{
-A list of data.frames where each data.frame is a retweet cascade
+If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.
+Otherwise there will be no return.
 }
 \description{
 This function extracts cascades from a given jsonl file where each line is a tweet

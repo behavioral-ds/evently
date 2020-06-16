@@ -24,4 +24,6 @@ Suggests:
     knitr,
     ggplot2,
     tsne,
-    seismic
+    seismic,
+    data.table,
+    bit64

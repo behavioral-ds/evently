@@ -1,119 +1,107 @@
 # this script hosts methods that are related to extracting data from raw tweet json objects
 # crawled from Twitter API
 
+# Make sure data.table knows we know we're using it
+.datatable.aware = TRUE
+
 #' This function extracts cascades from a given jsonl file where each line is a tweet
 #' json object. Please refer to the Twitter developer documentation:
 #' https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
 #' @param path File path to the tweets jsonl file
+#' @param batch Number of tweets to be read for processing at each iteration, choose
+#' the best number for your memory load. Defaults to at most 10000 tweets each iteration.
+#' @param cores Number of cores to be used for processing each batch in parallel.
+#' @param output_path If provided, the index.csv and data.csv files which define the cascaddes
+#' will be generated. In index.csv, each row is a cascade where events can be obtained from data.csv
+#' by corresponding indics (start_ind to end_ind). Defaults to NULL.
 #' @param keep_user Twitter user ids will be kept
 #' @param keep_absolute_time Keep the absolute tweeting times
-#' @param progress A progress bar will present if set to True (default)
-#' @return A list of data.frames where each data.frame is a retweet cascade
+#' @param progress The progress will be reported if set to True (default)
+#' @param return_as_list If true then a list of cascades (data.frames) will be returned.
+#' @return If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.
+#' Otherwise there will be no return.
+#' @import parallel
 #' @export
-parse_raw_tweets_to_cascades <- function(path, keep_user = F, keep_absolute_time = F, progress = T) {
-  check_required_packages('jsonlite')
-  con <- file(path, "r")
-  tweets <- readLines(con, n = -1)
-  close(con)
-
-  # use environments as dictionaries for fast lookup
-  cascades_time <- new.env() # retweet times relative to the original tweet
-  cascades_magnitude <- new.env() # the number of followers
-  cascades_user <- new.env() # user id
-  cascades_tweet_time <- new.env() # absolute time of the tweet
-
+parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output_path = NULL,
+                                         keep_user = F, keep_absolute_time = F, progress = T,
+                                         return_as_list = T) {
+  check_required_packages(c('jsonlite', 'data.table', 'bit64'))
+  library(data.table)
   # a helper function
   zero_if_null <- function(count) {
     ifelse(is.null(count), 0, count)
   }
 
-  # compute the time difference between two time strings from tweet objects
-  convert_time_epoch <- function(t) {
-    as.numeric(strptime(t, "%a %b %d %T %z %Y", tz = 'GMT'))
-  }
-
-  if (progress) pb <- utils::txtProgressBar(min = 0, max = length(tweets), style = 3)
-  for (k in seq_along(tweets)) {
-    tweet <- tweets[[k]]
-    if (progress) utils::setTxtProgressBar(pb, k)
+  parse_tweet <- function(tweet) {
     tryCatch({
       json_tweet <- jsonlite::fromJSON(tweet)
-      current_id <- json_tweet$id_str
-      current_time <- convert_time_epoch(json_tweet$created_at)
-
+      id <- json_tweet$id_str
+      magnitude <- zero_if_null(json_tweet$user$followers_count)
+      user_id <- json_tweet$user$id_str
+      screen_name <- json_tweet$user$screen_name
+      retweet_id <- NA
       if (!is.null(json_tweet[['retweeted_status']])) {
         # if this tweet is a retweet, get original tweet's information
-        original_time <- convert_time_epoch(json_tweet$retweeted_status$created_at)
-        original_id <- json_tweet$retweeted_status$id_str
-
-        if (is.null(cascades_time[[original_id]])) {
-          # if the original tweet hasn't been added yet, we add it here
-
-          cascades_time[[original_id]] <- 0 # as this is relative time, the time for initial tweet is 0
-          cascades_magnitude[[original_id]] <- zero_if_null(json_tweet$retweeted_status$user$followers_count)
-          cascades_user[[original_id]] <- json_tweet$retweeted_status$user$id_str
-          cascades_tweet_time[[original_id]] <- original_time
-        }
-        cascades_time[[original_id]][length(cascades_time[[original_id]]) + 1] <- current_time - original_time
-        cascades_magnitude[[original_id]][length(cascades_magnitude[[original_id]]) + 1] <- zero_if_null(json_tweet$user$followers_count)
-        cascades_user[[original_id]][length(cascades_user[[original_id]]) + 1] <- json_tweet$user$id_str
-      } else {
-        # if this tweet is not a retweet
-        if (is.null(cascades_time[[current_id]])) {
-          cascades_time[[current_id]] <- 0
-
-          cascades_magnitude[[current_id]] <- zero_if_null(json_tweet$user$followers_count)
-          cascades_user[[current_id]] <- json_tweet$user$id_str
-          cascades_tweet_time[[current_id]] <- current_time
-        } else {
-          # this tweet might be added already via its retweets, but we use this magnitude instead as it's the status when this tweet happened
-          cascades_magnitude[[current_id]][1] <- zero_if_null(json_tweet$user$followers_count)
-        }
+        retweet_id <- json_tweet$retweeted_status$id_str
       }
+      list(id = id, magnitude = magnitude, user_id = user_id,
+           screen_name = screen_name, retweet_id = retweet_id)
     },
     error = function(e) {
       warning(sprintf('Error processing json: %s', e))
     })
   }
-  if (progress) close(pb)
 
-  # define vectors for final outputs
-  res_time <- c()
-  res_mag <- c()
-  res_user <- c()
-  res_start <- c()
-  res_end <- c()
-  res_tweet_time <- c()
-  i <- 0
+  con <- file(path, "r")
+  i <- 1
+  total_tweets <- 0
+  processed_tweets_batch <- list()
+  repeat {
+    tweets <- readLines(con, n = batch)
+    if (progress) cat(sprintf('Total tweets processed so far: %s; tweets to process at this iteration: %s',
+                      total_tweets, length(tweets)))
+    total_tweets <- total_tweets + length(tweets)
+    if (length(tweets) == 0) break()
 
-  # finally, let's extract all cascades
-  for (cascade in names(cascades_time)) {
-    tmp_time <- cascades_time[[cascade]]
-    tmp_mg <- cascades_magnitude[[cascade]]
-    tmp_user <- cascades_user[[cascade]]
+    processed_tweets_batch_list <- rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
+    if (!is.null(output_path)) {
+      # save this intermediate results in case the function fails
+      fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('processed_tweets_tmp_%s.csv', i)))
+    }
+    processed_tweets_batch[[i]] <- processed_tweets_batch_list
+    cat('\r')
+  }
+  cat('\n')
+  close(con)
 
-    sorted_indices <- order(tmp_time)
-    res_time <- c(res_time, tmp_time[sorted_indices])
-    res_mag <- c(res_mag, tmp_mg[sorted_indices])
-    res_user <- c(res_user, tmp_user[sorted_indices])
+  processed_tweets <- as.data.table(rbindlist(processed_tweets_batch))
+  processed_tweets[is.na(retweet_id), retweet_id := id]
+  processed_tweets <- processed_tweets[(retweet_id %in% id)]
+  processed_tweets[, absolute_time := melt_snowflake(id)$timestamp_ms]
+  setorder(processed_tweets, retweet_id, absolute_time)
+  processed_tweets[, time := absolute_time - absolute_time[1], retweet_id]
+  processed_tweets[, time := as.double(time)/1000]
+  processed_tweets[, index := 1:nrow(processed_tweets)]
+  index <- processed_tweets[, .(start_ind = index[1],
+                                end_ind = index[length(index)],
+                                tweet_time = absolute_time[1]/1000), retweet_id][, c('start_ind', 'end_ind', 'tweet_time')]
+  kept_columns <- c('time', 'magnitude')
+  if (keep_user) c(kept_columns, 'user_id', 'screen_name')
+  if (keep_absolute_time) c(kept_columns, 'absolute_time')
+  data <- processed_tweets[, kept_columns, with = F]
 
-    res_start <- c(res_start, i + 1)
-    res_end <- c(res_end, i + length(tmp_time))
-    res_tweet_time <- c(res_tweet_time, cascades_tweet_time[[cascade]])
-    i <- i + length(tmp_time)
+  if (!is.null(output_path)) {
+    fwrite(index, file = file.path(output_path, 'index.csv'))
+    fwrite(data, file = file.path(output_path, 'data.csv'))
+
+    tmp_files <- list.files(output_path, pattern = 'processed_tweets_tmp')
+    file.remove(tmp_files)
   }
 
-  # formatted as two dataframes in case we want to output as the usual csv formats
-  index <- data.frame(start_ind = res_start, end_ind = res_end, tweet_time = res_tweet_time)
-  data <- data.frame(magnitude = res_mag, time = res_time)
-  cascade_sizes <- index$end_ind - index$start_ind + 1
-  if (keep_user) data <- cbind(data, data.frame(user = res_user, stringsAsFactors = F))
-  if (keep_absolute_time) {
-    data <- cbind(data,
-                  data.frame(absolute_time = rep(res_tweet_time, cascade_sizes) + data$time,
-                             stringsAsFactors = F))
+  if (return_as_list) {
+    cascade_sizes <- index$end_ind - index$start_ind + 1
+    # return as a list of datas
+    datas <- split(data, rep(1:nrow(index), cascade_sizes))
+    return(unname(datas))
   }
-  # return as a list of datas
-  datas <- split(data, rep(1:nrow(index), cascade_sizes))
-  return(unname(datas))
 }
