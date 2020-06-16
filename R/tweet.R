@@ -64,17 +64,18 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     total_tweets <- total_tweets + length(tweets)
     if (length(tweets) == 0) break()
 
-    processed_tweets_batch_list <- rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
-    if (save_temp) {
+    if (save_temp && !file.exists(file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))) {
       stopifnot(!is.null(output_path))
+
+      processed_tweets_batch_list <- rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
       # save this intermediate results in case the function fails
       fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
-    } else {
-      processed_tweets_batch[[i]] <- processed_tweets_batch_list
+      rm(processed_tweets_batch_list) # to clear up memory
+    } else if (!save_temp) {
+      processed_tweets_batch[[i]] <- rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
     }
     cat('\r')
     rm(tweets) # to clear up memory
-    rm(processed_tweets_batch_list)
     i <- i + 1
   }
   cat('\n')
