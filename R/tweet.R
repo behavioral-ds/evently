@@ -86,8 +86,8 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
                                 end_ind = index[length(index)],
                                 tweet_time = absolute_time[1]/1000), retweet_id][, c('start_ind', 'end_ind', 'tweet_time')]
   kept_columns <- c('time', 'magnitude')
-  if (keep_user) c(kept_columns, 'user_id', 'screen_name')
-  if (keep_absolute_time) c(kept_columns, 'absolute_time')
+  if (keep_user) kept_columns <- c(kept_columns, 'user_id', 'screen_name')
+  if (keep_absolute_time) kept_columns <- c(kept_columns, 'absolute_time')
   data <- processed_tweets[, kept_columns, with = F]
 
   if (!is.null(output_path)) {

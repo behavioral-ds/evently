@@ -19,5 +19,5 @@ check_required_packages <- function(pkg_name) {
            call. = FALSE)
     }
   }
-  for (pkg in pkg_name) library(pkg, character.only = TRUE)
+  for (pkg in pkg_name) suppressMessages(library(pkg, character.only = TRUE))
 }
