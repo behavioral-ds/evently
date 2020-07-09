@@ -132,7 +132,7 @@ generate_immigrant_event_series <- function(par, model_type, Tmax) {
 #' @param return_as_object wether return the cascades within a model object
 #' @param init_history If given, the simulation will start after the last
 #' event in the given init_history
-#' @return A list of data.frames where each data.frame is a simualted event
+#' @return A list of data.frames where each data.frame is a simulated event
 #' cascade with the given model by default. Or a model object with the data.frames
 #' if return_as_object is True
 #' @export
