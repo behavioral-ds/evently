@@ -63,7 +63,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   final_lower_bound <- get_lower_bound(model)
   final_upper_bound <- get_upper_bound(model)
   if (!is.null(lower_bound)) {
-    if (length(lower_bound) <= length(final_lower_bound)) {
+    if (length(lower_bound) <= length(final_lower_bound) && all(names(lower_bound) %in% names(final_lower_bound))) {
       final_lower_bound[names(lower_bound)] <- lower_bound
     } else {
       stop('Wrong lower bound provided!')
@@ -71,7 +71,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   }
 
   if (!is.null(upper_bound)) {
-    if (length(upper_bound) <= length(final_upper_bound)) {
+    if (length(upper_bound) <= length(final_upper_bound) && all(names(upper_bound) %in% names(final_upper_bound))) {
       final_upper_bound[names(upper_bound)] <- upper_bound
     } else {
       stop('Wrong upper bound provided!')
