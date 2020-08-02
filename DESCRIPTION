@@ -13,8 +13,6 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true
 RoxygenNote: 7.1.0
-Imports:
-    poweRlaw
 Suggests:
     testthat,
     covr,
@@ -26,4 +24,5 @@ Suggests:
     tsne,
     seismic,
     data.table,
-    bit64
+    bit64,
+    poweRlaw

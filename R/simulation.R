@@ -5,13 +5,13 @@
 #' @param n The number of samples to be generated
 #' @param alpha Powerlaw distribution parameters
 #' @param mmin Powerlaw distribution parameters
-#' @import poweRlaw
 #' @return A single number, a random user magnitude
 #' @export
 #' @examples
 #' generate_user_magnitude(n = 1)
 generate_user_magnitude <- function(n, alpha = 2.016, mmin = 1) {
-  if ( is.null(.globals$user_infl) ) {
+  check_required_packages('poweRlaw')
+  if (is.null(.globals$user_infl) ) {
     .globals$user_infl <- conpl$new()
   }
   .globals$user_infl$setXmin(mmin)

@@ -46,7 +46,7 @@ model_type are not requird once this is given}
 event in the given init_history}
 }
 \value{
-A list of data.frames where each data.frame is a simualted event
+A list of data.frames where each data.frame is a simulated event
 cascade with the given model by default. Or a model object with the data.frames
 if return_as_object is True
 }

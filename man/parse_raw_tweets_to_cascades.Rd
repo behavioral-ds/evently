@@ -14,7 +14,8 @@ parse_raw_tweets_to_cascades(
   keep_user = F,
   keep_absolute_time = F,
   progress = T,
-  return_as_list = T
+  return_as_list = T,
+  save_temp = F
 )
 }
 \arguments{
