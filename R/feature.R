@@ -53,11 +53,11 @@ construct_temporal_features <- function(cascades) {
 #' Given a list of group-fits produced by 'group_fit_series', this function generates features
 #' for each group-fit by summarizing the fitted parameters.
 #' @param list_fits A list of group fits returned by {group_fit_series}
-#' @param data A named list of cascades
+#' @param data A indicator decides if the data features should be included or not.
 #' @return A data frame of features for each group. If features are all -1, it means all the
 #' fits of the group are NAs
 #' @export
-generate_features <- function(list_fits, data = F) {
+generate_features <- function(list_fits, data = FALSE) {
   # determine if list_fits is a list of hawkes.group.fits
   stopifnot(is.list(list_fits) && all(sapply(list_fits, function(fits) 'hawkes.group.fits' %in% class(fits))))
   #conver_to_feature <- function(values, param) {
@@ -99,7 +99,7 @@ generate_features <- function(list_fits, data = F) {
   res_df <- cbind(data.frame(id = rownames(res_df)), res_df)
 
 
-  if (!is.null(data) && data) {
+  if (!is.null(data) && is.logical(data) && data) {
     data <- unlist(lapply(seq_along(list_fits), function(i) {
         datas <- lapply(list_fits[[i]], function(model) model$data[[1]])
 	names(datas) <- rep(names(list_fits)[[i]], length(datas))
