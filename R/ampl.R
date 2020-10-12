@@ -18,9 +18,9 @@ setup_ampl <- function(ampl_path) {
   )
   ampl_download_url <- paste0('https://ampl.com/demo/', ampl_suffix, '.tgz')
   download.file(ampl_download_url, destfile = '/tmp/ampl.tgz')
-  untar('/tmp/ampl.tgz', exdir = ampl_path)
-  file.rename(from = paste0(ampl_path, '/', ampl_suffix),
-              to = ampl_final_path)
+  untar('/tmp/ampl.tgz', exdir = ampl_final_path)
+  # file.rename(from = paste0(ampl_path, '/', ampl_suffix),
+  #            to = ampl_final_path)
 
   # download ipopt
   ipopt_download_url <- switch (machine_ident,
