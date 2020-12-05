@@ -14,6 +14,20 @@ models.
 library(evently)
 ```
 
+## Citation
+
+Please consider citing the following paper if you find the package helpful to your research
+```
+@inproceedings{kong2021evently,
+    address = {Jerusalem, Israel},
+    author = {Kong, Quyu and Ram, Rohit and Rizoiu, Marian-Andrei},
+    booktitle = {ACM International Conference on Web Search and Data Mining (WSDM), Demo},
+    title = {{evently: A Toolkit for Analyzing Online Users via Reshare Cascade Modeling}},
+    year = {2021},
+}
+```
+
+
 ## Installation and dependencies
 
 Several dependencies
