@@ -12,6 +12,19 @@ This package is designed for simulating and fitting the Hawkes processes and the
 library(evently)
 ```
 
+## Citation
+
+Please consider citing the following paper if you find the package helpful to your research
+```
+@inproceedings{kong2021evently,
+    address = {Jerusalem, Israel},
+    author = {Kong, Quyu and Ram, Rohit and Rizoiu, Marian-Andrei},
+    booktitle = {ACM International Conference on Web Search and Data Mining (WSDM), Demo},
+    title = {{evently: A Toolkit for Analyzing Online Users via Reshare Cascade Modeling}},
+    year = {2021},
+}
+```
+
 ## Installation and dependencies
 Several dependencies ([poweRlaw](https://cran.r-project.org/web/packages/poweRlaw/poweRlaw.pdf), [AMPL](https://ampl.com/), [Ipopt](https://www.coin-or.org/Ipopt/documentation/)) are required for running this package. These dependencies will be installed automatically by R or by following instructions upon package load.
  
