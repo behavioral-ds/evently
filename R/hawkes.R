@@ -207,7 +207,7 @@ get_viral_score.hawkes <- function(model, m_0 = NULL) {
 #' @importFrom stats runif
 preprocess_data <- function(data, observation_time) {
   offset_same_time <- function(history) {
-    # check if two retweets happened at the same time. add a random number if so
+    # check if two retweets happened at the same time. add a small number if so
     i <- 1
     while (i <= nrow(history) && history$time[i] == 0) i <- i + 1
     if ((nrow(history) + 1) == i) return(history)
@@ -215,7 +215,9 @@ preprocess_data <- function(data, observation_time) {
     i <- i + 1
     while (i <= nrow(history)) {
       if (history$time[i] == k) {
-        history$time[i] <- history$time[i-1] + runif(1, 0, 1e-5)
+        # add a small number but not .Machine$double.xmin due to
+        # machine precision in AMPL and R
+        history$time[i] <- history$time[i-1] + 1e-10
       } else {
         k <- history$time[i]
       }
