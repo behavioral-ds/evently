@@ -17,7 +17,7 @@ setup_ampl <- function(ampl_path) {
     stop('Cannot infer the operating system your are using. Autodownload failed.')
   )
   ampl_download_url <- paste0('https://ampl.com/demo/', ampl_suffix, '.tgz')
-  download.file(ampl_download_url, destfile = '/tmp/ampl.tgz')
+  download_file(ampl_download_url, destfile = '/tmp/ampl.tgz')
   untar('/tmp/ampl.tgz', exdir = ampl_final_path)
   if (length(list.files(ampl_final_path)) == 1) {
     # 2021/01/29: the file structure of ampl.tgz changed, fix it
@@ -33,7 +33,7 @@ setup_ampl <- function(ampl_path) {
     'Darwinx86_64' = 'https://ampl.com/dl/open/ipopt/ipopt-osx.zip',
     stop('Failed to guess the operating system you are using. Autodownload failed.')
   )
-  download.file(ipopt_download_url, destfile = '/tmp/ipopt.zip')
+  download_file(ipopt_download_url, destfile = '/tmp/ipopt.zip')
   unzip(zipfile = '/tmp/ipopt.zip', exdir = ampl_final_path)
   Sys.chmod(paste0(ampl_final_path, '/ipopt'), '777', use_umask = FALSE)
 
@@ -41,6 +41,20 @@ setup_ampl <- function(ampl_path) {
   write(paste0('AMPL_PATH=', ampl_final_path), file = paste0(Sys.getenv('HOME'), '/.Renviron'), append = TRUE)
   Sys.setenv(AMPL_PATH = ampl_final_path)
   .globals$execution <- paste0('export PATH=$PATH:', ampl_final_path, '; ampl')
+}
+
+# download file with error handling
+#' @importFrom utils download.file
+download_file <- function(url, destfile) {
+  tryCatch({
+    status <- download.file(url, destfile = destfile)
+  }, error = function(e) {
+    status <- 1
+  })
+  if (status != 0) {
+    # failed to download, retry with wget
+    download.file(url, destfile = destfile, method = 'wget')
+  }
 }
 
 #' Set up the folder for placing temporary files, defaults to /tmp
