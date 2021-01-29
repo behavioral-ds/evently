@@ -22,7 +22,7 @@ Please consider citing the following paper if you find the package helpful to yo
     address = {Jerusalem, Israel},
     author = {Kong, Quyu and Ram, Rohit and Rizoiu, Marian-Andrei},
     booktitle = {ACM International Conference on Web Search and Data Mining (WSDM), Demo},
-    title = {{evently: A Toolkit for Analyzing Online Users via Reshare Cascade Modeling}},
+    title = {{Evently: Modeling and Analyzing Reshare Cascades with Hawkes Processes}},
     year = {2021},
 }
 ```
