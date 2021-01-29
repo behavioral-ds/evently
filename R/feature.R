@@ -82,7 +82,7 @@ generate_features <- function(list_fits, data = FALSE) {
     all_param <- unlist(lapply(list_fits, function(fits) {
       sapply(fits, function(single_fit) single_fit$par[[param]])
     }))
-    unique(quantile(all_param, seq(0, 1, by = 0.05), na.rm = T, names = F))
+    unique(stats::quantile(all_param, seq(0, 1, by = 0.05), na.rm = T, names = F))
   })
   names(params_quantiles) <- params
   res <- lapply(list_fits, function(fits) {

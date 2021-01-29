@@ -146,9 +146,9 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
   tryCatch(expr = {
     system(paste(ampl_execution, tmp_files$run), ignore.stdout = T, ignore.stderr = F)
 
-    tmp <- read.csv(tmp_files$res, sep = '=', header = FALSE)
+    tmp <- read.csv(tmp_files$res, sep = '=', header = FALSE, stringsAsFactors = FALSE)
     ret <- tmp[,2]
-    names(ret) <- trimws(levels(tmp[,1])[tmp[,1]])
+    names(ret) <- trimws(tmp[,1])
   }, error = function(e) {
     warning(sprintf("AMPL execution failed! error %s: ", e$message))
   })

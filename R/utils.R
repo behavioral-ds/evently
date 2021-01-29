@@ -7,7 +7,7 @@ check_required_packages <- function(pkg_name) {
     if (interactive()) {
       installation_choice <- menu(c('yes', 'no'))
       if (installation_choice == 1) {
-        install.packages(pkg_name_to_install)
+        utils::install.packages(pkg_name_to_install)
       } else {
         stop(sprintf("package(s) %s is required. \nPlease run `install.packages(c(%s))` to use this functionality.",
                      paste(pkg_name_to_install, collapse = ','), paste(sprintf('"%s"', pkg_name_to_install), collapse = ', ')),

@@ -12,12 +12,12 @@
 generate_user_magnitude <- function(n, alpha = 2.016, mmin = 1) {
   check_required_packages('poweRlaw')
   if (is.null(.globals$user_infl) ) {
-    .globals$user_infl <- conpl$new()
+    .globals$user_infl <- poweRlaw::conpl$new()
   }
   .globals$user_infl$setXmin(mmin)
   .globals$user_infl$setPars(alpha)
 
-  return(dist_rand(.globals$user_infl, n))
+  return(poweRlaw::dist_rand(.globals$user_infl, n))
 }
 
 ##################################### SIMULATION OF THE HAWKES PROCESS ##############################################
