@@ -19,6 +19,11 @@ setup_ampl <- function(ampl_path) {
   ampl_download_url <- paste0('https://ampl.com/demo/', ampl_suffix, '.tgz')
   download.file(ampl_download_url, destfile = '/tmp/ampl.tgz')
   untar('/tmp/ampl.tgz', exdir = ampl_final_path)
+  if (length(list.files(ampl_final_path)) == 1) {
+    # 2021/01/29: the file structure of ampl.tgz changed, fix it
+    pre_dir <- file.path(ampl_final_path, list.files(ampl_final_path))
+    file.rename(file.path(pre_dir, list.files(pre_dir)), file.path(ampl_final_path, list.files(pre_dir)))
+  }
   # file.rename(from = paste0(ampl_path, '/', ampl_suffix),
   #            to = ampl_final_path)
 
