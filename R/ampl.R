@@ -46,10 +46,11 @@ setup_ampl <- function(ampl_path) {
 # download file with error handling
 #' @importFrom utils download.file
 download_file <- function(url, destfile) {
+  status <- 1
   tryCatch({
     status <- download.file(url, destfile = destfile)
   }, error = function(e) {
-    status <- 1
+    print('Failed to download, retry with wget...')
   })
   if (status != 0) {
     # failed to download, retry with wget
