@@ -51,6 +51,8 @@ download_file <- function(url, destfile) {
     status <- download.file(url, destfile = destfile)
   }, error = function(e) {
     print('Failed to download, retry with wget...')
+  }, warning = function(e) {
+    print('The downloading process may have failed, retry with wget...')
   })
   if (status != 0) {
     # failed to download, retry with wget
