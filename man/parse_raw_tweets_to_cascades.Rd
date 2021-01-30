@@ -37,6 +37,8 @@ by corresponding indics (start_ind to end_ind). Defaults to NULL.}
 \item{progress}{The progress will be reported if set to True (default)}
 
 \item{return_as_list}{If true then a list of cascades (data.frames) will be returned.}
+
+\item{save_temp}{If temporary files should be generated while processing. Processing can be resumed on failures.}
 }
 \value{
 If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.
