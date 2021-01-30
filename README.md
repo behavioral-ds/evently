@@ -1,4 +1,5 @@
 evently: simulation, fitting of Hawkes processes
+![R-CMD-check](https://github.com/behavioral-ds/evently/workflows/R-CMD-check/badge.svg)
 ================
 
 ## Introduction
