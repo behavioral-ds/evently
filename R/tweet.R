@@ -18,6 +18,7 @@
 #' @param keep_absolute_time Keep the absolute tweeting times
 #' @param progress The progress will be reported if set to True (default)
 #' @param return_as_list If true then a list of cascades (data.frames) will be returned.
+#' @param save_temp If temporary files should be generated while processing. Processing can be resumed on failures.
 #' @return If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.
 #' Otherwise there will be no return.
 #' @import parallel
