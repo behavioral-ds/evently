@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -78,77 +78,94 @@
 <h2 class="hasAnchor">
 <a href="#introduction" class="anchor"></a>Introduction</h2>
 <p>This package is designed for simulating and fitting the Hawkes processes and the HawkesN processes with several options of kernel functions. Currently, it assumes univariate processes without background event rates. Prior knowledge about the models is assumed in the following tutorial and please refer to <code>[1]</code> and <code>[2]</code> for details about the models.</p>
-<div class="sourceCode" id="cb1"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">evently</span>)</pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">evently</span><span class="op">)</span></code></pre></div>
+</div>
+<div id="citation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#citation" class="anchor"></a>Citation</h2>
+<p>Please consider citing the following paper if you find the package helpful to your research</p>
+<pre><code>@inproceedings{kong2021evently,
+    address = {Jerusalem, Israel},
+    author = {Kong, Quyu and Ram, Rohit and Rizoiu, Marian-Andrei},
+    booktitle = {ACM International Conference on Web Search and Data Mining (WSDM), Demo},
+    title = {{Evently: Modeling and Analyzing Reshare Cascades with Hawkes Processes}},
+    year = {2021},
+}</code></pre>
 </div>
 <div id="installation-and-dependencies" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation-and-dependencies" class="anchor"></a>Installation and dependencies</h2>
 <p>Several dependencies (<a href="https://cran.r-project.org/web/packages/poweRlaw/poweRlaw.pdf">poweRlaw</a>, <a href="https://ampl.com/">AMPL</a>, <a href="https://www.coin-or.org/Ipopt/documentation/">Ipopt</a>) are required for running this package. These dependencies will be installed automatically by R or by following instructions upon package load.</p>
 <p>Install the package by executing</p>
-<div class="sourceCode" id="cb2"><pre class="r"><span class="kw">if</span> (!<span class="fu"><a href="https://rdrr.io/r/base/library.html">require</a></span>(<span class="st">'devtools'</span>)) <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'devtools'</span>)
-<span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">'behavioral-ds/evently'</span>)</pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/">'devtools'</a></span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">'devtools'</span><span class="op">)</span>
+<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span><span class="op">(</span><span class="st">'behavioral-ds/evently'</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="simulating-cascades" class="section level2">
 <h2 class="hasAnchor">
 <a href="#simulating-cascades" class="anchor"></a>Simulating cascades</h2>
-<p>Let’s first simulate 100 event cascades of the <strong>Hawkes process with an exponential kernel function</strong> (please refer to the <a href="#available-models">Available models</a> for models and their abbreviations in the package) with a given parameter set, <embed src="https://latex.codecogs.com/png.latex?%5Ckappa%20%3D%200.9%2C%20%5Ctheta%20%3D%201%20%22%5Ckappa%20=%200.9,%20%5Ctheta%20=%201%22"></embed>. For each simulation, we only simulate until 5 seconds. The resulted cascades are placed in a single <code>list</code> where each cascade is a <code>data.frame</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">4</span>)
-<span class="no">sim_no</span> <span class="kw">&lt;-</span> <span class="fl">100</span>
-<span class="no">data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/generate_series.html">generate_series</a></span>(<span class="kw">par</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="kw">K</span> <span class="kw">=</span> <span class="fl">0.9</span>, <span class="kw">theta</span> <span class="kw">=</span> <span class="fl">1</span>), <span class="kw">model_type</span> <span class="kw">=</span> <span class="st">'EXP'</span>, <span class="kw">Tmax</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">sim_no</span> <span class="kw">=</span> <span class="no">sim_no</span>)
+<p>Let’s first simulate 100 event cascades of the <strong>Hawkes process with an exponential kernel function</strong> (please refer to the <a href="#available-models">Available models</a> for models and their abbreviations in the package) with a given parameter set, <img src="https://latex.codecogs.com/png.latex?%5Ckappa%20%3D%200.9%2C%20%5Ctheta%20%3D%201%20%22%5Ckappa%20=%200.9,%20%5Ctheta%20=%201%22" alt="\kappa = 0.9, \theta = 1">. For each simulation, we only simulate until 5 seconds. The resulted cascades are placed in a single <code>list</code> where each cascade is a <code>data.frame</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>
+<span class="va">sim_no</span> <span class="op">&lt;-</span> <span class="fl">100</span>
+<span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/generate_series.html">generate_series</a></span><span class="op">(</span>par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>K <span class="op">=</span> <span class="fl">0.9</span>, theta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, model_type <span class="op">=</span> <span class="st">'EXP'</span>, Tmax <span class="op">=</span> <span class="fl">5</span>, sim_no <span class="op">=</span> <span class="va">sim_no</span><span class="op">)</span>
 <span class="co"># alternatively, `generate_series` also accepts a model class object</span>
 <span class="co"># e.g.</span>
 <span class="co"># model &lt;- new_hawkes(par = c(K = 0.9, theta = 1), model_type = 'EXP')</span>
 <span class="co"># generate_series(model = model, Tmax = 5, sim_no = sim_no)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">data</span><span class="kw">[[</span><span class="fl">1</span>]])</pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co">##   magnitude      time</span></a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="co">## 1         1 0.0000000</span></a>
-<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="co">## 2         1 0.5941959</span></a>
-<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="co">## 3         1 1.4712411</span></a>
-<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="co">## 4         1 1.6105430</span></a>
-<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="co">## 5         1 1.7855535</span></a>
-<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="co">## 6         1 1.8883869</span></a></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">data</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">##   magnitude      time</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="co">## 1         1 0.0000000</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co">## 2         1 0.5941959</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="co">## 3         1 1.4712411</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="co">## 4         1 1.6105430</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co">## 5         1 1.7855535</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="co">## 6         1 1.8883869</span></span></code></pre></div>
 <p>A simulated process is represented by a <code>data.frame</code> where each row is an event. <code>time</code> indicates the event happening time, while <code>magnitude</code> is the event mark information which is always 1 if <code>model_type</code> is an unmarked model. In the context of retweet diffusion cascades, the first row is the original tweet and all following events are its retweets. <code>time</code> records the relative time (in second) of each retweet to the original tweet and <code>magnitude</code> is the follows’ count of the user who retweeted.</p>
 </div>
 <div id="fitting-a-model-on-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#fitting-a-model-on-data" class="anchor"></a>Fitting a model on data</h2>
 <p>We can then fit on the cascades simulated in the previous section. After providing the <code>data</code> and <code>model_type</code>, the fitting procedure will spawn 10 AMPL optimization procedures with different parameter inistializations due to the non-convexity of some likelihood functions. Among the 10 fitted model, the one giving the best likelihood value will be returned. To make the fitting procedure faster, we can specify the number of <code>cores</code> to be used for fitting them in parallel.</p>
-<div class="sourceCode" id="cb5"><pre class="r"><span class="no">fitted_model</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/fit_series.html">fit_series</a></span>(<span class="no">data</span>, <span class="kw">model_type</span> <span class="kw">=</span> <span class="st">'EXP'</span>, <span class="kw">observation_time</span> <span class="kw">=</span> <span class="fl">5</span>, <span class="kw">cores</span> <span class="kw">=</span> <span class="fl">10</span>)
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">fitted_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_series.html">fit_series</a></span><span class="op">(</span><span class="va">data</span>, model_type <span class="op">=</span> <span class="st">'EXP'</span>, observation_time <span class="op">=</span> <span class="fl">5</span>, cores <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
 
-<span class="no">fitted_model</span></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">## - Model: EXP </span></a>
-<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="co">## - No. of cascades: 100 </span></a>
-<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">## - init_par:</span></a>
-<a class="sourceLine" id="cb6-4" data-line-number="4"><span class="co">##   K 7.92e+00; theta 1.32e+00</span></a>
-<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="co">## - par:</span></a>
-<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="co">##   K 8.51e-01; theta 1.06e+00</span></a>
-<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">## - Neg Log Likelihood: 285.488 </span></a>
-<a class="sourceLine" id="cb6-8" data-line-number="8"><span class="co">## - lower_bound:</span></a>
-<a class="sourceLine" id="cb6-9" data-line-number="9"><span class="co">##   K 1.00e-100; theta 1.00e-100</span></a>
-<a class="sourceLine" id="cb6-10" data-line-number="10"><span class="co">## - upper_bound:</span></a>
-<a class="sourceLine" id="cb6-11" data-line-number="11"><span class="co">##   K 1.00e+04; theta 3.00e+02</span></a>
-<a class="sourceLine" id="cb6-12" data-line-number="12"><span class="co">## - Convergence: 0</span></a></code></pre></div>
+<span class="va">fitted_model</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">## - Model: EXP </span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="co">## - No. of cascades: 100 </span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co">## - init_par:</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">##   K 7.92e+00; theta 1.32e+00</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">## - par:</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="co">##   K 8.51e-01; theta 1.06e+00</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="co">## - Neg Log Likelihood: 285.488 </span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co">## - lower_bound:</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="co">##   K 1.00e-100; theta 1.00e-100</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="co">## - upper_bound:</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="co">##   K 1.00e+04; theta 3.00e+02</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="co">## - Convergence: 0</span></span></code></pre></div>
 </div>
 <div id="cascades-from-real-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#cascades-from-real-data" class="anchor"></a>Cascades from real data</h2>
 <p>We provide a function to help parse provided Tweet JSON objects to cascades. Tweet JSON objects are crawled from the Twitter API and one can refer to the <a href="https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object">documentation</a> for more information.</p>
 <p>In this package, we provide a collection of tweets about the same topic for demonstration purpose. The file is in a <a href="http://jsonlines.org/"><code>jsonl</code></a> format where each line of this file is a Tweet JSON string. The content of the tweets have been encrypted due to the Twitter API agreement. One can find the file at <code>inst/extdata/tweets_anonymized.jsonl</code>. Let’s now extract cascades from the file.</p>
-<div class="sourceCode" id="cb7"><pre class="r"><span class="no">filepath</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">'extdata'</span>, <span class="st">'tweets_anonymized.jsonl'</span>, <span class="kw">package</span> <span class="kw">=</span> <span class="st">'evently'</span>)
-<span class="no">cascades</span> <span class="kw">&lt;-</span> <span class="fu"><a href="reference/parse_raw_tweets_to_cascades.html">parse_raw_tweets_to_cascades</a></span>(<span class="no">filepath</span>, <span class="kw">progress</span> <span class="kw">=</span> <span class="no">F</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">cascades</span>[<span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span>(<span class="fl">3</span>)])</pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">## [[1]]</span></a>
-<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="co">##   magnitude time</span></a>
-<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="co">## 1       337    0</span></a>
-<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="co">## </span></a>
-<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="co">## [[2]]</span></a>
-<a class="sourceLine" id="cb8-6" data-line-number="6"><span class="co">##   magnitude time</span></a>
-<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="co">## 2       130    0</span></a>
-<a class="sourceLine" id="cb8-8" data-line-number="8"><span class="co">## </span></a>
-<a class="sourceLine" id="cb8-9" data-line-number="9"><span class="co">## [[3]]</span></a>
-<a class="sourceLine" id="cb8-10" data-line-number="10"><span class="co">##   magnitude time</span></a>
-<a class="sourceLine" id="cb8-11" data-line-number="11"><span class="co">## 3       251    0</span></a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">filepath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">'extdata'</span>, <span class="st">'tweets_anonymized.jsonl'</span>, package <span class="op">=</span> <span class="st">'evently'</span><span class="op">)</span>
+<span class="va">cascades</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/parse_raw_tweets_to_cascades.html">parse_raw_tweets_to_cascades</a></span><span class="op">(</span><span class="va">filepath</span>, progress <span class="op">=</span> <span class="cn">F</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">cascades</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">## [[1]]</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="co">##   magnitude time</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">## 1       337    0</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="co">## </span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="co">## [[2]]</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="co">##   magnitude time</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">## 2       130    0</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">## </span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="co">## [[3]]</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="co">##   magnitude time</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="co">## 3       251    0</span></span></code></pre></div>
 <p>As the file includes all raw tweets, it is natural to see that most cascades extracted only have single events in it. We can further fit Hawkes models on these cascades.</p>
 </div>
 <div id="available-models" class="section level2">
@@ -269,7 +286,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

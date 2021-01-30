@@ -83,7 +83,7 @@ event cascades." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -129,14 +129,14 @@ event cascades.</h1>
 event cascades.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_hawkes_neg_likelihood_value</span>(
-  <span class='no'>model</span>,
-  <span class='no'>...</span>,
-  <span class='no'>par</span>,
-  <span class='no'>data</span>,
-  <span class='no'>model_type</span>,
-  <span class='no'>observation_time</span>
-)</pre>
+    <pre class="usage"><span class='fu'>get_hawkes_neg_likelihood_value</span><span class='op'>(</span>
+  <span class='va'>model</span>,
+  <span class='va'>...</span>,
+  <span class='va'>par</span>,
+  <span class='va'>data</span>,
+  <span class='va'>model_type</span>,
+  <span class='va'>observation_time</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -173,16 +173,17 @@ are required.</p></td>
     <p>A single number, the negative log-likelihood of the given model on data</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='no'>data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='generate_series.html'>generate_series</a></span>(<span class='kw'>model_type</span> <span class='kw'>=</span> <span class='st'>'EXP'</span>,
-                                     <span class='kw'>par</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>theta</span> <span class='kw'>=</span> <span class='fl'>1</span>),
-                                     <span class='kw'>sim_no</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>Tmax</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)
-<span class='no'>fitted</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='fit_series.html'>fit_series</a></span>(<span class='no'>data</span>, <span class='st'>'EXP'</span>, <span class='kw'>observation_time</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)
-<span class='no'>data_test</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='generate_series.html'>generate_series</a></span>(<span class='kw'>model_type</span> <span class='kw'>=</span> <span class='st'>'EXP'</span>,
-                                          <span class='kw'>par</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='kw'>K</span> <span class='kw'>=</span> <span class='fl'>0.9</span>, <span class='kw'>theta</span> <span class='kw'>=</span> <span class='fl'>1</span>),
-                                          <span class='kw'>sim_no</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>Tmax</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)
-<span class='fu'>get_hawkes_neg_likelihood_value</span>(<span class='no'>fitted</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data_test</span>)
-}</div></pre>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='va'>data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='generate_series.html'>generate_series</a></span><span class='op'>(</span>model_type <span class='op'>=</span> <span class='st'>'EXP'</span>,
+                                     par <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>K <span class='op'>=</span> <span class='fl'>0.9</span>, theta <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,
+                                     sim_no <span class='op'>=</span> <span class='fl'>10</span>, Tmax <span class='op'>=</span> <span class='cn'>Inf</span><span class='op'>)</span>
+<span class='va'>fitted</span> <span class='op'>&lt;-</span> <span class='fu'><a href='fit_series.html'>fit_series</a></span><span class='op'>(</span><span class='va'>data</span>, <span class='st'>'EXP'</span>, observation_time <span class='op'>=</span> <span class='cn'>Inf</span><span class='op'>)</span>
+<span class='va'>data_test</span> <span class='op'>&lt;-</span> <span class='fu'><a href='generate_series.html'>generate_series</a></span><span class='op'>(</span>model_type <span class='op'>=</span> <span class='st'>'EXP'</span>,
+                                          par <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span>K <span class='op'>=</span> <span class='fl'>0.9</span>, theta <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>,
+                                          sim_no <span class='op'>=</span> <span class='fl'>10</span>, Tmax <span class='op'>=</span> <span class='cn'>Inf</span><span class='op'>)</span>
+<span class='fu'>get_hawkes_neg_likelihood_value</span><span class='op'>(</span><span class='va'>fitted</span>, data <span class='op'>=</span> <span class='va'>data_test</span><span class='op'>)</span>
+<span class='op'>}</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -198,7 +199,7 @@ are required.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
