@@ -24,7 +24,7 @@
 #' @import parallel
 #' @export
 parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output_path = NULL,
-                                         keep_user = F, keep_absolute_time = F, progress = T,
+                                         keep_user = F, keep_absolute_time = F, keep_text = F, progress = T,
                                          return_as_list = T, save_temp = F) {
   check_required_packages(c('jsonlite', 'data.table', 'bit64'))
   library(data.table)
@@ -33,7 +33,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     ifelse(is.null(count), 0, count)
   }
 
-  parse_tweet <- function(tweet) {
+  parse_tweet <- function(tweet, keep_text = F) {
     tryCatch({
       json_tweet <- jsonlite::fromJSON(tweet)
       id <- json_tweet$id_str
@@ -41,12 +41,16 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
       user_id <- json_tweet$user$id_str
       screen_name <- json_tweet$user$screen_name
       retweet_id <- NA
+      if (keep_text) text <- json_tweet$text
       if (!is.null(json_tweet[['retweeted_status']])) {
         # if this tweet is a retweet, get original tweet's information
         retweet_id <- json_tweet$retweeted_status$id_str
+        if (keep_text) text <- NA
       }
-      list(id = id, magnitude = magnitude, user_id = user_id,
+      res <- list(id = id, magnitude = magnitude, user_id = user_id,
            screen_name = screen_name, retweet_id = retweet_id)
+      if (keep_text) res[['text']] <- text
+      res
     },
     error = function(e) {
       warning(sprintf('Error processing json: %s', e))
@@ -68,12 +72,12 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     if (save_temp && !file.exists(file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))) {
       stopifnot(!is.null(output_path))
 
-      processed_tweets_batch_list <- data.table::rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
+      processed_tweets_batch_list <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores))
       # save this intermediate results in case the function fails
       fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
       rm(processed_tweets_batch_list) # to clear up memory
     } else if (!save_temp) {
-      processed_tweets_batch[[i]] <- data.table::rbindlist(mclapply(tweets, parse_tweet, mc.cores = cores))
+      processed_tweets_batch[[i]] <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores))
     }
     cat('\r')
     rm(tweets) # to clear up memory
@@ -92,13 +96,21 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
   processed_tweets[, time := absolute_time - absolute_time[1], retweet_id]
   processed_tweets[, time := as.double(time)/1000]
   processed_tweets[, index := 1:nrow(processed_tweets)]
-  index <- processed_tweets[, .(start_ind = index[1],
-                                end_ind = index[length(index)],
-                                tweet_time = absolute_time[1]/1000), retweet_id][, c('start_ind', 'end_ind', 'tweet_time')]
+  if (keep_text) {
+    index <- processed_tweets[, .(start_ind = index[1],
+                                  end_ind = index[length(index)],
+                                  tweet_time = absolute_time[1]/1000,
+                                  text = text[1]), retweet_id][, c('start_ind', 'end_ind', 'tweet_time', 'text')]
+  } else {
+    index <- processed_tweets[, .(start_ind = index[1],
+                                  end_ind = index[length(index)],
+                                  tweet_time = absolute_time[1]/1000), retweet_id][, c('start_ind', 'end_ind', 'tweet_time')]
+  }
   processed_tweets[, absolute_time := absolute_time/1000]
   kept_columns <- c('time', 'magnitude')
   if (keep_user) kept_columns <- c(kept_columns, 'user_id', 'screen_name')
   if (keep_absolute_time) kept_columns <- c(kept_columns, 'absolute_time')
+
   data <- processed_tweets[, kept_columns, with = F]
 
   if (!is.null(output_path)) {
