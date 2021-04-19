@@ -13,9 +13,11 @@ parse_raw_tweets_to_cascades(
   output_path = NULL,
   keep_user = F,
   keep_absolute_time = F,
+  keep_text = F,
   progress = T,
   return_as_list = T,
-  save_temp = F
+  save_temp = F,
+  api_version = 1
 )
 }
 \arguments{
@@ -30,15 +32,19 @@ the best number for your memory load. Defaults to at most 10000 tweets each iter
 will be generated. In index.csv, each row is a cascade where events can be obtained from data.csv
 by corresponding indics (start_ind to end_ind). Defaults to NULL.}
 
-\item{keep_user}{Twitter user ids will be kept}
+\item{keep_user}{Twitter user ids will be kept.}
 
-\item{keep_absolute_time}{Keep the absolute tweeting times}
+\item{keep_absolute_time}{Keep the absolute tweeting times.}
+
+\item{keep_text}{Keep the tweet text.}
 
 \item{progress}{The progress will be reported if set to True (default)}
 
 \item{return_as_list}{If true then a list of cascades (data.frames) will be returned.}
 
 \item{save_temp}{If temporary files should be generated while processing. Processing can be resumed on failures.}
+
+\item{api_version}{Version of Twitter API used for collecting the tweets.}
 }
 \value{
 If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.

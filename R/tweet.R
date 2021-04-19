@@ -14,18 +14,20 @@
 #' @param output_path If provided, the index.csv and data.csv files which define the cascaddes
 #' will be generated. In index.csv, each row is a cascade where events can be obtained from data.csv
 #' by corresponding indics (start_ind to end_ind). Defaults to NULL.
-#' @param keep_user Twitter user ids will be kept
-#' @param keep_absolute_time Keep the absolute tweeting times
+#' @param keep_user Twitter user ids will be kept.
+#' @param keep_absolute_time Keep the absolute tweeting times.
+#' @param keep_text Keep the tweet text.
 #' @param progress The progress will be reported if set to True (default)
 #' @param return_as_list If true then a list of cascades (data.frames) will be returned.
 #' @param save_temp If temporary files should be generated while processing. Processing can be resumed on failures.
+#' @param api_version Version of Twitter API used for collecting the tweets.
 #' @return If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.
 #' Otherwise there will be no return.
 #' @import parallel
 #' @export
 parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output_path = NULL,
                                          keep_user = F, keep_absolute_time = F, keep_text = F, progress = T,
-                                         return_as_list = T, save_temp = F) {
+                                         return_as_list = T, save_temp = F, api_version=1) {
   check_required_packages(c('jsonlite', 'data.table', 'bit64'))
   library(data.table)
   # a helper function
@@ -33,28 +35,59 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     ifelse(is.null(count), 0, count)
   }
 
-  parse_tweet <- function(tweet, keep_text = F) {
-    tryCatch({
-      json_tweet <- jsonlite::fromJSON(tweet)
-      id <- json_tweet$id_str
-      magnitude <- zero_if_null(json_tweet$user$followers_count)
-      user_id <- json_tweet$user$id_str
-      screen_name <- json_tweet$user$screen_name
-      retweet_id <- NA
-      if (keep_text) text <- json_tweet$text
-      if (!is.null(json_tweet[['retweeted_status']])) {
-        # if this tweet is a retweet, get original tweet's information
-        retweet_id <- json_tweet$retweeted_status$id_str
-        if (keep_text) text <- NA
-      }
-      res <- list(id = id, magnitude = magnitude, user_id = user_id,
-           screen_name = screen_name, retweet_id = retweet_id)
-      if (keep_text) res[['text']] <- text
-      res
-    },
-    error = function(e) {
-      warning(sprintf('Error processing json: %s', e))
-    })
+  if (api_version == 1) {
+    parse_tweet <- function(tweet, keep_text = F) {
+      tryCatch({
+        json_tweet <- jsonlite::fromJSON(tweet)
+        id <- json_tweet$id_str
+        magnitude <- zero_if_null(json_tweet$user$followers_count)
+        user_id <- json_tweet$user$id_str
+        screen_name <- json_tweet$user$screen_name
+        retweet_id <- NA
+        if (keep_text) text <- json_tweet$text
+        if (!is.null(json_tweet[['retweeted_status']])) {
+          # if this tweet is a retweet, get original tweet's information
+          retweet_id <- json_tweet$retweeted_status$id_str
+          if (keep_text) text <- NA
+        }
+        res <- list(id = id, magnitude = magnitude, user_id = user_id,
+             screen_name = screen_name, retweet_id = retweet_id)
+        if (keep_text) res[['text']] <- text
+        res
+      },
+      error = function(e) {
+        warning(sprintf('Error processing json: %s', e))
+      })
+    }
+  } else if (api_version == 2) {
+    parse_tweet <- function(tweet, keep_text = F) {
+      tryCatch({
+        json_tweet <- jsonlite::fromJSON(tweet)
+        if (is.null(json_tweet$includes) || is.null(json_tweet$includes$users)) {
+          stop('The author information is required!')
+        }
+        id <- json_tweet$data$id
+        magnitude <- zero_if_null(json_tweet$includes$users$public_metrics$followers_count)
+        user_id <- json_tweet$data$author_id
+        screen_name <- json_tweet$user$screen_name
+        retweet_id <- NA
+        if (keep_text) text <- json_tweet$data$text
+        if (!is.null(json_tweet$data$referenced_tweets) && json_tweet$data$referenced_tweets$type == 'retweeted') {
+          # if this tweet is a retweet, get original tweet's information
+          retweet_id <- json_tweet$data$referenced_tweets$id
+          if (keep_text) text <- NA
+        }
+        res <- list(id = id, magnitude = magnitude, user_id = user_id,
+                    screen_name = screen_name, retweet_id = retweet_id)
+        if (keep_text) res[['text']] <- text
+        res
+      },
+      error = function(e) {
+        warning(sprintf('Error processing json: %s', e))
+      })
+    }
+  } else {
+    stop('Unknown API version!')
   }
 
   con <- file(path, "r")
