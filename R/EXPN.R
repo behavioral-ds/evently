@@ -7,7 +7,7 @@ get_param_names.hawkes_EXPN <- function(model) {
 get_ampl_likelihood.hawkes_EXPN <- function(model) {
   paste(
     'sum {cn in 1..HL} ((  (1 - 0^(L[cn]-J0[cn]-1)) *  (sum {i in J0[cn]+1..L[cn]-1} (log(N-i+1))',
-    '- (L[cn] - J0[cn] - 1) * log(N) + (L[cn] - J0[cn] - 1) * log(K * theta) + sum{i in J0[cn]+1..L[cn]-1} (log(sum{j in 1..i-1} (exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100 )))',
+    '- (L[cn] - J0[cn] - 1) * log(N) + (L[cn] - J0[cn] - 1) * log(K * theta) + sum{i in J0[cn]+1..L[cn]-1} (log(sum{j in ind[cn,i]..i-1} (exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100 )))',
     '- K * sum {i in 1..L[cn]-1} (sum{j in i..L[cn]-1}((N - j) / N * (exp(-1*theta*(time[cn,j] - time[cn,i])) - exp(-1*theta * (time[cn,j+1] - time[cn,i])))))));'
   )
 }
@@ -23,7 +23,7 @@ get_param_names.hawkes_mEXPN <- function(model) {
 get_ampl_likelihood.hawkes_mEXPN <- function(model) {
   paste(
     'sum {cn in 1..HL} ((  (1 - 0^(L[cn]-J0[cn]-1)) *  (sum {i in J0[cn]+1..L[cn]-1} (log(N-i+1))',
-    '- (L[cn] - J0[cn] - 1) * log(N) + (L[cn] - J0[cn] - 1) * log(K * theta) + sum{i in J0[cn]+1..L[cn]-1} (log(sum{j in 1..i-1} (exp(beta * log(magnitude[cn,j] + 1e-100)) * exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100 )))',
+    '- (L[cn] - J0[cn] - 1) * log(N) + (L[cn] - J0[cn] - 1) * log(K * theta) + sum{i in J0[cn]+1..L[cn]-1} (log(sum{j in ind[cn,i]..i-1} (exp(beta * log(magnitude[cn,j] + 1e-100)) * exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100 )))',
     '- K * sum {i in 1..L[cn]-1} (exp(beta * log(magnitude[cn,i]  + 1e-100)) * sum{j in i..L[cn]-1}((N - j) / N * (exp(-1*theta*(time[cn,j] - time[cn,i])) - exp(-1*theta * (time[cn,j+1] - time[cn,i])))))));'
   )
 }

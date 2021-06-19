@@ -24,7 +24,7 @@
 #'            data = data, observation_time = Inf)
 new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
                        observation_time = NULL, lower_bound = NULL, upper_bound = NULL,
-                       model_vars = NULL) {
+                       model_vars = NULL, limit_event = NULL) {
   model_type <- interpret_model_type(model_type)
   model <- list(model_type = model_type)
   if (length(model_type) > 1) {
@@ -59,6 +59,7 @@ new_hawkes <- function(model_type, par = NULL, data = NULL, init_par = NULL,
   model$init_par <- init_par
   model$par <- par
   model$value <- NA
+  model$limit_event <- limit_event
 
   final_lower_bound <- get_lower_bound(model)
   final_upper_bound <- get_upper_bound(model)
@@ -205,7 +206,7 @@ get_viral_score.hawkes <- function(model, m_0 = NULL) {
 
 # check the cascades before feeding it into ampl for fitting hawkes
 #' @importFrom stats runif
-preprocess_data <- function(data, observation_time) {
+preprocess_data <- function(data, observation_time, limit_event =  NULL) {
   offset_same_time <- function(history) {
     # check if two retweets happened at the same time. add a small number if so
     i <- 1
@@ -254,6 +255,21 @@ preprocess_data <- function(data, observation_time) {
     new_row <- data.frame(time = observation_time[i], magnitude = 0)
     hist <- rbind(hist[, c('time', 'magnitude')], new_row)
     offset_same_time(hist)
+    hist$ind <- rep(1, length(nrow(hist)))
+
+    # process data and add index where limited events will be added in the O(N^2) part of the loss function for efficiency
+    if (all(!is.null(limit_event))) {
+      if (limit_event$type == 'event' && !is.null(limit_event$value)) {
+        hist$ind <- sapply(seq(nrow(hist)), function(i) max(hist$ind[i], i-limit_event$value))
+      } else if (limit_event$type == 'time' && !is.null(limit_event$value)) {
+        # TODO based on time
+        stop('Not implemented!')
+      } else {
+        stop('Wrong limit_event type provided!')
+      }
+    }
+
+    hist
   })
 
   # sanity check
@@ -264,13 +280,13 @@ preprocess_data <- function(data, observation_time) {
 
 get_ampl_data_output.hawkes <- function(model) {
   # preprocess the data here
-  data <- preprocess_data(model$data, model$observation_time)
+  data <- preprocess_data(model$data, model$observation_time, limit_event = model$limit_event)
 
   # prepare output datas here
   lengthes <- sapply(data, nrow)
   indexed_data <- do.call(rbind.data.frame, lapply(seq_along(data), function(i) {
     hist <- data[[i]]
-    data.frame(index1 = i, index2 = seq(nrow(hist)), magnitude = hist$magnitude, time = hist$time)
+    data.frame(index1 = i, index2 = seq(nrow(hist)), magnitude = hist$magnitude, time = hist$time, ind = hist$ind)
   }))
   start_zeros <- sapply(data, function(hist) {
     which(hist$time > 0)[1] - 1
@@ -280,7 +296,7 @@ get_ampl_data_output.hawkes <- function(model) {
     ampl_output_from_r('HL', length(data), 'atomic'),
     ampl_output_from_r('L', lengthes, 'vector'),
     ampl_output_from_r('ML', max(lengthes), 'atomic'),
-    ampl_output_from_r(names = c('magnitude', 'time'), var = indexed_data, 'data.frame'),
+    ampl_output_from_r(names = c('magnitude', 'time', 'ind'), var = indexed_data, 'data.frame'),
     ampl_output_from_r('J0', start_zeros, 'vector')
   )
 }
@@ -303,6 +319,7 @@ get_ampl_model_output.hawkes <- function(model) {
     'param L {1..HL} >= 0;',
     'param magnitude {1..HL,1..ML} >= 0;',
     'param time {1..HL,1..ML} >= 0;',
+    'param ind {1..HL,1..ML} >= 0;',
     'param J0 {1..HL} >= 0;',
     '',
     sep = '\n'

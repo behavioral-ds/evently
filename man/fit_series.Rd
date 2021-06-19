@@ -14,6 +14,7 @@ fit_series(
   observation_time = NULL,
   lower_bound = NULL,
   upper_bound = NULL,
+  limit_event = NULL,
   model_vars = NULL,
   parallel_type = "PSOCK",
   ...
@@ -44,6 +45,8 @@ values are the lowest possible values.}
 
 \item{upper_bound}{Model parameter upper bounds. A named vector where names are model parameters and
 values are the largest possible values.}
+
+\item{limit_event}{choose how to optimize the computation by reducing the number of events added in log-likelihood functions}
 
 \item{model_vars}{A named list of extra variables provided to hawkes objects}
 

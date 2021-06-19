@@ -114,3 +114,9 @@ test_that('fit with constant background rate works', {
   fitted <- fit_series(cascade, model_type = c('EXP', 'CONST'))
   expect_s3_class(fitted, 'hawkes')
 })
+
+test_that('fit with limit_event should work', {
+  cascade <- data.frame(time = seq(0, 10), magnitude = seq(11))
+  expect_error(fit_series(cascade, model_type = 'EXP', limit_event = list()))
+  expect_error(fit_series(cascade, model_type = 'EXP', limit_event = list(type = 'wrongtype')))
+})

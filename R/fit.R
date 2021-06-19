@@ -20,6 +20,7 @@
 #' values are the lowest possible values.
 #' @param upper_bound Model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
+#' @param limit_event choose how to optimize the computation by reducing the number of events added in log-likelihood functions
 #' @param model_vars A named list of extra variables provided to hawkes objects
 #' @param parallel_type One of "PSOCK" or "FORK". Default to "PSOCK". See "Details" in makeCluster {parallel}.
 #' @param ... Further arguments passed to ampl
@@ -38,10 +39,10 @@
 #' fitted$value # negative log-likelihood value
 #' }
 fit_series <- function(data, model_type, cores = 1, init_pars = NULL, .init_no = NULL, observation_time = NULL,
-                       lower_bound = NULL, upper_bound = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
+                       lower_bound = NULL, upper_bound = NULL, limit_event = NULL, model_vars = NULL, parallel_type = 'PSOCK', ...) {
   data <- preparation(data)
   model <- new_hawkes(data = data, model_type = model_type, observation_time = observation_time,
-                      lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars)
+                      lower_bound = lower_bound, upper_bound = upper_bound, model_vars = model_vars, limit_event = limit_event)
   fit_series_by_model(model, cores = cores, init_pars = init_pars, .init_no = .init_no,
                       parallel_type = parallel_type, ...)
 }

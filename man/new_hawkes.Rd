@@ -12,7 +12,8 @@ new_hawkes(
   observation_time = NULL,
   lower_bound = NULL,
   upper_bound = NULL,
-  model_vars = NULL
+  model_vars = NULL,
+  limit_event = NULL
 )
 }
 \arguments{
