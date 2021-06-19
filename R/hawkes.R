@@ -14,6 +14,7 @@
 #' values are the lowest possible values.
 #' @param upper_bound Model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
+#' #' @param limit_event choose how to optimize the computation by reducing the number of events added in log-likelihood functions.
 #' @param model_vars A named list of extra variables provided to hawkes objects
 #' @return A model object with class [hawkes] and [hawkes_`model_type`] where `model_type` is replaced
 #' by the given model_type
