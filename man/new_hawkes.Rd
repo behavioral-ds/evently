@@ -35,10 +35,11 @@ are observed until a common time.}
 values are the lowest possible values.}
 
 \item{upper_bound}{Model parameter upper bounds. A named vector where names are model parameters and
-values are the largest possible values.
-#' @param limit_event choose how to optimize the computation by reducing the number of events added in log-likelihood functions.}
+values are the largest possible values.}
 
 \item{model_vars}{A named list of extra variables provided to hawkes objects}
+
+\item{limit_event}{choose how to optimize the computation by reducing the number of events added in log-likelihood functions.}
 }
 \value{
 A model object with class [hawkes] and [hawkes_`model_type`] where `model_type` is replaced
