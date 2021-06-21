@@ -263,8 +263,17 @@ preprocess_data <- function(data, observation_time, limit_event =  NULL) {
       if (limit_event$type == 'event' && !is.null(limit_event$value)) {
         hist$ind <- sapply(seq(nrow(hist)), function(i) max(hist$ind[i], i-limit_event$value))
       } else if (limit_event$type == 'time' && !is.null(limit_event$value)) {
-        # TODO based on time
-        stop('Not implemented!')
+        stopifnot(limit_event$value > 0)
+        min_times <- hist$time - limit_event$value
+        i <- 1
+        ind <- c()
+        for (j in seq(2, nrow(hist))) {
+          while (min_times[j] > hist$time[i]) {
+            i <- i + 1
+          }
+          ind[j] <- min(j-1, i)
+        }
+        hist$ind <- ind
       } else {
         stop('Wrong limit_event type provided!')
       }
