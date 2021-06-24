@@ -107,7 +107,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
 
       processed_tweets_batch_list <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores))
       # save this intermediate results in case the function fails
-      fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
+      data.table::fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
       rm(processed_tweets_batch_list) # to clear up memory
     } else if (!save_temp) {
       processed_tweets_batch[[i]] <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores))
@@ -120,7 +120,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
   close(con)
 
   if (save_temp) processed_tweets_batch <- lapply(list.files(path = output_path, pattern = temp_prefix),
-                                                  function(f) fread(file.path(output_path, f)))
+                                                  function(f) data.table::fread(file.path(output_path, f)))
   processed_tweets <- data.table::as.data.table(data.table::rbindlist(processed_tweets_batch))
   processed_tweets[is.na(retweet_id), retweet_id := id]
   processed_tweets <- processed_tweets[(retweet_id %in% id) & !is.na(id)] #id could be NA due to processing errors

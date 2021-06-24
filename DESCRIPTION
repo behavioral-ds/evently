@@ -1,7 +1,7 @@
 Package: evently
 Type: Package
 Title: Fit Hawkes and HawkesN Processes with AMPL and Ipopt
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person("Quyu", "Kong", email = "quyu.kong@anu.edu.au", role = c("aut", "cre")),
     person("Marian-Andrei", "Rizoiu", email = "marian-andrei.rizoiu@uts.edu.au", role = c("aut"))
@@ -13,6 +13,8 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true
 RoxygenNote: 7.1.1
+Depends: 
+    R (>= 3.5)
 Suggests:
     testthat,
     covr,
@@ -25,4 +27,6 @@ Suggests:
     seismic,
     data.table,
     bit64,
-    poweRlaw
+    poweRlaw,
+    purrr,
+    glue
