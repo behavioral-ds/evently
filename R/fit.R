@@ -20,7 +20,11 @@
 #' values are the lowest possible values.
 #' @param upper_bound Model parameter upper bounds. A named vector where names are model parameters and
 #' values are the largest possible values.
-#' @param limit_event choose how to optimize the computation by reducing the number of events added in log-likelihood functions
+#' @param limit_event Define the way to optimize the computation by reducing the number of events added in log-likelihood (LL) functions,
+#' defaults to NULL, i.e., no optimization. To limit the number of events computed, a list with `type` and `value` shoud be provided.
+#' For example, limit_event = list(type = "event", value = 10) limits the LL fitting to 10 events,
+#' limit_event = list(type = "time", value = 10)  limits the LL fitting to the events within past 10 time units.
+#' The best practice to trade-off the computation could be to limit to the largest number of events that one can afford.
 #' @param model_vars A named list of extra variables provided to hawkes objects
 #' @param parallel_type One of "PSOCK" or "FORK". Default to "PSOCK". See "Details" in makeCluster {parallel}.
 #' @param ... Further arguments passed to ampl

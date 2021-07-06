@@ -46,7 +46,11 @@ values are the lowest possible values.}
 \item{upper_bound}{Model parameter upper bounds. A named vector where names are model parameters and
 values are the largest possible values.}
 
-\item{limit_event}{choose how to optimize the computation by reducing the number of events added in log-likelihood functions}
+\item{limit_event}{Define the way to optimize the computation by reducing the number of events added in log-likelihood (LL) functions,
+defaults to NULL, i.e., no optimization. To limit the number of events computed, a list with `type` and `value` shoud be provided.
+For example, limit_event = list(type = "event", value = 10) limits the LL fitting to 10 events,
+limit_event = list(type = "time", value = 10)  limits the LL fitting to the events within past 10 time units.
+The best practice to trade-off the computation could be to limit to the largest number of events that one can afford.}
 
 \item{model_vars}{A named list of extra variables provided to hawkes objects}
 
