@@ -74,3 +74,14 @@ test_that('simulate with a given history works', {
   sim <- generate_series(par = c(K = 0.8, theta = 1), model_type = 'EXP', init_history = hist)
   expect_true(all(sim[[1]][1:3,] == hist))
 })
+
+test_that('simulate with background rate should work', {
+  kernel.type <- "EXP"
+  exo.type <- "CONST"
+  set.seed(888)
+  par <- c(K = 0.5, theta = 1, lambda = 0.25)
+
+  hists <- generate_series(model_type = c(exo.type, kernel.type), par = par,
+                           sim_no = 1, Tmax = 100)
+  expect_false(is.unsorted(hists[[1]]$time))
+})

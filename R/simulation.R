@@ -168,6 +168,9 @@ generate_series <- function(model, par, model_type, sim_no = 1, cores = 1, Tmax 
                                                         history_init = immigrant_events[i, ], tol = tol)
       })
       cascade <- do.call(rbind, cascades)
+      cascade <- cascade[order(cascade$time), ]
+      rownames(cascade) <- NULL
+
       if (nrow(immigrant_events) > 1) cascade[order(cascade$time), ]
     } else if (!is.null(model_type$hawkes_decay_type) && !is.null(init_history)) {
       cascade <- generate_series_no_background_rate(par[get_param_names(new_hawkes(model_type = model_type$hawkes_decay_type))],
