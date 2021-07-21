@@ -18,20 +18,20 @@ get_ampl_likelihood.hawkes_MULTI <- function(model) {
   switch (
     combined_type,
     'EXP_CONST' = paste(
-      'sum {cn in 1..HL} ( (1 - 0^(L[cn]-J0[cn]-1)) * (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K * theta * sum {j in 1..i-1} (exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100)))',
+      'sum {cn in 1..HL} ( (1 - 0^(L[cn]-J0[cn]-1)) * (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K * theta * sum {j in ind[cn,i]..i-1} (exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100)))',
       '- lambda * (time[cn,L[cn]] - time[cn, 1]) - K * sum {i in 1..L[cn]-1} ((1 - exp(-1 * theta * (time[cn,L[cn]] - time[cn,i])))));'
     ),
     'PL_CONST' =   paste(
-      'sum {cn in 1..HL} (  (1 - 0^(L[cn]-J0[cn]-1)) *  (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K*sum {j in 1..i-1} ((time[cn,i] - time[cn,j] + c) ^ (-1-theta)) + 1e-100)))',
+      'sum {cn in 1..HL} (  (1 - 0^(L[cn]-J0[cn]-1)) *  (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K*sum {j in ind[cn,i]..i-1} ((time[cn,i] - time[cn,j] + c) ^ (-1-theta)) + 1e-100)))',
       '- lambda * (time[cn,L[cn]] - time[cn, 1]) - K * sum {i in 1..L[cn]-1} (( (1 / c)^theta - ( 1 / (time[cn,L[cn]] - time[cn,i] + c))^theta )) / theta);'
     ),
     'mEXP_CONST' =   paste(
-      'sum {cn in 1..HL} ( (1 - 0^(L[cn]-J0[cn]-1)) * (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K * theta * sum {j in 1..i-1} (magnitude[cn,j]^beta * exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100)',
+      'sum {cn in 1..HL} ( (1 - 0^(L[cn]-J0[cn]-1)) * (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K * theta * sum {j in ind[cn,i]..i-1} (magnitude[cn,j]^beta * exp(-1 * theta * (time[cn,i] - time[cn,j]))) + 1e-100)',
       '))',
       '- lambda * (time[cn,L[cn]] - time[cn, 1]) - K * sum {i in 1..L[cn]-1} (magnitude[cn,i]^beta * (1 - exp(-1 * theta * (time[cn,L[cn]] - time[cn,i])))));'
     ),
     'mPL_CONST' =   paste(
-      'sum {cn in 1..HL} (  (1 - 0^(L[cn]-J0[cn]-1)) *  (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K * sum {j in 1..i-1} (magnitude[cn,j]^beta * (time[cn,i] - time[cn,j] + c) ^ (-1-theta)) + 1e-100))',
+      'sum {cn in 1..HL} (  (1 - 0^(L[cn]-J0[cn]-1)) *  (sum {i in J0[cn]+1..L[cn]-1} (log(lambda + K * sum {j in ind[cn,i]..i-1} (magnitude[cn,j]^beta * (time[cn,i] - time[cn,j] + c) ^ (-1-theta)) + 1e-100))',
       ')',
       '- lambda * (time[cn,L[cn]] - time[cn, 1]) - K * sum {i in 1..L[cn]-1} (magnitude[cn,i]^beta * ( (1 / c)^theta - ( 1 / (time[cn,L[cn]] - time[cn,i] + c))^theta )) / theta);'
     ),
