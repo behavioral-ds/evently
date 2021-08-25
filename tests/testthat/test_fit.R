@@ -120,3 +120,15 @@ test_that('fit with limit_event should work', {
   expect_error(fit_series(cascade, model_type = 'EXP', limit_event = list()))
   expect_error(fit_series(cascade, model_type = 'EXP', limit_event = list(type = 'wrongtype')))
 })
+
+
+test_that('fit DMM should work', {
+  datas <- list(
+    data.frame(time = seq(0, 10), magnitude = seq(11)),
+    data.frame(time = 0, magnitude = 1),
+    data.frame(time = seq(0, 10), magnitude = seq(11)),
+    data.frame(time = seq(0, 10), magnitude = seq(11))
+  )
+  res <- fit_series(datas, model_type = 'DMM')
+  expect_false(any(is.null(res$par)))
+})

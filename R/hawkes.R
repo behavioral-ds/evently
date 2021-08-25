@@ -159,8 +159,16 @@ print.hawkes <- function(x, ...) {
     } else if (n %in% c('init_par', 'par', 'lower_bound', 'upper_bound')) {
       cat(paste0('- ', n, ':\n'))
       cat('  ')
-      formatted_text <- if (any(is.na(x[[n]]))) as.character(x[[n]]) else formatC(x[[n]], format = "e", digits = 2)
-      cat(paste(names(x[[n]]), formatted_text, collapse = '; '))
+      if (any(is.na(x[[n]]))) {
+        formatted_text <- as.character(x[[n]])
+        cat(paste(names(x[[n]]), formatted_text, collapse = '; '))
+      } else if (is.list(x[[n]])) {
+        cat(paste(names(x[[n]]), paste(unname(x[[n]])), sep = ' = ', collapse = ';\n  '))
+        cat('; ')
+      } else {
+        formatted_text <- formatC(x[[n]], format = "e", digits = 2)
+        cat(paste(names(x[[n]]), formatted_text, collapse = '; '))
+      }
       cat('\n')
     }
   }

@@ -1,6 +1,10 @@
 # implementation of CIKM'20: https://github.com/qykong/dual-mixture-hawkes-processes
 
 
+get_param_names.hawkes_DMM <- function(model) {
+  c('par') # placeholder
+}
+
 ############# utility functions ##############
 random_init_probabilities <- function(k) {
   values <- runif(k, 1, 100)
@@ -34,9 +38,16 @@ get_ampl_data_output.hawkes_mixturePLkernel <- function(model) {
 
 # customized AMPL model output
 get_ampl_model_output.hawkes_mixturePLkernel <- function(model) {
-  paste('param HL > 0; param CL := ', model$cluster_number, '; param ML > 0; param L {1..HL} >= 0; param magnitude {1..HL,1..ML} >= 0; param time {1..HL,1..ML} >= 0; param J0 {1..HL} >= 0; param PKH {1..CL,1..HL} >=0;
-        var c {1..CL} >= 0;
-        var theta {1..CL} >= 0;',
+  paste('param HL > 0; param CL := ', model$cluster_number, '; ',
+        'param ML > 0;',
+        'param L {1..HL} >= 0;',
+        'param magnitude {1..HL,1..ML} >= 0;',
+        'param time {1..HL,1..ML} >= 0;',
+        'param ind {1..HL,1..ML} >= 0;',
+        'param J0 {1..HL} >= 0;',
+        'param PKH {1..CL,1..HL} >=0;',
+        'var c {1..CL} >= 0;',
+        'var theta {1..CL} >= 0;',
         if (is.finite(model$init_par[[1]])) paste(glue::glue('let {get_param_names(model)} := {model$init_par[get_param_names(model)]};'), collapse = "\n") else '',
         'maximize Likelihood:',
         get_ampl_likelihood(model),
@@ -70,12 +81,15 @@ KMMEM <- function(data, k, max_iter = 10) {
   ps <- random_init_probabilities(k)
 
   params <- generate_random_points(new_hawkes(model_type='mixturePLkernel', model_vars = list(cluster_number = k)))[1,]
-  params <- as.double(params)
+  ns <- names(params)
+  # params <- as.vector(params)
+  # names(params) <- ns
 
   data <- data[sapply(data, function(.x) nrow(.x) > 1)]
   kernel_log_likelihood <- function(cluster_no, param, hist) {
     c <- param[[sprintf('c[%s]', cluster_no)]]
     theta <- param[[sprintf('theta[%s]', cluster_no)]]
+
     if (nrow(hist) == 1) stop()
     sum(sapply(seq(2, nrow(hist)), function(.x) log(sum(theta * c^theta * (hist$time[.x] - hist$time[seq(.x-1)] + c) ^ (-1-theta)) +.Machine$double.xmin )))
   }
@@ -100,7 +114,9 @@ KMMEM <- function(data, k, max_iter = 10) {
     })
 
     ps <- sapply(seq(k), function(.x) sum(p_k_l[[.x]])/length(data))
-    params <- rbind.data.frame(params)
+
+    params <- as.data.frame(as.list(params))
+    colnames(params) <- ns
 
     res <- fit_series(data, model_type = 'mixturePLkernel', init_pars = params,
                       observation_time = Inf, model_vars = list(cluster_number = k, p_k_h_index = p_k_h_index), cores = 1)
@@ -175,7 +191,7 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
 
   sizes <- sapply(hists, nrow)
   cat('start BMM\n')
-  if (!missing(clusters)) {
+  if (!is.null(clusters)) {
     BMM_clusters <- clusters[1]
     n_star_p <- BMMEM_repeat(sizes, k = BMM_clusters, cores = cores, times = times)
     if (length(clusters) == 2) kernel_clusters <- clusters[2] else kernel_clusters <- clusters
@@ -199,22 +215,30 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
   # remove single event cascades as they won't be computed in KMM anyway
   keeped_hists <- hists[sapply(hists, function(h) nrow(h) >= 2)]
   # if no cascades left then return here
-  if (length(keeped_hists) == 0) return(list(n_star = n_star_p$n_star,
-                                             p_n_star = n_star_p$p,
-                                             params = NA,
-                                             p_params = NA,
-                                             kernel_clusters = kernel_clusters,
-                                             BMM_clusters = BMM_clusters))
+  if (length(keeped_hists) == 0) {
+    model$par <- list(n_star = n_star_p$n_star,
+                      p_n_star = n_star_p$p,
+                      params = NA,
+                      p_params = NA,
+                      kernel_clusters = kernel_clusters,
+                      BMM_clusters = BMM_clusters)
+    return(model)
+  }
   cat('start KMM\n')
   kernel_clusters <- min(length(keeped_hists), kernel_clusters)
 
   res <- KMMEM_repeat(keeped_hists, k = kernel_clusters, times = times, cores = cores)
   cat('done KMM\n')
   params <- res
-  return(list(n_star = n_star_p$n_star,
-              p_n_star = n_star_p$p,
-              params = res$params,
-              p_params = res$probability,
-              kernel_clusters = kernel_clusters,
-              BMM_clusters = BMM_clusters))
+  model$par <- list(n_star = n_star_p$n_star,
+                    p_n_star = n_star_p$p,
+                    params = res$params,
+                    p_params = res$probability,
+                    kernel_clusters = kernel_clusters,
+                    BMM_clusters = BMM_clusters)
+  model$value <- res$value
+  model$upper_bound <- NULL
+  model$lower_bound <- NULL
+  model$init_par <- NULL
+  model
 }
