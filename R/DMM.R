@@ -82,10 +82,7 @@ KMMEM <- function(data, k, max_iter = 10) {
 
   params <- generate_random_points(new_hawkes(model_type='mixturePLkernel', model_vars = list(cluster_number = k)))[1,]
   ns <- names(params)
-  # params <- as.vector(params)
-  # names(params) <- ns
 
-  data <- data[sapply(data, function(.x) nrow(.x) > 1)]
   kernel_log_likelihood <- function(cluster_no, param, hist) {
     c <- param[[sprintf('c[%s]', cluster_no)]]
     theta <- param[[sprintf('theta[%s]', cluster_no)]]
@@ -109,9 +106,11 @@ KMMEM <- function(data, k, max_iter = 10) {
       total_likelihood <- new_total_likelihood
     }
     p_k_l <- lapply(seq(k), function(.x) sapply(seq_along(data), function(l) if (is.infinite(qs[[l]][.x])) 0 else 1/(sum(exp(qs[[l]][-.x] - qs[[l]][.x])) + 1) ))
-    p_k_h_index <- purrr::map_df(seq(k), function(.x) {
-      purrr::map_dfr(seq_along(data), function(l) list(k = .x, h = l, p = p_k_l[[.x]][[l]]))
+    p_k_h_index <- lapply(seq(k), function(.x) {
+      lapply(seq_along(data), function(l) list(k = .x, h = l, p = p_k_l[[.x]][[l]]))
     })
+    p_k_h_index <- do.call(function(...) rbind.data.frame(..., make.row.names = FALSE),
+                           p_k_h_index)
 
     ps <- sapply(seq(k), function(.x) sum(p_k_l[[.x]])/length(data))
 
@@ -214,6 +213,9 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
 
   # remove single event cascades as they won't be computed in KMM anyway
   keeped_hists <- hists[sapply(hists, function(h) nrow(h) >= 2)]
+  if (!is.null(model$max_event_length) && model$max_event_length > 0) {
+    keeped_hists <- lapply(keeped_hists, function(hist) hist[seq(min(model$max_event_length, nrow(hist)))])
+  }
   # if no cascades left then return here
   if (length(keeped_hists) == 0) {
     model$par <- list(n_star = n_star_p$n_star,
@@ -231,9 +233,9 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
   cat('done KMM\n')
   params <- res
   model$par <- list(n_star = n_star_p$n_star,
-                    p_n_star = n_star_p$p,
-                    params = res$params,
-                    p_params = res$probability,
+                    n_star_probability = n_star_p$p,
+                    kernel_params = res$params,
+                    kernel_params_probability = res$probability,
                     kernel_clusters = kernel_clusters,
                     BMM_clusters = BMM_clusters)
   model$value <- res$value
