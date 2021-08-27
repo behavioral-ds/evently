@@ -77,7 +77,7 @@ generate_random_points.hawkes_mixturePLkernel <- function(model) {
 }
 
 ######### kernel mixture model fitting ##################
-KMMEM <- function(data, k, max_iter = 10) {
+KMMEM <- function(data, k, max_iter = 10, ipopt_max_iter = 1000) {
   ps <- random_init_probabilities(k)
 
   params <- generate_random_points(new_hawkes(model_type='mixturePLkernel', model_vars = list(cluster_number = k)))[1,]
@@ -118,7 +118,9 @@ KMMEM <- function(data, k, max_iter = 10) {
     colnames(params) <- ns
 
     res <- fit_series(data, model_type = 'mixturePLkernel', init_pars = params,
-                      observation_time = Inf, model_vars = list(cluster_number = k, p_k_h_index = p_k_h_index), cores = 1)
+                      observation_time = Inf, model_vars = list(cluster_number = k,
+                                                                p_k_h_index = p_k_h_index),
+                      cores = 1, ipopt_max_iter = ipopt_max_iter)
     params <- res$par
   }
   params <- lapply(seq(k), function(.x) c(theta = params[[sprintf('theta[%s]', .x)]],
@@ -182,7 +184,9 @@ BMMEM_repeat <- function(..., times = 10, cores = 1) {
 }
 
 ######## fit the two mixture models together #########
-fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_type, .init_no, ...) {
+fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
+                                           parallel_type, .init_no,
+                                           ipopt_max_iter = 1000, ...) {
   hists <- model$data
   clusters <- model$cluster_no
   times <- model$times
@@ -217,6 +221,7 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
     cat(sprintf('Capping number of events in KMM to %s', model$max_event_length))
     keeped_hists <- lapply(keeped_hists, function(hist) hist[seq(min(model$max_event_length, nrow(hist))), ])
   }
+
   # if no cascades left then return here
   if (length(keeped_hists) == 0) {
     model$par <- list(n_star = n_star_p$n_star,
@@ -230,7 +235,8 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
   cat('start KMM\n')
   kernel_clusters <- min(length(keeped_hists), kernel_clusters)
 
-  res <- KMMEM_repeat(keeped_hists, k = kernel_clusters, times = times, cores = cores)
+  res <- KMMEM_repeat(keeped_hists, k = kernel_clusters, times = times,
+                      cores = cores, ipopt_max_iter=ipopt_max_iter)
   cat('done KMM\n')
   params <- res
   model$par <- list(n_star = n_star_p$n_star,

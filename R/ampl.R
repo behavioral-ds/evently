@@ -83,7 +83,7 @@ prepare_tmp_file <- function(type) {
 
 # fit with ampl
 ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal = 'fit',
-                     debug = F, ampl_execution = .globals$execution) {
+                     debug = F, ampl_execution = .globals$execution, ipopt_max_iter = 1000) {
   if (missing(dat_file)) {
     dat_file <- output_dat(model)
     # if the file is created within this function then remove once finishes
@@ -102,7 +102,7 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
   tmp_files <- list(dat = dat_file, mod = mod_file, run = tmp_run, res = tmp_res)
   # what's the expected result
   res <- switch (goal,
-    fit = .run(model = model, solver = solver, tmp_files = tmp_files, debug, ampl_execution),
+    fit = .run(model = model, solver = solver, tmp_files = tmp_files, debug, ampl_execution, ipopt_max_iter),
     nll = .run_get_likelihood(model = model, tmp_files = tmp_files, debug, ampl_execution)
   )
 
@@ -113,13 +113,13 @@ ampl_run <- function(model = model, solver = 'ipopt', dat_file, mod_file, goal =
 # the solver (default "minos"). Returns the fitted parameters, the value of the
 # log.likelihood function and the exit status.
 #' @importFrom utils read.csv
-.run <- function(model, solver = "minos", tmp_files, debug, ampl_execution, ...) {
+.run <- function(model, solver = "minos", tmp_files, debug, ampl_execution, ipopt_max_iter, ...) {
   arguments <- list(...) # allow future extensions
 
   var_names <- paste(names(model$init_par), collapse = ", ")
   solver_text <- sprintf("option solver %s;", solver)
   if (solver == "ipopt")
-    solver_text <- paste(solver_text, "options ipopt_options 'print_level=1 max_iter=1000';", sep = '\n')
+    solver_text <- paste(solver_text, sprintf("options ipopt_options 'print_level=1 max_iter=%s';", ipopt_max_iter), sep = '\n')
   # print("halt_on_ampl_error=yes causing errors; not sure why but removed for now")
   # linear_solver=ma57
   if (solver == "knitro")
