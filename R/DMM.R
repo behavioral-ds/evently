@@ -214,6 +214,7 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars, parallel_typ
   # remove single event cascades as they won't be computed in KMM anyway
   keeped_hists <- hists[sapply(hists, function(h) nrow(h) >= 2)]
   if (!is.null(model$max_event_length) && model$max_event_length > 0) {
+    cat(sprintf('Capping number of events in KMM to %s', model$max_event_length))
     keeped_hists <- lapply(keeped_hists, function(hist) hist[seq(min(model$max_event_length, nrow(hist)))])
   }
   # if no cascades left then return here
