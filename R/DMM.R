@@ -77,7 +77,7 @@ generate_random_points.hawkes_mixturePLkernel <- function(model) {
 }
 
 ######### kernel mixture model fitting ##################
-KMMEM <- function(data, k, max_iter = 10, ipopt_max_iter = 1000) {
+KMMEM <- function(full_data, k, max_iter = 10, ipopt_max_iter = 1000, max_no_cascades = NULL) {
   ps <- random_init_probabilities(k)
 
   params <- generate_random_points(new_hawkes(model_type='mixturePLkernel', model_vars = list(cluster_number = k)))[1,]
@@ -96,7 +96,15 @@ KMMEM <- function(data, k, max_iter = 10, ipopt_max_iter = 1000) {
   print('start em on kernel functions....')
 
   repeat {
-    qs <- lapply(seq_along(data), function(l) sapply(seq(k), function(.x) (log(ps[.x]) + kernel_log_likelihood(.x, params, data[[l]]))))
+    if (!is.null(max_no_cascades)) {
+      data <- sample(full_data, min(max_no_cascades, length(full_data)))
+    }
+    qs <- lapply(seq_along(data),
+                 function(l) {
+                   sapply(seq(k), function(.x) {
+                     (log(ps[.x]) + kernel_log_likelihood(.x, params, data[[l]]))
+                   })
+                 })
     new_total_likelihood <- sum(sapply(seq_along(data), function(l) log_sum_exp(qs[[l]]) ))
     print(sprintf('iteration %s: %s', iter, round(new_total_likelihood, digits = 2)))
     if (abs(new_total_likelihood - total_likelihood) < 1e-2 || iter >= max_iter) {
@@ -105,6 +113,7 @@ KMMEM <- function(data, k, max_iter = 10, ipopt_max_iter = 1000) {
       iter <- iter + 1
       total_likelihood <- new_total_likelihood
     }
+
     p_k_l <- lapply(seq(k), function(.x) sapply(seq_along(data), function(l) if (is.infinite(qs[[l]][.x])) 0 else 1/(sum(exp(qs[[l]][-.x] - qs[[l]][.x])) + 1) ))
     p_k_h_index <- lapply(seq(k), function(.x) {
       lapply(seq_along(data), function(l) list(k = .x, h = l, p = p_k_l[[.x]][[l]]))
@@ -186,7 +195,8 @@ BMMEM_repeat <- function(..., times = 10, cores = 1) {
 ######## fit the two mixture models together #########
 fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
                                            parallel_type, .init_no,
-                                           ipopt_max_iter = 1000, ...) {
+                                           ipopt_max_iter = 1000,
+                                           max_no_cascades = NULL, ...) {
   hists <- model$data
   clusters <- model$cluster_no
   times <- model$times
@@ -218,7 +228,7 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
   # remove single event cascades as they won't be computed in KMM anyway
   keeped_hists <- hists[sapply(hists, function(h) nrow(h) >= 2)]
   if (!is.null(model$max_event_length) && model$max_event_length > 0) {
-    cat(sprintf('Capping number of events in KMM to %s', model$max_event_length))
+    cat(sprintf('Capping number of events in KMM to %s\n', model$max_event_length))
     keeped_hists <- lapply(keeped_hists, function(hist) hist[seq(min(model$max_event_length, nrow(hist))), ])
   }
 
@@ -236,7 +246,8 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
   kernel_clusters <- min(length(keeped_hists), kernel_clusters)
 
   res <- KMMEM_repeat(keeped_hists, k = kernel_clusters, times = times,
-                      cores = cores, ipopt_max_iter=ipopt_max_iter)
+                      cores = cores, ipopt_max_iter=ipopt_max_iter,
+                      max_no_cascades = max_no_cascades)
   cat('done KMM\n')
   params <- res
   model$par <- list(n_star = n_star_p$n_star,
