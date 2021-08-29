@@ -105,7 +105,7 @@ KMMEM <- function(full_data, k, max_iter = 10, ipopt_max_iter = 1000, max_no_cas
                      (log(ps[.x]) + kernel_log_likelihood(.x, params, data[[l]]))
                    })
                  })
-    new_total_likelihood <- sum(sapply(seq_along(data), function(l) log_sum_exp(qs[[l]]) ))
+    new_total_likelihood <- sum(sapply(seq_along(data), function(l) log_sum_exp(qs[[l]]) / nrow(data[[l]]) ))
     print(sprintf('iteration %s: %s', iter, round(new_total_likelihood, digits = 2)))
     if (abs(new_total_likelihood - total_likelihood) < 1e-2 || iter >= max_iter) {
       break
