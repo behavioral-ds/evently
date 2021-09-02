@@ -20,7 +20,12 @@ make_snowflake <- function(timestamp_ms, datacenter_id, worker_id, sequence_id, 
   sid
 }
 
-# inversely transform a snowflake id back to its components.
+#' Inversely transform a Twitter id back to its components (timestamp, datacentre id,
+#' worker id and sequence id).
+#' @param snowflake_id a list of Twitter ids
+#' @param twepoch time epoch. Defaults to 1288834974657
+#' @return A list of timestamp, datacentre id, worker id and sequence id
+#' @export
 melt_snowflake <- function(snowflake_id, twepoch = bit64::as.integer64('1288834974657')) {
   check_required_packages('bit64')
   base <- bit64::as.integer64(2)
