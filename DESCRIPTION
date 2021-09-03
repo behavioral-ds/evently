@@ -29,5 +29,5 @@ Suggests:
     bit64,
     poweRlaw,
     purrr,
-    glue，
+    glue,
     Hmisc
