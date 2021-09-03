@@ -5,32 +5,35 @@
 #' group fits.
 #' @param data A (named) list of data.frame(s) where each data.frame is an event cascade with
 #' event tims and event magnitudes (optional). The list names (if present) will be used for grouping cascades with same names.
-#' @param model_type A string representing the model type, e.g. EXP for Hawkes processes with an exponential kernel function
-#' @param observation_times A list or an vector of observation times for the cascades in data
 #' @param cores The number of cores used for parallel fitting, defaults to 1 (non-parallel)
 #' @param ... Check the available arguments of {fit_series}
 #' @return A list of model obejcts where each object fits on an invidual cascade in data
 #' @export
-group_fit_series <- function(data, model_type, observation_times = NULL, cores = 1, ...) {
+group_fit_series <- function(data, cores = 1, ...) {
   stopifnot(is.list(data))
-  stopifnot(length(data) == length(observation_times) || is.null(observation_times) || length(observation_times) == 1)
-  if (length(observation_times) == 1) {
-    observation_times <- rep(observation_times, length(data))
-  }
+  stopifnot(!is.null(names(data)))
+  # stopifnot(length(data) == length(observation_times) || is.null(observation_times) || length(observation_times) == 1)
+  # if (length(observation_times) == 1) {
+  #   observation_times <- rep(observation_times, length(data))
+  # }
 
-  fits <- mclapply(seq_along(data), function(i) fit_series(data = data[[i]], model_type = model_type,
-                                                           observation_time = observation_times[[i]],
-                                                           cores = 1, ...), mc.cores = cores)
+  # fits <- mclapply(seq_along(data), function(i) fit_series(data = data[[i]], model_type = model_type,
+  #                                                          observation_time = observation_times[[i]],
+  #                                                          cores = 1, ...), mc.cores = cores)
+  datas <- split(unname(data), names(data))
+  fits <- mclapply(datas, function(d) fit_series(d, model_type = 'DMM', observation_time = Inf,
+                                                 cores = 1, ...), mc.cores = cores)
+
   # data is named then start grouping cascades
-  if (!is.null(names(data))) {
-    fits <- split(fits, f = names(data))
-    for (i in seq_along(fits)) {
-      class(fits[[i]]) <- 'hawkes.group.fits'
-    }
-  } else {
-    class(fits) <- 'hawkes.group.fits'
-  }
-
+  # if (!is.null(names(data))) {
+  #   fits <- split(fits, f = names(data))
+  #   for (i in seq_along(fits)) {
+  #     class(fits[[i]]) <- 'hawkes.group.fits'
+  #   }
+  # } else {
+  #
+  # }
+  class(fits) <- 'hawkes.group.fits'
   fits
 }
 

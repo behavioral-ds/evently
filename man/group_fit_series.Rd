@@ -6,15 +6,11 @@
 If the given cascades are in a named list, the names will be regarded as groups and the result will be reformatted as a list of
 group fits.}
 \usage{
-group_fit_series(data, model_type, observation_times = NULL, cores = 1, ...)
+group_fit_series(data, cores = 1, ...)
 }
 \arguments{
 \item{data}{A (named) list of data.frame(s) where each data.frame is an event cascade with
 event tims and event magnitudes (optional). The list names (if present) will be used for grouping cascades with same names.}
-
-\item{model_type}{A string representing the model type, e.g. EXP for Hawkes processes with an exponential kernel function}
-
-\item{observation_times}{A list or an vector of observation times for the cascades in data}
 
 \item{cores}{The number of cores used for parallel fitting, defaults to 1 (non-parallel)}
 

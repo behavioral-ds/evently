@@ -96,9 +96,11 @@ KMMEM <- function(full_data, k, max_iter = 10, ipopt_max_iter = 1000, max_no_cas
   print('start em on kernel functions....')
 
   repeat {
+    data <- full_data
     if (!is.null(max_no_cascades)) {
       data <- sample(full_data, min(max_no_cascades, length(full_data)))
     }
+
     qs <- lapply(seq_along(data),
                  function(l) {
                    sapply(seq(k), function(.x) {
@@ -202,6 +204,15 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
   times <- model$times
   if (is.null(times)) times <- 10
 
+  # hard cut at cascade size 10
+  model$par <- list(n_star = NA, n_star_probability = NA,
+                    kernel_params = NA, kernel_params_probability = NA,
+                    kernel_clusters = NA, BMM_clusters = NA)
+  model$val <- NA
+  if (length(hists) < 10) {
+    return(model)
+  }
+
   sizes <- sapply(hists, nrow)
   cat('start BMM\n')
   if (!is.null(clusters)) {
@@ -234,12 +245,12 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
 
   # if no cascades left then return here
   if (length(keeped_hists) == 0) {
-    model$par <- list(n_star = n_star_p$n_star,
-                      p_n_star = n_star_p$p,
-                      params = NA,
-                      p_params = NA,
-                      kernel_clusters = kernel_clusters,
-                      BMM_clusters = BMM_clusters)
+    model$par$n_star <- n_star_p$n_star
+    model$par$n_star_probability <- n_star_p$p
+    model$par$kernel_params <- NA
+    model$par$kernel_params_probability <- NA
+    model$par$kernel_clusters <- kernel_clusters
+    model$par$BMM_clusters <- BMM_clusters
     return(model)
   }
   cat('start KMM\n')
@@ -249,16 +260,13 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
                       cores = cores, ipopt_max_iter=ipopt_max_iter,
                       max_no_cascades = max_no_cascades)
   cat('done KMM\n')
-  params <- res
-  model$par <- list(n_star = n_star_p$n_star,
-                    n_star_probability = n_star_p$p,
-                    kernel_params = res$params,
-                    kernel_params_probability = res$probability,
-                    kernel_clusters = kernel_clusters,
-                    BMM_clusters = BMM_clusters)
+
+  model$par$n_star <- n_star_p$n_star
+  model$par$n_star_probability <- n_star_p$p
+  model$par$kernel_params <- res$params
+  model$par$kernel_params_probability <- res$probability
+  model$par$kernel_clusters <- kernel_clusters
+  model$par$BMM_clusters <- BMM_clusters
   model$value <- res$value
-  model$upper_bound <- NULL
-  model$lower_bound <- NULL
-  model$init_par <- NULL
   model
 }
