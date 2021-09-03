@@ -62,14 +62,14 @@ construct_temporal_features <- function(cascades) {
 #' @export
 generate_features <- function(list_fits, data = FALSE) {
   # determine if list_fits is a list of hawkes.group.fits
-  stopifnot(is.list(list_fits) && all(sapply(list_fits, function(fits) 'hawkes.group.fits' %in% class(fits))))
+  stopifnot(is.list(list_fits) && 'hawkes.group.fits' %in% class(list_fits))
   #conver_to_feature <- function(values, param) {
   #  summarized <- as.list(summary(values))
   #  names(summarized) <- paste(param, names(summarized))
   #  summarized
   #}
 
-  params <- get_param_names(list_fits[[1]][[1]])
+  # params <- get_param_names(list_fits[[1]][[1]])
 
   # # v1 simple summary
   # res <- lapply(list_fits, function(fits) {
@@ -81,40 +81,73 @@ generate_features <- function(list_fits, data = FALSE) {
   #   }))
   # })
   # v2 discretization
-  params_quantiles <- lapply(params, function(param) {
-    all_param <- unlist(lapply(list_fits, function(fits) {
-      sapply(fits, function(single_fit) single_fit$par[[param]])
-    }))
-    unique(stats::quantile(all_param, seq(0, 1, by = 0.05), na.rm = T, names = F))
-  })
-  names(params_quantiles) <- params
+  params_quantiles <- get_parameter_quantiles(list_fits)
+
+  # names(params_quantiles) <- params
   res <- lapply(list_fits, function(fits) {
-    do.call(c, lapply(params, function(param) {
-      param_values <- sapply(fits, function(single_fit) single_fit$par[[param]])
-      param_values <- as.numeric(param_values[!is.na(param_values)])
-      quantile_counts <- table(cut(param_values, breaks = params_quantiles[[param]], include.lowest = T))
-      quantile_counts <- as.list(quantile_counts / sum(quantile_counts))
-      names(quantile_counts) <- paste(param, seq(length(quantile_counts)))
-      quantile_counts
-    }))
+    n_star_bits <- rep(0, length(params_quantiles[[1]])-1)
+    if (all(!is.na(fits$par$n_star))) {
+      cuts <- cut(fits$par$n_star, breaks = params_quantiles[[1]], include.lowest = TRUE)
+      summed <- sapply(split(fits$par$n_star_probability, cuts), sum)
+      n_star_bits <- as.numeric(summed)
+    }
+    theta_bits <- rep(0, length(params_quantiles[[2]])-1)
+    c_bits <- rep(0, length(params_quantiles[[3]])-1)
+    if (all(!is.na(fits$par$kernel_params_probability))) {
+      theta_cuts <- cut(sapply(fits$par$kernel_params, function(p) p[['theta']]),
+                  breaks = params_quantiles[[2]], include.lowest = TRUE)
+      c_cuts <- cut(sapply(fits$par$kernel_params, function(p) p[['c']]),
+                        breaks = params_quantiles[[3]], include.lowest = TRUE)
+      theta_summed <- sapply(split(fits$par$kernel_params_probability, theta_cuts), sum)
+      c_summed <- sapply(split(fits$par$kernel_params_probability, c_cuts), sum)
+      theta_bits <- as.numeric(theta_summed)
+      c_bits <- as.numeric(c_summed)
+    }
+    c(n_star_bits, theta_bits, c_bits)
   })
   res_df <- do.call(rbind.data.frame, res)
+  colnames(res_df) <- as.character(seq(ncol(res_df)))
   res_df <- cbind(data.frame(id = rownames(res_df)), res_df)
-
 
   if (!is.null(data) && is.logical(data) && data) {
     data <- unlist(lapply(seq_along(list_fits), function(i) {
-        datas <- lapply(list_fits[[i]], function(model) model$data[[1]])
-	names(datas) <- rep(names(list_fits)[[i]], length(datas))
-	datas
+        datas <- lapply(list_fits[[i]]$data, function(model) model$data[[1]])
+	      names(datas) <- rep(names(list_fits)[[i]], length(datas))
+	      datas
     }), recursive = F)
     data_features <- do.call(rbind.data.frame,
                              lapply(split(unname(data), names(data))[names(list_fits)],
                                  function(.x) as.list(construct_temporal_features(.x))))
+
     res_df <- cbind(res_df, data_features)
   }
   rownames(res_df) <- NULL
   res_df
+}
+
+# get quantiles
+get_parameter_quantiles <- function(list_fits) {
+  check_required_packages('Hmisc')
+  filter_na <- function(to_filter) to_filter[!is.na(to_filter)]
+  n_stars <- filter_na(unname(unlist(lapply(list_fits, function(f) f$par$n_star))))
+  n_star_ps <- filter_na(unname(unlist(lapply(list_fits, function(f) f$par$n_star_probability))))
+  thetas <- filter_na(unname(unlist(lapply(list_fits, function(f) if (all(is.na(f$par$kernel_params_probability))) NA
+                                                         else sapply(f$par$kernel_params, function(pa) pa[['theta']])))))
+  cs <- filter_na(unname(unlist(lapply(list_fits, function(f) if (all(is.na(f$par$kernel_params_probability))) NA
+                                                     else sapply(f$par$kernel_params, function(pa) pa[['c']])))))
+  thetas_p <- filter_na(unname(unlist(lapply(list_fits, function(f) if (all(is.na(f$par$kernel_params_probability))) NA
+                                                                   else f$par$kernel_params_probability))))
+
+  n_stars_quantiles <- unique(unname(Hmisc::wtd.quantile(n_stars, weights = n_star_ps, probs = seq(0, 1, 0.1), na.rm = T)))
+  n_stars_quantiles[length(n_stars_quantiles)+1] <- 1
+  n_stars_quantiles <- c(0, n_stars_quantiles)
+  theta_quantiles <- unique(unname(Hmisc::wtd.quantile(thetas, weights = thetas_p, probs = seq(0, 1, 0.1), na.rm = T)))
+  theta_quantiles <- c(0, theta_quantiles)
+  c_quantiles <- unique(unname(Hmisc::wtd.quantile(cs, weights = thetas_p, probs = seq(0, 1, 0.1), na.rm = T)))
+  c_quantiles <- c(0, c_quantiles)
+  list(n_stars_quantiles = n_stars_quantiles,
+       theta_quantiles = theta_quantiles,
+       c_quantiles = c_quantiles)
 }
 
 # Compute order 1 wassersterin distance between the empirical distributions of v1 and v2
