@@ -198,6 +198,7 @@ BMMEM_repeat <- function(..., times = 10, cores = 1) {
 fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
                                            parallel_type, .init_no,
                                            ipopt_max_iter = 1000,
+                                           min_no_cascades = 1,
                                            max_no_cascades = NULL, ...) {
   hists <- model$data
   clusters <- model$cluster_no
@@ -209,7 +210,7 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
                     kernel_params = NA, kernel_params_probability = NA,
                     kernel_clusters = NA, BMM_clusters = NA)
   model$val <- NA
-  if (length(hists) < 10) {
+  if (length(hists) < min_no_cascades) {
     return(model)
   }
 
