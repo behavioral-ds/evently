@@ -145,9 +145,9 @@ get_parameter_quantiles <- function(list_fits) {
   theta_quantiles <- c(0, theta_quantiles)
   c_quantiles <- unique(unname(Hmisc::wtd.quantile(cs, weights = thetas_p, probs = seq(0, 1, 0.1), na.rm = T)))
   c_quantiles <- c(0, c_quantiles)
-  list(n_stars_quantiles = n_stars_quantiles,
-       theta_quantiles = theta_quantiles,
-       c_quantiles = c_quantiles)
+  list(n_stars_quantiles = unique(n_stars_quantiles),
+       theta_quantiles = unique(theta_quantiles),
+       c_quantiles = unique(c_quantiles))
 }
 
 # Compute order 1 wassersterin distance between the empirical distributions of v1 and v2
