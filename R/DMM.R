@@ -139,18 +139,6 @@ KMMEM <- function(full_data, k, max_iter = 10, ipopt_max_iter = 1000, max_no_cas
   return(list(probability = ps, params = params, p_k_h_index = p_k_h_index, total_likelihood = total_likelihood))
 }
 
-KMMEM_repeat <- function(..., times = 10, cores = 1) {
-  models <- mclapply(seq(times), function(i) {
-    tryCatch({
-      KMMEM(...)
-    }, error = function(e) {
-      print(e)
-      return(list(total_likelihood = -.Machine$double.xmax))
-    })
-  }, mc.cores = cores)
-  models[[which.max(sapply(models, function(x) x[['total_likelihood']]))]]
-}
-
 
 ######### Borel mixture model fitting ##################
 
@@ -170,6 +158,7 @@ BMMEM <- function(sizes, k = 1, max_iter = 50) {
   repeat {
     qs <- lapply(seq(k), function(.x) sapply(seq_along(counts$size), function(l) ps[.x] * borel(counts$size[l], n_stars[.x])))
     new_total_likelihood <- sum(sapply(seq_along(counts$size), function(l) log(sum(sapply(seq(k), function(.x) qs[[.x]][l])))) * counts$count)
+
     if (new_total_likelihood - total_likelihood < 1e-2 || iter >= max_iter) {
       break
     } else {
@@ -189,8 +178,21 @@ BMMEM <- function(sizes, k = 1, max_iter = 50) {
               total_likelihood = total_likelihood))
 }
 
-BMMEM_repeat <- function(..., times = 10, cores = 1) {
-  models <- mclapply(seq(times), function(i) {BMMEM(...) }, mc.cores = cores)
+MMEM_repeat <- function(..., times = 10, cores = 1, type = 'BMMEM') {
+  models <- mclapply(seq(times), function(i) {
+    tryCatch({
+      if (type == 'BMMEM') {
+        BMMEM(...)
+      } else if (type == 'KMMEM') {
+        KMMEM(...)
+      } else {
+        stop('Wrong type!')
+      }
+    }, error = function(e) {
+      print(e)
+      return(list(total_likelihood = -.Machine$double.xmax))
+    })
+  }, mc.cores = cores)
   models[[which.max(sapply(models, function(x) x[['total_likelihood']]))]]
 }
 
@@ -218,12 +220,12 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
   cat('start BMM\n')
   if (!is.null(clusters)) {
     BMM_clusters <- clusters[1]
-    n_star_p <- BMMEM_repeat(sizes, k = BMM_clusters, cores = cores, times = times)
+    n_star_p <- MMEM_repeat(sizes, k = BMM_clusters, cores = cores, times = times, type = 'BMMEM')
     if (length(clusters) == 2) kernel_clusters <- clusters[2] else kernel_clusters <- clusters
   } else {
     # test k from 2 to 10 and choose the best by AIC
     trials <- lapply(seq(2, 10), function(k) {
-      n_star_p <- BMMEM_repeat(sizes, k = k, cores = cores, times = times)
+      n_star_p <- MMEM_repeat(sizes, k = k, cores = cores, times = times, type = 'BMMEM')
       list(n_star_p = n_star_p,
            aic_n_star = -n_star_p$total_likelihood * 2 + k * 2,
            k = k)
@@ -257,9 +259,9 @@ fit_series_by_model.hawkes_DMM <- function(model, cores, init_pars,
   cat('start KMM\n')
   kernel_clusters <- min(length(keeped_hists), kernel_clusters)
 
-  res <- KMMEM_repeat(keeped_hists, k = kernel_clusters, times = times,
+  res <- MMEM_repeat(keeped_hists, k = kernel_clusters, times = times,
                       cores = cores, ipopt_max_iter=ipopt_max_iter,
-                      max_no_cascades = max_no_cascades)
+                      max_no_cascades = max_no_cascades, type = 'KMMEM')
   cat('done KMM\n')
 
   model$par$n_star <- n_star_p$n_star
