@@ -186,7 +186,7 @@ or <Marian-Andrei@rizoiu.eu>.
 ## Documentation
 
 Please consult the package
-[documentation](https://www.behavioral-ds.ml/evently) for more details
+[documentation](https://www.behavioral-ds.science/evently) for more details
 and tutorials
 
 ## Reference
