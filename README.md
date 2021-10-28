@@ -177,9 +177,7 @@ from the National Security College, Crawford School, ANU.
 
 ## License
 
-Both dataset and code are distributed under the [Creative Commons
-Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-license](https://creativecommons.org/licenses/by-nc/4.0/). If you
+Both dataset and code are distributed under the [MIT License](https://raw.githubusercontent.com/behavioral-ds/evently/master/LICENSE.txt). If you
 require a different license, please contact us at <Quyu.Kong@anu.edu.au>
 or <Marian-Andrei@rizoiu.eu>.
 
