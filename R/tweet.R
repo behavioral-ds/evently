@@ -57,6 +57,8 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
       },
       error = function(e) {
         warning(sprintf('Error processing json: %s', e))
+        list(id = NA, magnitude = NA, user_id = NA,
+             screen_name = NA, retweet_id = NA)
       })
     }
   } else if (api_version == 2) {
@@ -84,6 +86,8 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
       },
       error = function(e) {
         warning(sprintf('Error processing json: %s', e))
+        list(id = NA, magnitude = NA, user_id = NA,
+             screen_name = NA, retweet_id = NA)
       })
     }
   } else {
