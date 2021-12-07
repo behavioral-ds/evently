@@ -14,6 +14,7 @@ parse_raw_tweets_to_cascades(
   keep_user = F,
   keep_absolute_time = F,
   keep_text = F,
+  keep_retweet_count = F,
   progress = T,
   return_as_list = T,
   save_temp = F,
@@ -37,6 +38,8 @@ by corresponding indics (start_ind to end_ind). Defaults to NULL.}
 \item{keep_absolute_time}{Keep the absolute tweeting times.}
 
 \item{keep_text}{Keep the tweet text.}
+
+\item{keep_retweet_count}{Keep the retweet_count field.}
 
 \item{progress}{The progress will be reported if set to True (default)}
 

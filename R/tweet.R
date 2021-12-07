@@ -17,6 +17,7 @@
 #' @param keep_user Twitter user ids will be kept.
 #' @param keep_absolute_time Keep the absolute tweeting times.
 #' @param keep_text Keep the tweet text.
+#' @param keep_retweet_count Keep the retweet_count field.
 #' @param progress The progress will be reported if set to True (default)
 #' @param return_as_list If true then a list of cascades (data.frames) will be returned.
 #' @param save_temp If temporary files should be generated while processing. Processing can be resumed on failures.
@@ -26,8 +27,8 @@
 #' @import parallel
 #' @export
 parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output_path = NULL,
-                                         keep_user = F, keep_absolute_time = F, keep_text = F, progress = T,
-                                         return_as_list = T, save_temp = F, api_version=1) {
+                                         keep_user = F, keep_absolute_time = F, keep_text = F, keep_retweet_count = F,
+                                         progress = T, return_as_list = T, save_temp = F, api_version=1) {
   check_required_packages(c('jsonlite', 'data.table', 'bit64'))
   library(data.table)
   # a helper function
@@ -45,14 +46,17 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
         screen_name <- json_tweet$user$screen_name
         retweet_id <- NA
         if (keep_text) text <- json_tweet$text
+        if (keep_retweet_count) retweet_count <- json_tweet$retweet_count
         if (!is.null(json_tweet[['retweeted_status']])) {
           # if this tweet is a retweet, get original tweet's information
           retweet_id <- json_tweet$retweeted_status$id_str
           if (keep_text) text <- NA
+          if (keep_retweet_count) retweet_count <- json_tweet$retweeted_status$retweet_count
         }
         res <- list(id = id, magnitude = magnitude, user_id = user_id,
              screen_name = screen_name, retweet_id = retweet_id)
         if (keep_text) res[['text']] <- text
+        if (keep_retweet_count) res[['retweet_count']] <- retweet_count
         res
       },
       error = function(e) {
@@ -143,6 +147,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
   kept_columns <- c('time', 'magnitude')
   if (keep_user) kept_columns <- c(kept_columns, 'user_id', 'screen_name')
   if (keep_absolute_time) kept_columns <- c(kept_columns, 'absolute_time')
+  if (keep_retweet_count) kept_columns <- c(retweet_count, 'retweet_count')
 
   data <- processed_tweets[, kept_columns, with = F]
 
