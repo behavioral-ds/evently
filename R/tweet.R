@@ -151,7 +151,7 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
   kept_columns <- c('time', 'magnitude')
   if (keep_user) kept_columns <- c(kept_columns, 'user_id', 'screen_name')
   if (keep_absolute_time) kept_columns <- c(kept_columns, 'absolute_time')
-  if (keep_retweet_count) kept_columns <- c(retweet_count, 'retweet_count')
+  if (keep_retweet_count) kept_columns <- c(kept_columns, 'retweet_count')
 
   data <- processed_tweets[, kept_columns, with = F]
 
