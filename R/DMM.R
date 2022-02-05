@@ -93,7 +93,7 @@ KMMEM <- function(full_data, k, max_iter = 10, ipopt_max_iter = 1000, max_no_cas
 
   iter <- 1
   total_likelihood <- -.Machine$double.xmax
-  print('start em on kernel functions....')
+  # print('start em on kernel functions....')
 
   repeat {
     data <- full_data
@@ -108,7 +108,7 @@ KMMEM <- function(full_data, k, max_iter = 10, ipopt_max_iter = 1000, max_no_cas
                    })
                  })
     new_total_likelihood <- sum(sapply(seq_along(data), function(l) log_sum_exp(qs[[l]]) / nrow(data[[l]]) ))
-    print(sprintf('iteration %s: %s', iter, round(new_total_likelihood, digits = 2)))
+    # print(sprintf('iteration %s: %s', iter, round(new_total_likelihood, digits = 2)))
     if (abs(new_total_likelihood - total_likelihood) < 1e-2 || iter >= max_iter) {
       break
     } else {
