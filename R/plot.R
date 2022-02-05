@@ -53,7 +53,7 @@ plot_kernel_function <- function(fitted_models) {
   data <- list(data.frame(magnitude = 1, time = 0)) # dummy data to get the kernel function from a Hawkes intensity function
 
   kernel_functions <- lapply(fitted_models, function(model) {
-    model$data <- list(model$data[[1]][1,])
+    model$data <- list(data.frame(magnitude = 0, time = 0))
     Vectorize(function(t) get_model_intensity_at(model, t = t))
   })
   cut_off_time <- max(sapply(kernel_functions, function(f) {
