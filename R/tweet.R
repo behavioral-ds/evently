@@ -7,7 +7,7 @@
 #' This function extracts cascades from a given jsonl file where each line is a tweet
 #' json object. Please refer to the Twitter developer documentation:
 #' https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object
-#' @param path File path to the tweets jsonl file
+#' @param paths Full file paths to the tweets jsonl files
 #' @param batch Number of tweets to be read for processing at each iteration, choose
 #' the best number for your memory load. Defaults to at most 10000 tweets each iteration.
 #' @param cores Number of cores to be used for processing each batch in parallel.
@@ -26,7 +26,7 @@
 #' Otherwise there will be no return.
 #' @import parallel
 #' @export
-parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output_path = NULL,
+parse_raw_tweets_to_cascades <- function(paths, batch = 100000, cores = 1, output_path = NULL,
                                          keep_user = F, keep_absolute_time = F, keep_text = F, keep_retweet_count = F,
                                          progress = T, return_as_list = T, save_temp = F, api_version=1) {
   check_required_packages(c('jsonlite', 'data.table', 'bit64'))
@@ -98,34 +98,37 @@ parse_raw_tweets_to_cascades <- function(path, batch = 100000, cores = 1, output
     stop('Unknown API version!')
   }
 
-  con <- file(path, "r")
   i <- 1
   total_tweets <- 0
   processed_tweets_batch <- list()
   temp_prefix <- 'processed_tweets_tmp_'
-  repeat {
-    tweets <- readLines(con, n = batch)
-    if (progress) cat(sprintf('Total tweets processed so far: %s; tweets to process at this iteration: %s',
-                      total_tweets, length(tweets)))
-    total_tweets <- total_tweets + length(tweets)
-    if (length(tweets) == 0) break()
+  for (path in paths) {
+    con <- file(path, "r")
+    repeat {
+      tweets <- readLines(con, n = batch)
+      if (progress) cat(sprintf('Total tweets processed so far: %s; tweets to process at this iteration: %s',
+                        total_tweets, length(tweets)))
+      total_tweets <- total_tweets + length(tweets)
+      if (length(tweets) == 0) break()
 
-    if (save_temp && !file.exists(file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))) {
-      stopifnot(!is.null(output_path))
+      if (save_temp && !file.exists(file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))) {
+        stopifnot(!is.null(output_path))
 
-      processed_tweets_batch_list <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores), fill=TRUE)
-      # save this intermediate results in case the function fails
-      data.table::fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
-      rm(processed_tweets_batch_list) # to clear up memory
-    } else if (!save_temp) {
-      processed_tweets_batch[[i]] <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores), fill=TRUE)
+        processed_tweets_batch_list <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores), fill=TRUE)
+        # save this intermediate results in case the function fails
+        data.table::fwrite(processed_tweets_batch_list, file = file.path(output_path, sprintf('%s%s.csv', temp_prefix, i)))
+        rm(processed_tweets_batch_list) # to clear up memory
+      } else if (!save_temp) {
+        processed_tweets_batch[[i]] <- data.table::rbindlist(mclapply(tweets, parse_tweet, keep_text = keep_text, mc.cores = cores), fill=TRUE)
+      }
+      cat('\r')
+      rm(tweets) # to clear up memory
+      i <- i + 1
     }
-    cat('\r')
-    rm(tweets) # to clear up memory
-    i <- i + 1
+    close(con)
   }
   cat('\n')
-  close(con)
+
 
   if (save_temp) processed_tweets_batch <- lapply(list.files(path = output_path, pattern = temp_prefix),
                                                   function(f) data.table::fread(file.path(output_path, f)))

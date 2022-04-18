@@ -7,7 +7,7 @@ json object. Please refer to the Twitter developer documentation:
 https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/tweet-object}
 \usage{
 parse_raw_tweets_to_cascades(
-  path,
+  paths,
   batch = 1e+05,
   cores = 1,
   output_path = NULL,
@@ -22,7 +22,7 @@ parse_raw_tweets_to_cascades(
 )
 }
 \arguments{
-\item{path}{File path to the tweets jsonl file}
+\item{paths}{Full file paths to the tweets jsonl files}
 
 \item{batch}{Number of tweets to be read for processing at each iteration, choose
 the best number for your memory load. Defaults to at most 10000 tweets each iteration.}
