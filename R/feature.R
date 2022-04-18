@@ -111,9 +111,9 @@ generate_features <- function(list_fits, data = FALSE) {
 
   if (!is.null(data) && is.logical(data) && data) {
     data <- unlist(lapply(seq_along(list_fits), function(i) {
-        datas <- lapply(list_fits[[i]]$data, function(model) model$data[[1]])
-	      names(datas) <- rep(names(list_fits)[[i]], length(datas))
-	      datas
+        datas <- list_fits[[i]]$data
+	names(datas) <- rep(names(list_fits)[[i]], length(datas))
+	datas
     }), recursive = F)
     data_features <- do.call(rbind.data.frame,
                              lapply(split(unname(data), names(data))[names(list_fits)],
