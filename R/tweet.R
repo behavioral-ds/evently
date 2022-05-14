@@ -21,6 +21,7 @@
 #' @param progress The progress will be reported if set to True (default)
 #' @param return_as_list If true then a list of cascades (data.frames) will be returned.
 #' @param save_temp If temporary files should be generated while processing. Processing can be resumed on failures.
+#' @param keep_temp_files If temporary files should be kept after index and data files generated.
 #' @param api_version Version of Twitter API used for collecting the tweets.
 #' @return If return_as_list is TRUE then a list of data.frames where each data.frame is a retweet cascade.
 #' Otherwise there will be no return.
@@ -28,7 +29,7 @@
 #' @export
 parse_raw_tweets_to_cascades <- function(paths, batch = 100000, cores = 1, output_path = NULL,
                                          keep_user = F, keep_absolute_time = F, keep_text = F, keep_retweet_count = F,
-                                         progress = T, return_as_list = T, save_temp = F, api_version=1) {
+                                         progress = T, return_as_list = T, save_temp = F, keep_temp_files = T, api_version=1) {
   check_required_packages(c('jsonlite', 'data.table', 'bit64'))
   library(data.table)
   # a helper function
@@ -147,7 +148,7 @@ parse_raw_tweets_to_cascades <- function(paths, batch = 100000, cores = 1, outpu
   if (keep_text) {
     index[, text := processed_tweets$text[start_ind]]
   }
-  
+
   kept_columns <- c('time', 'magnitude')
   if (keep_user) kept_columns <- c(kept_columns, 'user_id', 'screen_name')
   if (keep_absolute_time) kept_columns <- c(kept_columns, 'absolute_time')
@@ -158,9 +159,10 @@ parse_raw_tweets_to_cascades <- function(paths, batch = 100000, cores = 1, outpu
   if (!is.null(output_path)) {
     fwrite(index, file = file.path(output_path, 'index.csv'))
     fwrite(data, file = file.path(output_path, 'data.csv'))
-
-    tmp_files <- list.files(output_path, pattern = 'processed_tweets_tmp')
-    file.remove(tmp_files)
+    if (!keep_temp_files) {
+      tmp_files <- list.files(output_path, pattern = 'processed_tweets_tmp')
+      file.remove(tmp_files)
+    }
   }
 
   if (return_as_list) {

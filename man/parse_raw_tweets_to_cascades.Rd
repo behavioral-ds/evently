@@ -18,6 +18,7 @@ parse_raw_tweets_to_cascades(
   progress = T,
   return_as_list = T,
   save_temp = F,
+  keep_temp_files = T,
   api_version = 1
 )
 }
@@ -46,6 +47,8 @@ by corresponding indics (start_ind to end_ind). Defaults to NULL.}
 \item{return_as_list}{If true then a list of cascades (data.frames) will be returned.}
 
 \item{save_temp}{If temporary files should be generated while processing. Processing can be resumed on failures.}
+
+\item{keep_temp_files}{If temporary files should be kept after index and data files generated.}
 
 \item{api_version}{Version of Twitter API used for collecting the tweets.}
 }
