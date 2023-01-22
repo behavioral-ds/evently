@@ -140,6 +140,7 @@ parse_raw_tweets_to_cascades <- function(paths, batch = 100000, cores = 1, outpu
   setorder(processed_tweets, retweet_id, absolute_time)
   processed_tweets[, time := absolute_time - absolute_time[1], retweet_id]
   processed_tweets[, index := 1:nrow(processed_tweets)]
+  processed_tweets[, retweet_id := bit64::as.integer64(retweet_id)]
   processed_tweets[, diff := c(bit64::as.integer64('-1'), retweet_id[-1] - retweet_id[-length(retweet_id)])]
   index <- processed_tweets[diff != 0, .(start_ind = index)]
   index[, end_ind := c(start_ind[-1] - 1, nrow(processed_tweets))]
